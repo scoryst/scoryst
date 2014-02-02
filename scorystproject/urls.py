@@ -56,6 +56,9 @@ urlpatterns = patterns('',
   url(r'^course/(?P<course_id>\d+)/statistics/(?P<exam_id>\d+)/get-histogram/$',
     'scorystapp.views.statistics.get_histogram_for_exam'),
   url(r'^course/(?P<course_id>\d+)/statistics/(?P<exam_id>\d+)/get-histogram'
+    '/(?P<question_number>\d+)/$',
+    'scorystapp.views.statistics.get_histogram_for_question'),
+  url(r'^course/(?P<course_id>\d+)/statistics/(?P<exam_id>\d+)/get-histogram'
     '/(?P<question_number>\d+)/(?P<part_number>\d+)/$',
     'scorystapp.views.statistics.get_histogram_for_question_part'),
 

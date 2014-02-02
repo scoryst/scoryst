@@ -26,7 +26,7 @@ def get_statistics(request, cur_course_user, exam_id):
   exam = shortcuts.get_object_or_404(models.Exam, pk=exam_id)
   statistics = {
     'exam_statistics': _get_exam_statistics(exam),
-    'question_parts_statistics': _get_all_question_part_statistics(exam)
+    'question_statistics': _get_all_question_statistics(exam)
   }
   return http.HttpResponse(json.dumps(statistics), mimetype='application/json')
 
@@ -42,11 +42,23 @@ def get_histogram_for_exam(request, cur_course_user, exam_id):
   exam_answers = models.ExamAnswer.objects.filter(exam=exam, preview=False)
   graded_exam_scores = [e.get_points() for e in exam_answers if e.is_graded()]
   
-  # TODO: Remove later, this is just to make a pretty graph
-  # graded_exam_scores = [13, 28, 34, 22, 22, 22, 22, 22, 22, 26, 26, 32, 5, 5, 5, 5,
-  #   5, 12, 1, 29, 29, 29, 36, 38, 12, 12, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15]
-
   return http.HttpResponse(json.dumps(_get_histogram(graded_exam_scores)),
+    mimetype='application/json')
+
+
+@decorators.login_required
+@decorators.valid_course_user_required
+def get_histogram_for_question(request, cur_course_user, exam_id, question_number):
+  """
+  Fetches the histogram for the given question_number for the exam
+  """
+  exam = shortcuts.get_object_or_404(models.Exam, pk=exam_id)
+  exam_answers = models.ExamAnswer.objects.filter(exam=exam, preview=False)
+
+  graded_question_scores = [ea.get_question_points(question_number) for ea in exam_answers 
+    if ea.is_question_graded(question_number)]
+  
+  return http.HttpResponse(json.dumps(_get_histogram(graded_question_scores)),
     mimetype='application/json')
 
 
@@ -63,16 +75,6 @@ def get_histogram_for_question_part(request, cur_course_user, exam_id,
 
   question_part_answers = models.QuestionPartAnswer.objects.filter(question_part=question_part)
   graded_question_part_scores = [qp.get_points() for qp in question_part_answers if qp.is_graded()]
-
-  # TODO: Remove later, this is just to make a pretty graph
-  # if (int(question_number) == 1):
-  #   graded_question_part_scores = [2, 3, 5, 11, 11, 2, 7, 0, 2, 8, 2, 11, 7]
-  # elif (int(question_number) == 2):
-  #   graded_question_part_scores = [2, 3, 5, 11, 11, 2, 7, 0, 2, 8, 2, 11, 7, 20, 20, 20, 20, 20, 20]
-  # elif (int(question_number) == 3):
-  #   graded_question_part_scores = [0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 15, 15, 15, 10, 10, 6,3,9,9,9,9,9]
-  # elif (int(question_number) == 4):
-  #   graded_question_part_scores = [0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 15, 15, 15, 10, 10, 6,3,9,9,9,9,9, 2, 3, 5, 11, 11, 2, 7, 0, 2, 8, 2, 11, 7, 20, 2, 3, 5, 11, 11, 2, 7, 0, 2, 8, 2, 11, 7]
 
   return http.HttpResponse(json.dumps(_get_histogram(graded_question_part_scores)),
     mimetype='application/json')
@@ -149,13 +151,52 @@ def _get_exam_statistics(exam):
   }
 
 
-def _get_all_question_part_statistics(exam):
+def _get_all_question_statistics(exam):
   """
   Calculates the median, mean, max, min and standard deviation for all question_parts
   in the exam
   """
+  question_statistics = []
+  question_parts = models.QuestionPart.objects.filter(exam=exam).order_by('-question_number')
+  exam_answers = models.ExamAnswer.objects.filter(exam=exam, preview=False)
+
+  if question_parts.count() and exam_answers.count():
+    num_questions  = question_parts[0].question_number
+    
+    for question_number in range(num_questions):
+      question_statistics.append(_get_question_statistics(exam_answers, question_number + 1))
+
+  return question_statistics
+
+
+def _get_question_statistics(exam_answers, question_number):
+  """
+  Calculates the median, mean, max, min and standard deviation among all the exams
+  for which this question_number has been graded.
+  Also calculates the same for each part for given question
+  """
+  graded_question_scores = [ea.get_question_points(question_number) for ea in exam_answers 
+    if ea.is_question_graded(question_number)]
+
+  return {
+    'id': exam_answers[0].exam.id,
+    'question_number': question_number,
+    'median': _median(graded_question_scores),
+    'mean': _mean(graded_question_scores),
+    'max': _max(graded_question_scores),
+    'min': _min(graded_question_scores),
+    'std_dev': _standard_deviation(graded_question_scores),
+    'question_part_statistics': _get_all_question_part_statistics(exam_answers[0].exam, question_number)
+  }
+
+
+def _get_all_question_part_statistics(exam, question_number):
+  """
+  Calculates the median, mean, max, min and standard deviation among all the exams
+  for all parts for which this question_number has been graded.
+  """
   question_parts_statistics = []
-  question_parts = models.QuestionPart.objects.filter(exam=exam).order_by(
+  question_parts = models.QuestionPart.objects.filter(exam=exam, question_number=question_number).order_by(
     'question_number', 'part_number')
 
   for question_part in question_parts:
@@ -188,7 +229,7 @@ def _get_histogram(scores):
   """
   Returns a histogram of the scores of the form {
     'range_1_start-range_1_end': number_1,
-    'range_2start-range_2_end': number_2,
+    'range_2_start-range_2_end': number_2,
   }
   """
   sorted_scores = sorted(scores)

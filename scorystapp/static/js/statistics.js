@@ -26,7 +26,9 @@ $(function() {
     var url = curExamId + '/get-histogram/';
     if (questionNumber && partNumber) {
       url += questionNumber + '/' + partNumber + '/';
-    } 
+    } else if (questionNumber) {
+      url += questionNumber + '/';
+    }
 
     $.ajax({
       url: url,
@@ -104,14 +106,26 @@ $(function() {
   $statisticsTable.on('click', 'tr', function(event) {
     event.preventDefault();
     var $tr = $(event.currentTarget);
-    var questionNumber = $tr.children().eq(0).html();
-    var partNumber = $tr.children().eq(1).html();
+    var questionNumber = $tr.children().eq(1).html();
+    var partNumber = $tr.children().eq(2).html();
+    var $histogramHeader = $('.histogram-header');
 
     if (questionNumber == 'Total') {
       renderHistogram();
-    } else if (questionNumber != 'Question') {
+      $histogramHeader.text('Total Scores');
+    } else if (questionNumber != 'Question' && partNumber != '-') {
       renderHistogram(questionNumber, partNumber);
-    } 
+      $histogramHeader.text('Question: ' + questionNumber + '.' + partNumber);
+    } else if (questionNumber != 'Question') {
+      questionNumber = parseInt(questionNumber, 10);
+      renderHistogram(questionNumber);
+      $histogramHeader.text('Question: ' + questionNumber);
+    }
+
+    if ($(event.target).parent('a').length) {
+      $tr.find('a.toggle').toggle();
+      $('table').find('tr.question-part[data-question=' + questionNumber + ']').toggle();
+    }
   });
 
 

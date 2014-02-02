@@ -1111,6 +1111,27 @@ footer .amp {
   cursor: pointer;
 }
 
+.statistics .table .question {
+  background-color: #F9F9F9;
+}
+
+.statistics .table .row-body:hover {
+  background-color: #E9E9E9;
+}
+
+.statistics table .question-part {
+  display: none;
+}
+
+.statistics a.toggle {
+  color: inherit;
+}
+
+.statistics a.collapse {
+  display: none;
+}
+
+
 .statistics #histogram {
   width: 100%;
   height: 500px;
