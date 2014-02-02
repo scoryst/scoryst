@@ -15,7 +15,6 @@ var templates = {
 };
 
 var $examSummary = $('.exam-summary');  // Exam summary table.
-var $toggleParts = $('');
 
 // Get JSON data back to render the exam breakdown for the selected student.
 function renderExamSummary(userId, examId) {
@@ -47,11 +46,9 @@ $examSummary.on('click', 'button', function(event) {
 
 $examSummary.on('click', 'a.toggle', function(event) {
   event.preventDefault();
-  console.log('Clicked');
 
-  $target = $(event.currentTarget);
+  var $target = $(event.currentTarget);
   var questionNum = parseInt($target.parents('tr').attr('data-question'), 10);
-  console.log(questionNum);
 
   $('table').find('tr.question-part[data-question=' + questionNum + ']').toggle();
   $target.parents('tr').find('a.toggle').toggle();
