@@ -57,7 +57,7 @@
       </div>
 
       <div class="col-xs-8 exam-summary">
-        <h2>Student's Exam Summary</h2>
+        <h2><!-- Add in student's name in header --></h2>
 
         <div class="table-container">
           <!-- Exam info to be added in with handlebars template. -->
@@ -78,6 +78,10 @@
     <label class="checkbox-inline">
       <input type="checkbox" class="unmapped" checked="true"> No exam ({{numUnmapped}})
     </label>
+  </script>
+
+  <script type="text/x-handlebars-template" class="student-heading-template">
+    <span>{{studentName}}'s Exam Summary</span>
   </script>
 
   <script type="text/x-handlebars-template" class="exam-template">

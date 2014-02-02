@@ -215,6 +215,7 @@ def _get_summary_for_exam(exam_answer_id, question_number=0, part_number=0):
     'question_number', 'part_number')
 
   exam_to_return = {
+      'studentName': exam_answer.course_user.user.get_full_name(),
       'points': 0,
       'maxPoints': 0,
       'isGraded': True,
