@@ -87,6 +87,7 @@
       <table class="table table-striped table-condensed">
         <thead>
           <tr>
+            <th></th>
             <th>Question</th>
             <th>Part</th>
             <th>Points</th>
@@ -97,16 +98,26 @@
         <tbody data-exam-answer-id="{{examAnswerId}}">
           {{#each questions}}
             <tr data-question="{{questionNumber}}">
-              <td><strong>{{questionNumber}}</strong></td>
-              <td><strong> - </strong></td>
-              <td><strong>
+              <td>
+                <a class="toggle" href="#"><i class="fa fa-chevron-down"></i></a>
+                <a class="toggle collapse" href="#"><i class="fa fa-chevron-up"></i></a>
+              </td>
+              <td>{{questionNumber}}</td>
+              <td> - </td>
+              <td>
                 {{#if isGraded}}
                   {{questionPoints}} / {{maxPoints}}
                 {{else}}
                   ungraded 
                 {{/if}}
-              </strong></td>
-              <td>{{grader}}</td>
+              </td>
+              <td>
+                {{#if isGraded}}
+                  {{grader}}
+                {{else}}
+                  -
+                {{/if}}
+              </td>
               {% endverbatim %}
               {% if not is_student %}
                 {% verbatim %}
@@ -122,12 +133,13 @@
               {% verbatim %}
             </tr>
             {{#each parts}}
-            <tr data-question="{{../questionNumber}}" data-part="{{partNumber}}">
+            <tr data-question="{{../questionNumber}}" data-part="{{partNumber}}" class="question-part">
+              <td></td>
               <td>{{../questionNumber}}</td>
               <td>{{partNumber}}</td>
               <td>
                 {{#if isGraded}}
-                  {{partPoints}}
+                  {{partPoints}} / {{maxPartPoints}}
                 {{else}}
                   -
                 {{/if}}
@@ -145,15 +157,16 @@
           {{/each}}
 
           <tr>
-            <td>Total</td>
-            <td>-</td>
-            <td>
+            <td></td>
+            <td><strong>Total</strong></td>
+            <td><strong>-</strong></td>
+            <td><strong>
               {{#if isGraded}}
-                {{points}}/{{maxPoints}}
+                {{points}} / {{maxPoints}}
               {{else}}
                 ungraded
               {{/if}}
-            </td>
+            </strong></td>
             <td>-</td>
             <td>-</td>
           </tr>

@@ -223,11 +223,20 @@ def _get_summary_for_exam(exam_answer_id, question_number=0, part_number=0):
         'maxPoints': 0,
         'questionPoints': 0,
         'isGraded': True,
-        'grader': None,
         'parts': []
       }
       exam_to_return['questions'].append(new_question)
       cur_question += 1
+
+      question_part_answers = models.QuestionPartAnswer.objects.filter(
+        question_part__question_number=question_part.question_number,
+        exam_answer=exam_answer)
+      graded_answers = filter(lambda answer: answer.is_graded(), question_part_answers)
+      graders = map(lambda answer: answer.grader.user.get_initials(), graded_answers)
+      if len(set(graders)) > 1:
+        new_question['grader'] = ', '.join(set(graders))
+      elif len(set(graders)) == 1:
+        new_question['grader'] = graded_answers[0].grader.user.get_full_name()
 
     cur_last_question = exam_to_return['questions'][-1]    
     cur_last_question['parts'].append({})
@@ -254,12 +263,7 @@ def _get_summary_for_exam(exam_answer_id, question_number=0, part_number=0):
 
     # Set the grader.
     if question_part_answer.grader is not None:
-      grader = question_part_answer.grader.user.get_full_name()
-      part['grader'] = grader
-      if cur_last_question['grader'] is None:
-        cur_last_question['grader'] = grader
-      elif cur_last_question['grader'] != grader and ', ...' not in cur_last_question['grader']:
-        cur_last_question['grader'] += ', ...'
+      part['grader'] = question_part_answer.grader.user.get_full_name()
 
     # Update the overall exam
     if not part['isGraded']:

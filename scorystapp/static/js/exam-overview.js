@@ -15,6 +15,7 @@ var templates = {
 };
 
 var $examSummary = $('.exam-summary');  // Exam summary table.
+var $toggleParts = $('');
 
 // Get JSON data back to render the exam breakdown for the selected student.
 function renderExamSummary(userId, examId) {
@@ -30,8 +31,8 @@ function renderExamSummary(userId, examId) {
 }
 
 // When a button is clicked, go to the correct grade page.
-$('.exam-summary').on('click', 'button', function(event) {
-  var $target = $(event.target);
+$examSummary.on('click', 'button', function(event) {
+  var $target = $(event.currentTarget);
   var examID = $target.parents('tbody').attr('data-exam-answer-id');
 
   var questionNumber = parseInt($target.parents('tr').attr('data-question'), 10);
@@ -42,4 +43,16 @@ $('.exam-summary').on('click', 'button', function(event) {
   $.cookie('activePartNumber', partNumber, { expires: 1, path: '/' });
 
   window.location = examID;
+});
+
+$examSummary.on('click', 'a.toggle', function(event) {
+  event.preventDefault();
+  console.log('Clicked');
+
+  $target = $(event.currentTarget);
+  var questionNum = parseInt($target.parents('tr').attr('data-question'), 10);
+  console.log(questionNum);
+
+  $('table').find('tr.question-part[data-question=' + questionNum + ']').toggle();
+  $target.parents('tr').find('a.toggle').toggle();
 });

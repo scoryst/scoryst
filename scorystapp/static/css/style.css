@@ -925,6 +925,19 @@ footer .amp {
   margin-top: -4px;
 }
 
+/* Collapse part information initially. */
+.grade-overview table .question-part {
+  display: none;
+}
+
+.grade-overview a.toggle {
+  color: inherit;
+}
+
+.grade-overview a.collapse {
+  display: none;
+}
+
 /* A div created by custom scrollbar js. */
 .grade-overview .overview {
   width: 100%;

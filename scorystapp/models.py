@@ -74,6 +74,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     """ Returns the first name of this user. Required for Django admin. """
     return self.first_name
 
+  def get_initials(self):
+    """ Returns the initials of this user. """
+    return '%s%s' % (self.first_name[0].upper(), self.last_name[0].upper())
+
   def is_instructor_for_any_course(self):
     """ Returns true if this user is an instructor for any course, or false otherwise. """
     return (CourseUser.objects.filter(user=self.pk, privilege=CourseUser.INSTRUCTOR)
