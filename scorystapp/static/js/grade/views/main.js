@@ -156,5 +156,8 @@ $(function() {
       activeQuestionNumber: activeQuestionNumber,
       activePartNumber: 1
     });
+
+    activePartNumber = 1;
+    $.cookie('activePartNumber', activePartNumber, { path: '/' });
   });
 });

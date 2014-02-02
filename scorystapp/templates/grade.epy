@@ -45,11 +45,11 @@
 
         {% if not is_student_view and not is_preview %}
           <button class="btn btn-default btn-sm previous-student" type="button">
-            <i class="fa fa-arrow-down"></i> Previous Student
+            <i class="fa fa-arrow-up"></i> Previous Student
           </button>
 
           <button class="btn btn-default btn-sm next-student" type="button">
-            <i class="fa fa-arrow-up"></i> Next Student
+            <i class="fa fa-arrow-down"></i> Next Student
           </button>
 
           <i class="fa fa-check nav-success"></i>
