@@ -117,7 +117,8 @@ def list_rubrics(request, cur_course_user, exam_answer_id, question_part_answer_
     if cur_course_user.privilege == models.CourseUser.STUDENT:
       return response.Response(status=403)
 
-    serializer = serializers.RubricSerializer(data=request.DATA)
+    serializer = serializers.RubricSerializer(data=request.DATA, context={
+      'question_part': question_part_answer.question_part })
     if serializer.is_valid():
       serializer.save()
       return response.Response(serializer.data)
@@ -145,7 +146,8 @@ def manage_rubric(request, cur_course_user, exam_answer_id, question_part_answer
     if cur_course_user.privilege == models.CourseUser.STUDENT:
       return response.Response(status=403)
 
-    serializer = serializers.RubricSerializer(rubric, data=request.DATA)
+    serializer = serializers.RubricSerializer(rubric, data=request.DATA, context={
+      'question_part': question_part_answer.question_part })
     if serializer.is_valid():
       serializer.save()
       return response.Response(serializer.data)
