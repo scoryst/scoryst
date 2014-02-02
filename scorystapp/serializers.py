@@ -62,7 +62,15 @@ class QuestionPartAnswerSerializer(serializers.ModelSerializer):
 
 
 class RubricSerializer(serializers.ModelSerializer):
-  # TODO: security for rubrics; setting question_part and editing question_part
+  def validate_question_part(self, attrs, source):
+    """ Validates that the QuestionPart matches the one currently being viewed. """
+    question_part = attrs.get(source)
+
+    if not question_part == self.context['question_part']:
+      raise serializers.ValidationError(
+          'Rubric for invalid question part: %d' % question_part.pk)
+    return attrs
+
   class Meta:
     model = models.Rubric
     fields = ('id', 'question_part', 'description', 'points')
