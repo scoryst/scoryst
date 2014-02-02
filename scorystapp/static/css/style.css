@@ -930,6 +930,10 @@ footer .amp {
   margin-top: -4px;
 }
 
+.grade-overview .gray {
+  background-color: #f9f9f9;
+}
+
 /* Collapse part information initially. */
 .grade-overview table .question-part {
   display: none;
