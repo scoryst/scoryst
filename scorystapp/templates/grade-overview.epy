@@ -90,12 +90,37 @@
             <th>Question</th>
             <th>Part</th>
             <th>Points</th>
-            <th>Grader</th>
+            <th>Graded By</th>
             <th></th>
           </tr>
         </thead>
         <tbody data-exam-answer-id="{{examAnswerId}}">
           {{#each questions}}
+            <tr data-question="{{questionNumber}}">
+              <td><strong>{{questionNumber}}</strong></td>
+              <td><strong> - </strong></td>
+              <td><strong>
+                {{#if isGraded}}
+                  {{questionPoints}} / {{maxPoints}}
+                {{else}}
+                  ungraded 
+                {{/if}}
+              </strong></td>
+              <td>{{grader}}</td>
+              {% endverbatim %}
+              {% if not is_student %}
+                {% verbatim %}
+                  {{#if isGraded}}
+                    <td><button type="button" class="btn btn-default btn-sm">Regrade</button></td>
+                  {{else}}
+                    <td><button type="button" class="btn btn-danger btn-sm">Grade</button></td>
+                  {{/if}}
+                {% endverbatim %}
+              {% else %}
+                <td><button type="button" class="btn btn-default btn-sm">View</button></td>
+              {% endif %}
+              {% verbatim %}
+            </tr>
             {{#each parts}}
             <tr data-question="{{../questionNumber}}" data-part="{{partNumber}}">
               <td>{{../questionNumber}}</td>
@@ -114,21 +139,7 @@
                   -
                 {{/if}}
               </td>
-              {% endverbatim %}
-
-              {% if not is_student %}
-                {% verbatim %}
-                  {{#if isGraded}}
-                    <td><button type="button" class="btn btn-default btn-sm">Regrade</button></td>
-                  {{else}}
-                    <td><button type="button" class="btn btn-danger btn-sm">Grade</button></td>
-                  {{/if}}
-                {% endverbatim %}
-              {% else %}
-                <td><button type="button" class="btn btn-default btn-sm">View</button></td>
-              {% endif %}
-
-              {% verbatim %}
+              <td></td>
             </tr>
             {{/each}}
           {{/each}}

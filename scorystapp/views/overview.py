@@ -23,7 +23,7 @@ def grade_overview(request, cur_course_user):
 @decorators.login_required
 @decorators.valid_course_user_required
 def student_grade_overview(request, cur_course_user):
-  """ Overview of the loggen in student's exams and grades for a particular exam. """
+  """ Overview of the logged in student's exams and grades for a particular exam. """
   cur_course = cur_course_user.course
   
   exams = models.Exam.objects.filter(course=cur_course.pk)
@@ -218,15 +218,18 @@ def _get_summary_for_exam(exam_answer_id, question_number=0, part_number=0):
 
   for question_part in question_parts:
     if question_part.question_number != cur_question:
-      new_question = {}
-      new_question['questionNumber'] = question_part.question_number
+      new_question = {
+        'questionNumber': question_part.question_number,
+        'maxPoints': 0,
+        'questionPoints': 0,
+        'isGraded': True,
+        'grader': None,
+        'parts': []
+      }
       exam_to_return['questions'].append(new_question)
       cur_question += 1
 
-    cur_last_question = exam_to_return['questions'][-1]
-    if 'parts' not in cur_last_question:
-      cur_last_question['parts'] = []
-    
+    cur_last_question = exam_to_return['questions'][-1]    
     cur_last_question['parts'].append({})
     part = cur_last_question['parts'][-1]
     part['partNumber'] = question_part.part_number
@@ -239,21 +242,31 @@ def _get_summary_for_exam(exam_answer_id, question_number=0, part_number=0):
 
     part['maxPartPoints'] = question_part.max_points
     exam_to_return['maxPoints'] += question_part.max_points
+    cur_last_question['maxPoints'] += question_part.max_points
 
     question_part_answer = shortcuts.get_object_or_404(models.QuestionPartAnswer,
       question_part=question_part, exam_answer=exam_answer)
 
     # Set the part points. We are assuming that we are grading up.
     part['partPoints'] = question_part_answer.get_points()
+    cur_last_question['questionPoints'] += question_part_answer.get_points()
     part['isGraded'] = question_part_answer.is_graded()
 
     # Set the grader.
     if question_part_answer.grader is not None:
-      part['grader'] = question_part_answer.grader.user.get_full_name()
+      grader = question_part_answer.grader.user.get_full_name()
+      part['grader'] = grader
+      if cur_last_question['grader'] is None:
+        cur_last_question['grader'] = grader
+      elif cur_last_question['grader'] != grader and ', ...' not in cur_last_question['grader']:
+        cur_last_question['grader'] += ', ...'
 
     # Update the overall exam
-    if not part['isGraded']:  # If a part is ungraded, the exam is ungraded
+    if not part['isGraded']:
+      # If a part is ungraded, the exam is ungraded
       exam_to_return['isGraded'] = False
+      # Similarly, the question associated with the part is ungraded
+      cur_last_question['isGraded'] = False
     else:  # If a part is graded, update the overall exam points
       exam_to_return['points'] += part['partPoints']
 
