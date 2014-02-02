@@ -39,14 +39,17 @@ def student_grade_overview(request, cur_course_user):
 @decorators.valid_course_user_required
 def get_user_exam_summary(request, cur_course_user, user_id, exam_id):
   """ Returns an exam summary given the user's ID and the course. """
+  student_name = shortcuts.get_object_or_404(models.User, id=user_id).get_full_name()
+
   try:
     exam_answer = models.ExamAnswer.objects.get(exam=exam_id, course_user__user=user_id)
   except models.ExamAnswer.DoesNotExist:
-    return http.HttpResponse(json.dumps({'noMappedExam': True}),
+    return http.HttpResponse(json.dumps({'noMappedExam': True, 'studentName': student_name}),
       mimetype='application/json')
 
-  exam_summary = _get_summary_for_exam(exam_answer.id)
-  return http.HttpResponse(json.dumps(exam_summary), mimetype='application/json')
+  data = _get_summary_for_exam(exam_answer.id)
+  data['studentName'] = student_name
+  return http.HttpResponse(json.dumps(data), mimetype='application/json')
 
 
 @decorators.login_required

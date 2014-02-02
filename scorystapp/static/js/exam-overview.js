@@ -10,11 +10,14 @@
 //  [...]
 // };
 var $examTemplate = $('.exam-template');
-var templates = {
-  renderExamTemplate: Handlebars.compile($examTemplate.html())
-};
-
+var $studentHeadingTemplate = $('.student-heading-template');
 var $examSummary = $('.exam-summary');  // Exam summary table.
+var $studentHeading = $('.exam-summary h2');
+
+var templates = {
+  renderExamTemplate: Handlebars.compile($examTemplate.html()),
+  renderStudentHeadingTemplate: Handlebars.compile($studentHeadingTemplate.html())
+};
 
 // Get JSON data back to render the exam breakdown for the selected student.
 function renderExamSummary(userId, examId) {
@@ -23,6 +26,7 @@ function renderExamSummary(userId, examId) {
     dataType: 'json'
   }).done(function(data) {
     $('.table-container').html(templates.renderExamTemplate(data));
+    $studentHeading.html(templates.renderStudentHeadingTemplate(data));
     window.resizeNav();
   }).fail(function(request, error) {
     console.log('Error while getting exam summary data: ' + error);

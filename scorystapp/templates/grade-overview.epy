@@ -57,7 +57,7 @@
       </div>
 
       <div class="col-xs-8 exam-summary">
-        <h2>Student's Exam Summary</h2>
+        <h2><!-- Student's name in header is added with Handlebars template. --></h2>
 
         <div class="table-container">
           <!-- Exam info to be added in with handlebars template. -->
@@ -80,11 +80,15 @@
     </label>
   </script>
 
+  <script type="text/x-handlebars-template" class="student-heading-template">
+    <span>{{studentName}}'s Exam Summary</span>
+  </script>
+
   <script type="text/x-handlebars-template" class="exam-template">
     {{#if noMappedExam}}
       <p>No student exam exists. If you think this is an error, contact us at <a href="mailto:support@scoryst.com">support@scoryst.com</a>.</p>
     {{else}}
-      <table class="table table-striped table-condensed">
+      <table class="table table-condensed">
         <thead>
           <tr>
             <th></th>
@@ -97,7 +101,7 @@
         </thead>
         <tbody data-exam-answer-id="{{examAnswerId}}">
           {{#each questions}}
-            <tr data-question="{{questionNumber}}">
+            <tr data-question="{{questionNumber}}" class="gray">
               <td>
                 <a class="toggle" href="#"><i class="fa fa-chevron-down"></i></a>
                 <a class="toggle collapse" href="#"><i class="fa fa-chevron-up"></i></a>
@@ -156,7 +160,7 @@
             {{/each}}
           {{/each}}
 
-          <tr>
+          <tr class="gray">
             <td></td>
             <td><strong>Total</strong></td>
             <td><strong>-</strong></td>
