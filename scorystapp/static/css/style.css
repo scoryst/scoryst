@@ -1115,8 +1115,23 @@ footer .amp {
   background-color: #F9F9F9;
 }
 
-.statistics .table .row-body:hover {
-  background-color: #E9E9E9;
+.statistics .table tr {
+  border-left: 2px solid transparent;
+  border-right: 2px solid transparent;
+}
+
+.statistics .table tr.row-body.selected {
+  background-color: rgba(151,187,205,0.5);
+  border-left: 2px solid;
+  border-right: 2px solid;
+  border-color: rgba(151,187,205,1);  
+}
+
+.statistics .table tr.row-body:hover {
+  background-color: rgba(151,187,205,0.5); 
+  border-left: 2px solid;
+  border-right: 2px solid;
+  border-color: rgba(151,187,205,1); 
 }
 
 .statistics table .question-part {
@@ -1130,7 +1145,6 @@ footer .amp {
 .statistics a.collapse {
   display: none;
 }
-
 
 .statistics #histogram {
   width: 100%;

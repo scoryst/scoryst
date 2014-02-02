@@ -69,4 +69,3 @@ def done_change_password(request):
   extra_context['title'] = 'Password Change Done'
   return views.password_change_done(request, template_name='reset/password-change-done.epy',
     extra_context=extra_context)
-  

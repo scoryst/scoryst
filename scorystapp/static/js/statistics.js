@@ -5,11 +5,16 @@ $(function() {
   
   var $statisticsTemplate = $('.statistics-template');
   var $statisticsTable = $('.table-container');
+  var $histogramHeader = $('.histogram-header');
+
+  var curQuestionNum = 0;
+  var curPartNum = 0;
 
   var templates = {
     renderStatisticsTemplate: Handlebars.compile($statisticsTemplate.html())
   };
   
+  // Makes an AJAX call to fetch the statistics to be rendered into the table
   function renderStatistics() {
     $.ajax({
       url: curExamId + '/get-statistics/',
@@ -22,6 +27,7 @@ $(function() {
     });
   }
 
+  // Makes an AJAX call to fetch the histogram to be displayed
   function renderHistogram(questionNumber, partNumber) {
     var url = curExamId + '/get-histogram/';
     if (questionNumber && partNumber) {
@@ -29,6 +35,14 @@ $(function() {
     } else if (questionNumber) {
       url += questionNumber + '/';
     }
+
+    // If the question and part haven't change, do not re-render
+    if (curQuestionNum == questionNumber && curPartNum == partNumber) {
+      return;
+    }
+
+    curQuestionNum = questionNumber;
+    curPartNum = partNumber;
 
     $.ajax({
       url: url,
@@ -74,6 +88,7 @@ $(function() {
     new Chart(ctx).Bar(chartData, convertToWholeNumberAxis(chartData));
   }
 
+  // Required to show whole number in the histogram y axis
   function convertToWholeNumberAxis(data) {
     var maxValue = false;
     for (datasetIndex = 0; datasetIndex < data.datasets.length; ++datasetIndex) {
@@ -106,26 +121,30 @@ $(function() {
   $statisticsTable.on('click', 'tr', function(event) {
     event.preventDefault();
     var $tr = $(event.currentTarget);
-    var questionNumber = $tr.children().eq(1).html();
-    var partNumber = $tr.children().eq(2).html();
-    var $histogramHeader = $('.histogram-header');
+    var questionNumber = $tr.find('.question-number').html();
+    var partNumber = $tr.find('.part-number').html();
+    var $selected = $('.selected');
 
-    if (questionNumber == 'Total') {
+    if (questionNumber === 'Total') {
       renderHistogram();
       $histogramHeader.text('Total Scores');
-    } else if (questionNumber != 'Question' && partNumber != '-') {
+    } else if (questionNumber && partNumber) {
       renderHistogram(questionNumber, partNumber);
       $histogramHeader.text('Question: ' + questionNumber + '.' + partNumber);
-    } else if (questionNumber != 'Question') {
-      questionNumber = parseInt(questionNumber, 10);
+    } else if (questionNumber) {
       renderHistogram(questionNumber);
       $histogramHeader.text('Question: ' + questionNumber);
     }
 
+    // Check if the collapse/expand button (for showing parts' statistics) is clicked
+    // and toggle the UI accordingly
     if ($(event.target).parent('a').length) {
       $tr.find('a.toggle').toggle();
       $('table').find('tr.question-part[data-question=' + questionNumber + ']').toggle();
     }
+
+    $selected.removeClass('selected');
+    $tr.addClass('selected');
   });
 
 
@@ -139,5 +158,10 @@ $(function() {
     $li.addClass('active');
     
     renderStatistics();
+    // Reset them to zero
+    curQuestionNum = 0;
+    curPartNum = 0;
+    $histogramHeader.text('Total Scores');
+    renderHistogram();
   });
 });

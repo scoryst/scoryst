@@ -65,7 +65,7 @@
           <a class="toggle" href="#"><i class="fa fa-chevron-down"></i></a>
           <a class="toggle collapse" href="#"><i class="fa fa-chevron-up"></i></a>
         </td>
-        <td>{{question_number}}</td>
+        <td class="question-number">{{question_number}}</td>
         <td>-</td>
         <td>{{mean}}</td>
         <td>{{median}}</td>
@@ -77,8 +77,8 @@
         {{#each question_part_statistics}}
         <tr class="row-body question-part" data-question={{question_number}}>
           <td></td>
-          <td>{{question_number}}</td>
-          <td>{{part_number}}</td>
+          <td class="question-number">{{question_number}}</td>
+          <td class="part-number">{{part_number}}</td>
           <td>{{mean}}</td>
           <td>{{median}}</td>
           <td>{{std_dev}}</td>
@@ -87,9 +87,9 @@
         </tr>
         {{/each}}
       {{/each}}
-      <tr class="question">
+      <tr class="row-body question">
         <td></td>
-        <td class="total">Total</td>
+        <td class="question-number total">Total</td>
         <td>-</td>
         <td>{{exam_statistics.mean}}</td>
         <td>{{exam_statistics.median}}</td>

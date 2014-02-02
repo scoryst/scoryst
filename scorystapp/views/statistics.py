@@ -55,8 +55,8 @@ def get_histogram_for_question(request, cur_course_user, exam_id, question_numbe
   exam = shortcuts.get_object_or_404(models.Exam, pk=exam_id)
   exam_answers = models.ExamAnswer.objects.filter(exam=exam, preview=False)
 
-  graded_question_scores = [ea.get_question_points(question_number) for ea in exam_answers 
-    if ea.is_question_graded(question_number)]
+  graded_question_scores = [exam_answer.get_question_points(question_number) for exam_answer in exam_answers 
+    if exam_answer.is_question_graded(question_number)]
   
   return http.HttpResponse(json.dumps(_get_histogram(graded_question_scores)),
     mimetype='application/json')
@@ -160,7 +160,7 @@ def _get_all_question_statistics(exam):
   question_parts = models.QuestionPart.objects.filter(exam=exam).order_by('-question_number')
   exam_answers = models.ExamAnswer.objects.filter(exam=exam, preview=False)
 
-  if question_parts.count() and exam_answers.count():
+  if question_parts.count() > 0 and exam_answers.count() > 0:
     num_questions  = question_parts[0].question_number
     
     for question_number in range(num_questions):
@@ -175,8 +175,8 @@ def _get_question_statistics(exam_answers, question_number):
   for which this question_number has been graded.
   Also calculates the same for each part for given question
   """
-  graded_question_scores = [ea.get_question_points(question_number) for ea in exam_answers 
-    if ea.is_question_graded(question_number)]
+  graded_question_scores = [exam_answer.get_question_points(question_number) for exam_answer in exam_answers 
+    if exam_answer.is_question_graded(question_number)]
 
   return {
     'id': exam_answers[0].exam.id,
