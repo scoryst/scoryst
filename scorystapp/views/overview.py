@@ -23,7 +23,7 @@ def grade_overview(request, cur_course_user):
 @decorators.login_required
 @decorators.valid_course_user_required
 def student_grade_overview(request, cur_course_user):
-  """ Overview of the logged in student's exams and grades for a particular exam. """
+  """ Overview of the logged in student's exams. """
   cur_course = cur_course_user.course
   
   exams = models.Exam.objects.filter(course=cur_course.pk)
@@ -233,9 +233,11 @@ def _get_summary_for_exam(exam_answer_id, question_number=0, part_number=0):
         exam_answer=exam_answer)
       graded_answers = filter(lambda answer: answer.is_graded(), question_part_answers)
       graders = map(lambda answer: answer.grader.user.get_initials(), graded_answers)
-      if len(set(graders)) > 1:
-        new_question['grader'] = ', '.join(set(graders))
-      elif len(set(graders)) == 1:
+      unique_graders = set(graders)
+      num_graders = len(unique_graders)
+      if num_graders > 1:
+        new_question['grader'] = ', '.join(unique_graders)
+      elif num_graders == 1:
         new_question['grader'] = graded_answers[0].grader.user.get_full_name()
 
     cur_last_question = exam_to_return['questions'][-1]    
