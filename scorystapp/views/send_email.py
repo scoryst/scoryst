@@ -124,15 +124,16 @@ def send_added_to_course_email(request, course_users, send_to_students=False):
 
 def send_exam_graded_email(request, exam):
   """
-  Sends an email to all students when exam corresponding to exam_id is graded
+  Sends an email to students if their exam answer corresponding to the exam is graded
+  and they have not been previously notified.
   """
-  # TODO: What if a student exam is not fully graded. Do we still send the email?
-  
-  exam_answers = models.ExamAnswer.objects.filter(exam=exam, preview=False)
+
+  exam_answers = models.ExamAnswer.objects.filter(exam=exam, preview=False, released=False)
+  graded_exams = filter(lambda answer: answer.is_graded(), exam_answers)
   course_users = []
-  for exam_answer in exam_answers:
+  for exam_answer in graded_exams:
     course_users.append(exam_answer.course_user)
+    exam_answer.released = True
+    exam_answer.save()
     
-  # course_users = models.CourseUser.objects.filter(course=exam.course,
-  #   privilege=models.CourseUser.STUDENT)
   _send_exam_graded_email(request, course_users, exam)

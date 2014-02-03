@@ -230,6 +230,7 @@ class ExamAnswer(models.Model):
   page_count = models.IntegerField()
   preview = models.BooleanField(default=False)
   pdf = models.FileField(upload_to=upload_pdf_to)
+  released = models.BooleanField(default=False)
 
   def get_points(self):
     """ Returns the total number of points the student received on this exam. """

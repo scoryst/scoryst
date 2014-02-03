@@ -36,7 +36,7 @@
           <h2>Exam Options</h2>
 
           <a href="#" class="btn btn-default btn-sm export-csv">Export CSV</a>
-          <button class="btn btn-danger btn-sm release-grades">Release grades</button>
+          <button class="btn btn-danger btn-sm release-grades">Release Grades</button>
         </div>
 
         <div class="students">

@@ -10,3 +10,4 @@ local_settings.py
 dump.rdb
 superuser.json
 fixtures
+scorystapp/migrations
