@@ -202,7 +202,7 @@ djcelery.setup_loader()
 
 # Use Redis as the broker
 BROKER_URL = 'redis://localhost:6379/0'
-CELERY_IMPORTS=('scorystapp.views.exams', )
+CELERY_IMPORTS=('scorystapp.views.exams', 'scorystapp.views.upload')
 
 EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
 CELERY_EMAIL_BACKEND = 'djrill.mail.backends.djrill.DjrillBackend'

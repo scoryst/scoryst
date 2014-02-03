@@ -231,7 +231,6 @@ def get_saved_exam(request, cur_course_user, exam_id):
   }
   return http.HttpResponse(json.dumps(return_object), mimetype='application/json')
 
-# TODO (kvmohan): Cleanup
 app = Celery('tasks', broker=settings.BROKER_URL)
 @app.task
 def upload(temp_pdf_name, num_pages, exam):

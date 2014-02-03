@@ -1,27 +1,45 @@
+from celery import Celery
 from django import shortcuts
 from django.core import files
-from scorystapp import models, decorators, forms
+from django.conf import settings
+from scorystapp import models, forms, decorators, utils
 from scorystapp.views import helpers
 import sys
 import Image
 import numpy
+import os
+import PyPDF2
+import shlex
+import subprocess
 
-# TODO: everything
 @decorators.login_required
 @decorators.valid_course_user_required
 @decorators.instructor_or_ta_required
 def upload(request, cur_course_user):
+  """
+  Shows the form to upload student exams and once submitted, processes the pdf,
+  splits them and takes the instructor/ta to the map exam page
+  """
   cur_course = cur_course_user.course
+  exams = models.Exam.objects.filter(course=cur_course).order_by('id')
+  # Get the exam choices for the select field in the upload template
+  exam_choices = [(exam.id, exam.name) for exam in exams]
+
   if request.method == 'POST':
-    form = forms.StudentExamsUploadForm(request.POST, request.FILES)
+    form = forms.StudentExamsUploadForm(request.POST, request.FILES, exam_choices=exam_choices)
     if form.is_valid():
-      # TODO: May not be unique, use select list
-      exam = models.Exam.objects.get(course=cur_course, name=form.cleaned_data['exam_name'])
-      _break_and_upload(exam, request.FILES['exam_file'])
-      return shortcuts.redirect('/course/%s/exams/%s/map/' % (cur_course_user.course.id, exam.id))
+      exam = shortcuts.get_object_or_404(models.Exam, pk=request.POST['exam_name'], course=cur_course)
+
+      # Break the pdf into corresponding student exams using a celery worker
+      # Break those pdfs into jpegs and upload them to S3.
+      name_prefix = exam.name + utils._generate_random_string(5)
+      _break_and_upload(exam, request.FILES['exam_file'], name_prefix)
+
+      # We return to the roster page because the files are still being processed and map exams
+      # won't be ready
+      return shortcuts.redirect('/course/%s/roster' % (cur_course_user.course.id,))
   else:
-    exams = models.Exam.objects.filter(course=cur_course).order_by('id')
-    form = forms.StudentExamsUploadForm()
+    form = forms.StudentExamsUploadForm(exam_choices=exam_choices)
 
   return helpers.render(request, 'upload.epy', {
     'title': 'Upload',
@@ -29,93 +47,95 @@ def upload(request, cur_course_user):
     'form': form
   })
 
-def _break_and_upload(exam, f):
-  num_pages = _split_to_jpegs(f)
-  num_pages_per_exam = exam.page_count * 2
 
-  num_students = num_pages / num_pages_per_exam
+def _break_and_upload(exam, f, name_prefix):
+  """
+  Given the pdf file, calls a celery function that breaks it down the pdf
+  into smaller pdfs and jpegs and handle uploading them to S3, creating unmapped
+  students etc.
+  """
+  temp_pdf_name = '/tmp/%s.pdf' % name_prefix
+  temp_pdf = open(temp_pdf_name, 'w')
+  temp_pdf.seek(0)
+  temp_pdf.write(f.read())
+  temp_pdf.flush()
+
+  _break_and_upload_celery(exam, temp_pdf_name, name_prefix)
+  # _break_and_upload_celery.delay(exam, temp_pdf_name, name_prefix)
+
+
+# app = Celery('tasks', broker=settings.BROKER_URL)
+# @app.task
+def _break_and_upload_celery(exam, temp_pdf_name, name_prefix):
+  """
+  Split the pdf into smaller pdfs- one for each exam, as well as jpegs and then
+  calls create_unmapped_exam_answers 
+  """
+  temp_jpeg_name = '/tmp/%s%%d.jpg' % name_prefix
   
+  # Split the pdf into jpegs
+  subprocess.call(shlex.split('convert -density 150 -size 1200x900 %s %s' % 
+    (temp_pdf_name, temp_jpeg_name)))
+
+  entire_pdf = PyPDF2.PdfFileReader(file(temp_pdf_name, 'rb'))
+  
+  # Makes the assumption that all exams have the same number of pages
+  num_pages = entire_pdf.getNumPages()
+  # Makes the assumption that each sheet has one page with questions and the
+  # other side is blank
+  num_pages_per_exam = exam.page_count * 2
+  num_students = num_pages / num_pages_per_exam
+
+  for curr_student in range(num_students):
+    # For each student, create a new pdf
+    single_student_pdf = PyPDF2.PdfFileWriter()
+
+    for curr_page in range(num_pages_per_exam):
+      page = entire_pdf.pages[curr_student * num_pages_per_exam + curr_page]
+      single_student_pdf.addPage(page)
+    
+    single_student_pdf.write(open('/tmp/%s%d.pdf' % (name_prefix, curr_student), 'wb'))
+
+  # Delete the giant pdf file
+  os.remove(temp_pdf_name)  
+
+  create_unmapped_exam_answers(exam, name_prefix, num_pages_per_exam, num_students)
+
+
+def create_unmapped_exam_answers(exam, name_prefix, num_pages_per_exam, num_students):
   question_parts = models.QuestionPart.objects.filter(exam=exam)
   
-  # TODO: Fuck my life
-  pdf = files.File(open('/tmp/midterm.pdf'))
-  for i in range(num_students):
+  for curr_student in range(num_students):
     exam_answer = models.ExamAnswer(course_user=None, exam=exam, page_count=num_pages_per_exam)
-    # TODO: Fuck my life
-    exam_answer.pdf.save('new', pdf)
-    exam_answer.save()
+    temp_pdf_name = '/tmp/%s%d.pdf' % (name_prefix, curr_student)
 
-    for j in range(num_pages_per_exam):
-      exam_page = models.ExamAnswerPage(exam_answer=exam_answer, page_number=j+1)
+    temp_pdf = file(temp_pdf_name, 'rb')
+    exam_answer.pdf.save('new', files.File(temp_pdf))
+    exam_answer.save()
+    os.remove(temp_pdf_name)
+
+    for curr_page in range(num_pages_per_exam):
+      exam_answer_page = models.ExamAnswerPage(exam_answer=exam_answer, page_number=curr_page+1)
       
-      njpg = i * num_pages_per_exam + j
-      jpgfile = file('/tmp/jpg%d.jpg' % njpg, 'r')
-      exam_page.page_jpeg.save('new', files.File(jpgfile))
-      exam_page.save()
-      jpgfile.close()
+      curr_page_num = curr_student * num_pages_per_exam + curr_page
+      temp_jpeg_name = '/tmp/%s%d.jpg' % (name_prefix, curr_page_num)
+      temp_jpeg = file(temp_jpeg_name, 'rb')
+      exam_answer_page.page_jpeg.save('new', files.File(temp_jpeg))
+      exam_answer_page.save()
+      temp_jpeg.close()   
 
     for question_part in question_parts:
       answer_pages=''
       for page in question_part.pages.split(','):
         page = int(page)
         answer_pages = answer_pages +  str(2 * page - 1) + ','
-        if 2 * page - 2 and not _is_blank('/tmp/jpg%d.jpg' % (i * num_pages_per_exam +  2 * page - 3)):
-          answer_pages = answer_pages +  str(2 * page - 2) + ','
+      # Remove the trailing comma (,) from the end of answer_pages
       answer_pages = answer_pages[:-1]
       question_part_answer = models.QuestionPartAnswer(question_part=question_part,
         exam_answer=exam_answer, pages=answer_pages)
       question_part_answer.save()
 
-
-def _is_blank(file_name):
-  print file_name
-  im = Image.open(file_name)
-  data = numpy.asarray(im) - 255
-  print numpy.linalg.norm(data)
-  # TODO: 
-  if numpy.linalg.norm(data) < 1000:
-    return True
-  else:
-    return False
-
-def _split_to_jpegs(f):
-  """
-  IDK what this function does, it somehow works
-  """
-  pdf = f.read()
-
-  startmark = '\xff\xd8'
-  startfix = 0
-  endmark = '\xff\xd9'
-  endfix = 2
-  i = 0
-
-  njpg = 0
-  while True:
-    istream = pdf.find('stream', i)
-    if istream < 0:
-      break
-    istart = pdf.find(startmark, istream, istream+20)
-    if istart < 0:
-      i = istream+20
-      continue
-    iend = pdf.find('endstream', istart)
-    if iend < 0:
-      raise Exception('Did not find end of stream!')
-    iend = pdf.find(endmark, iend-20)
-    if iend < 0:
-      raise Exception('Did not find end of JPG!')
-     
-    istart += startfix
-    iend += endfix
-    # print 'JPG %d from %d to %d' % (njpg, istart, iend)
-    jpg = pdf[istart:iend]
-    jpgfile = file('/tmp/jpg%d.jpg' % njpg, 'wb')
-    jpgfile.write(jpg)
-    jpgfile.close()
-     
-    njpg += 1
-    i = iend
-  print njpg
-  return 72 #Really wtf
-
+    for curr_page in range(num_pages_per_exam):
+      curr_page_num = curr_student * num_pages_per_exam + curr_page
+      temp_jpeg_name = '/tmp/%s%d.jpg' % (name_prefix, curr_page_num)
+      os.remove(temp_jpeg_name)
