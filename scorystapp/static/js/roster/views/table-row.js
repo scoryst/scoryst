@@ -53,9 +53,12 @@ var TableRowView = IdempotentView.extend({
         student_id: this.$el.find('.student-id').val()
       },
       privilege: privilege
+    }, {
+      success: function() {
+        this.render();
+      },
+      wait: true
     });
-
-    this.render();
   },
 
   addPopover: function() {
