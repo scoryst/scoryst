@@ -1,0 +1,27 @@
+<table>
+  <thead>
+    <tr>
+      <td>First Name</td>
+      <td>Last Name</td>
+      <td>Email</td>
+      <td>Student ID</td>
+      <td>Action</td>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for user in users %}
+      <tr class="{% cycle 'djDebugOdd' 'djDebugEven' %}">
+        <td>{{user.first_name}}</td>
+        <td>{{user.last_name}}</td>
+        <td>{{user.email}}</td>
+        <td>{{user.student_id}}</td>
+        <td>
+          <a href="{% url 'djdt:login_as' email=user.email %}" class="toggleTemplate">
+            Log in
+          </a>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
