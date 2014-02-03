@@ -137,7 +137,7 @@ class StudentExamsUploadForm(forms.Form):
   """ Allows an exam to be uploaded along with the empty and solutions pdf file """
 
   def __init__(self, *args, **kwargs):
-    """ Get the argument passed """
+    """ We pass in exam_choices from upload.py and retrieve the argument here  """
     exam_choices = kwargs.pop('exam_choices')
     super(StudentExamsUploadForm, self).__init__(*args, **kwargs)
     self.fields['exam_name'].choices = exam_choices
