@@ -248,9 +248,11 @@ def _get_histogram(scores):
   labels = []
   
   while curr < max_score:
-    labels.append('%d-%d' % (curr, curr + step_size))
+    labels.append('[%d, %d)' % (curr, curr + step_size))
     curr += step_size
     bins.append(curr)
+  # The last bin's upper score is inclusive, so change ) to ]
+  labels[-1] = labels[-1][:-1] + ']'
 
   hist, bin_edges = np.histogram(scores, bins=bins)
   
