@@ -87,7 +87,7 @@
         </tr>
         {{/each}}
       {{/each}}
-      <tr class="row-body question">
+      <tr class="row-body question selected">
         <td></td>
         <td class="question-number total">Total</td>
         <td>-</td>
