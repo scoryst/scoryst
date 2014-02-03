@@ -135,14 +135,19 @@ class ExamUploadForm(forms.Form):
 
 class StudentExamsUploadForm(forms.Form):
   """ Allows an exam to be uploaded along with the empty and solutions pdf file """
-  # 10MB
-  # TODO:Change back to 10?
-  MAX_ALLOWABLE_PDF_SIZE = 1024 * 1024 * 25
 
-  exams = models.Exam.objects.filter()
-  exam_name = forms.ChoiceField(choices=[('Midterm', 'Midterm',), ('Final', 'Final')])
+  def __init__(self, *args, **kwargs):
+    """ Get the argument passed """
+    exam_choices = kwargs.pop('exam_choices')
+    super(StudentExamsUploadForm, self).__init__(*args, **kwargs)
+    self.fields['exam_name'].choices = exam_choices
+
+  # 100MB
+  # TODO:Change back to 25?
+  MAX_ALLOWABLE_PDF_SIZE = 1024 * 1024 * 100
+
+  exam_name = forms.ChoiceField()
   exam_file = forms.FileField()
-  exam_solutions_file = forms.FileField(required=False)
 
   def clean_exam_file(self):
     """
@@ -150,20 +155,20 @@ class StudentExamsUploadForm(forms.Form):
     pdf 
     """
     data = self.cleaned_data.get('exam_file')
-    if not data:
-      # No need to raise an error since one will be raised anyway
-      return data
-    if data.size > StudentExamsUploadForm.MAX_ALLOWABLE_PDF_SIZE:
-      raise forms.ValidationError('Max size allowed is %s bytes but file size is %s bytes' %
-                                  (StudentExamsUploadForm.MAX_ALLOWABLE_PDF_SIZE, data.size))
-    
-    if 'pdf' not in data.content_type and 'octet-stream' not in data.content_type:
-      raise forms.ValidationError('Only PDF files are acceptable')
-    try:
-      PyPDF2.PdfFileReader(data)
-    except:
-      raise forms.ValidationError('The PDF file is invalid and may be corrupted')
-    data.seek(0, 0)  # Undo work of PdfFileReader
+    if data:
+      if data.size > ExamUploadForm.MAX_ALLOWABLE_PDF_SIZE:
+        max_size_in_mb = ExamUploadForm.MAX_ALLOWABLE_PDF_SIZE / float(1024 * 1024)
+        user_size_in_mb = data.size / float(1024 * 1024)
+        raise forms.ValidationError('Max size allowed is %d MB but file size is %d MB' %
+          (max_size_in_mb, user_size_in_mb))
+      
+      if 'pdf' not in data.content_type and 'octet-stream' not in data.content_type:
+        raise forms.ValidationError('Only PDF files are acceptable')
+      try:
+        PyPDF2.PdfFileReader(data)
+      except:
+        raise forms.ValidationError('The PDF file is invalid and may be corrupted')
+      data.seek(0, 0)  # Undo work of PdfFileReader
     return data
 
 
