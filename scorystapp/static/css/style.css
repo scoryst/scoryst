@@ -965,6 +965,10 @@ footer .amp {
   width: 300px;
 }
 
+.exams .confirm-popover {
+  width: 160px;
+}
+
 .exams .info-popover {
   padding-left: 2px;
 }
