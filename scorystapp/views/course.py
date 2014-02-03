@@ -1,3 +1,4 @@
+from django import shortcuts
 from scorystapp import models, forms, decorators
 from scorystapp.views import helpers
 
@@ -12,7 +13,9 @@ def new_course(request):
       course = form.save()
       course_user = models.CourseUser(user=request.user,
           course=course, privilege=models.CourseUser.INSTRUCTOR)
+
       course_user.save()
+      return shortcuts.redirect('/course/%d/roster/' % course.pk)
   else:
     form = forms.CourseForm()
 
