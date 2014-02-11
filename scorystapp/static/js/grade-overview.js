@@ -158,6 +158,9 @@ $(function() {
           renderExamSummary(curUserId, curExamId);
         }
       }
+
+      // Update the scrollbar
+      $studentScroll.customScrollbar();
     });
   }
 

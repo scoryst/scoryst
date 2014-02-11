@@ -66,6 +66,12 @@ class User(AbstractBaseUser, PermissionsMixin):
   USERNAME_FIELD = 'email'
   REQUIRED_FIELDS = ['first_name', 'last_name', 'student_id']
 
+  def save(self, *args, **kwargs):
+    """ Overwriting the save function so that lowercase email is saved. """
+    if hasattr(self, 'email'):
+      self.email = self.email.lower()
+    super(User, self).save(*args, **kwargs)
+
   def get_full_name(self):
     """ Returns the full name (first + ' ' + last) of this user. """
     full_name = '%s %s' % (self.first_name, self.last_name)

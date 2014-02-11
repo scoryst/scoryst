@@ -45,11 +45,11 @@
 
         {% if not is_student_view and not is_preview %}
           <button class="btn btn-default btn-sm previous-student" type="button">
-            <i class="fa fa-arrow-up"></i> Previous Student
+            <span class="shortcut">SHIFT<i class="fa fa-arrow-up"></i></span> Previous Student
           </button>
 
           <button class="btn btn-default btn-sm next-student" type="button">
-            <i class="fa fa-arrow-down"></i> Next Student
+            <span class="shortcut">SHIFT<i class="fa fa-arrow-down"></i></span> Next Student
           </button>
 
           <i class="fa fa-check nav-success"></i>
@@ -75,40 +75,42 @@
 
                 <tbody>
                   <tr>
-                    <td><i class="fa fa-arrow-left"></i></td>
+                    <td><span class="shortcut"><i class="fa fa-arrow-left"></i></span></td>
                     <td>Go to previous page of the exam</td>
                   </tr>
 
                   <tr>
-                    <td><i class="fa fa-arrow-right"></i></td>
+                    <td><span class="shortcut"><i class="fa fa-arrow-right"></i></span></td>
                     <td>Go to next page of the exam</td>
                   </tr>
 
                   {% if not is_student_view and not is_preview  %}
                   <tr>
-                    <td><i class="fa fa-arrow-down"></i></td>
+                    <td><span class="shortcut">SHIFT<i class="fa fa-arrow-down"></i></span></td>
                     <td>Go to previously graded student</td>
                   </tr>
 
                   <tr>
-                    <td><i class="fa fa-arrow-up"></i></td>
+                    <td><span class="shortcut">SHIFT<i class="fa fa-arrow-up"></i></span></td>
                     <td>Go to next student</td>
                   </tr>
                   {% endif %}
 
                   <tr>
-                    <td><strong>[</strong></td>
+                    <td><span class="shortcut"><strong>[</strong></span></td>
                     <td>Go to previous part or question</td>
                   </tr>
 
                   <tr>
-                    <td><strong>]</strong></td>
+                    <td><span class="shortcut"><strong>]</strong></span></td>
                     <td>Go to next part or question</td>
                   </tr>
 
                   {% if not is_student_view %}
                   <tr>
-                    <td><strong>A, B, ..., Z</strong></td>
+                    <td><span class="shortcut"><strong>A</strong></span>,
+                      <span class="shortcut"><strong>B</strong></span>, ...,
+                      <span class="shortcut"><strong>Z</strong></span></td>
                     <td>Select a rubric by its corresponding letter</td>
                   </tr>
                   {% endif %}

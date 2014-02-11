@@ -21,7 +21,6 @@ var TableRowView = IdempotentView.extend({
   render: function() {
     var templateData = this.courseUser.toJSON();
     this.$el.html(this.templates.rosterTemplate(templateData));
-    this.addPopover();
   },
 
   editRoster: function(event) {
@@ -46,6 +45,7 @@ var TableRowView = IdempotentView.extend({
     event.preventDefault();
 
     var privilege = this.$el.find('.privilege').find('select option').filter(':selected').val();
+    var self = this;
     this.courseUser.save({
       user: {
         first_name: this.$el.find('.first-name').val(),
@@ -55,7 +55,7 @@ var TableRowView = IdempotentView.extend({
       privilege: privilege
     }, {
       success: function() {
-        this.render();
+        self.render();
       },
       wait: true
     });

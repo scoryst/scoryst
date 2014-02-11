@@ -18,6 +18,10 @@ class UserLoginForm(forms.Form):
   email = forms.EmailField(max_length=100)
   password = forms.CharField(max_length=100, widget=forms.PasswordInput)
   
+  def clean_email(self):
+    """ Converts email to lowercase. """
+    return self.cleaned_data['email'].lower()
+
   def clean(self):
     """ Confirms the user provided valid credentials. """
     data = self.cleaned_data
@@ -65,7 +69,8 @@ class AddPeopleForm(forms.Form):
       first_name, last_name, email, student_id = parts
 
       # ensure email is valid
-      field = forms.EmailField(max_length=100)
+      field = forms.EmailField(max_length=100, error_messages={
+        'invalid': '%s is not a valid email address' % email})
       email = field.clean(email)
 
       # ensure first name, last name, and student ID are provided

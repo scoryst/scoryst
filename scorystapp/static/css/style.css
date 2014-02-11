@@ -516,6 +516,24 @@ footer .amp {
   -webkit-box-shadow: none;
 }
 
+/* Styling for keyboard shortcuts. */
+.grade .shortcut {
+  font-size: 11px;
+  font-family: Monaco, Menlo, 'Lucida Console', 'Lucida Sans Unicode', 'Courier New', Courier, Monospace;
+  padding: 4px 4px 2px 4px;
+  border-radius: 5px;
+  background-color: #ecf0f1;
+  margin-right: 2px;
+}
+
+.grade .shortcut strong {
+  font-size: 14px;
+}
+
+.grade .shortcut i {
+  margin-left: 2px;
+}
+
 .grade .save-comment, .grade .comment-textarea, .grade .add-rubric,
 .grade .student-nav {
   margin-bottom: 10px;
@@ -718,7 +736,7 @@ footer .amp {
 }
 
 .grade .nav-success {
-  margin-left: 5px;
+  margin-left: 3px;
 }
 
 .grade .left-icon {
@@ -897,6 +915,10 @@ footer .amp {
   background-image: url(/static/img/desc.gif);
 }
 
+.roster .student-id, .roster .privilege {
+  min-width: 85px;
+}
+
 /* Styling for editing roster in the table. */
 .roster input[type="text"] {
   width: 80%;
@@ -966,6 +988,7 @@ footer .amp {
 
 .grade-overview .filtering {
   margin-top: -4px;
+  font-size: 14px;
 }
 
 .grade-overview .gray {

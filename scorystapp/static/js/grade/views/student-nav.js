@@ -115,13 +115,17 @@ var StudentNavView = IdempotentView.extend({
 
     switch (event.keyCode) {
       case this.UP_ARROW_KEY_CODE:
-        event.preventDefault();
-        this.goToPreviousStudent();
+        if (event.shiftKey) {
+          event.preventDefault();
+          this.goToPreviousStudent();
+        }
         break;
 
       case this.DOWN_ARROW_KEY_CODE:
-        event.preventDefault();
-        this.goToNextStudent();
+        if (event.shiftKey) {
+          event.preventDefault();
+          this.goToNextStudent();          
+        }
         break;
     }
   }
