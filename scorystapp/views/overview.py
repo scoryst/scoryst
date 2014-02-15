@@ -1,5 +1,6 @@
 from django import shortcuts, http
 from scorystapp import models, forms, decorators
+from scorystapp.performance import cache
 from scorystapp.views import helpers, grade_or_view, send_email, statistics
 import csv
 import json
@@ -141,45 +142,51 @@ def get_students(request, cur_course_user, exam_id):
   Returns JSON information about the list of students associated with the
   exam id.
   """
-  cur_course = cur_course_user.course
+  @cache.cache_across_querysets([models.Exam(pk=exam_id),
+    models.CourseUser.objects.filter(course=cur_course_user.course.pk),
+    models.ExamAnswer.objects.filter(exam=exam_id),
+    models.QuestionPartAnswer.objects.filter(exam_answer__exam=exam_id)])
+  def _get_students():
+    cur_course = cur_course_user.course
+    exam = shortcuts.get_object_or_404(models.Exam, pk=exam_id)
 
-  exam = shortcuts.get_object_or_404(models.Exam, pk=exam_id)
-  student_course_users = models.CourseUser.objects.filter(course=cur_course.pk,
-    privilege=models.CourseUser.STUDENT).order_by('user__first_name')
+    student_course_users = models.CourseUser.objects.filter(course=cur_course.pk,
+      privilege=models.CourseUser.STUDENT).order_by('user__first_name')
 
-  student_users_to_return = []
-  for i, student_course_user in enumerate(student_course_users):
-    try:
-      exam_answer = models.ExamAnswer.objects.get(course_user=student_course_user,
-        exam=exam)
-    except models.ExamAnswer.DoesNotExist:
-      is_graded = False
-      filter_type = 'unmapped'
-      graders = ''
-    else:
-      filter_type = 'graded' if exam_answer.is_graded() else 'ungraded'
+    student_users_to_return = []
+    for i, student_course_user in enumerate(student_course_users):
+      try:
+        exam_answer = models.ExamAnswer.objects.get(course_user=student_course_user,
+          exam=exam)
+      except models.ExamAnswer.DoesNotExist:
+        is_graded = False
+        filter_type = 'unmapped'
+        graders = ''
+      else:
+        filter_type = 'graded' if exam_answer.is_graded() else 'ungraded'
 
-      question_part_answers = models.QuestionPartAnswer.objects.filter(exam_answer=exam_answer)
-      graded_answers = filter(lambda answer: answer.is_graded(), question_part_answers)
+        question_part_answers = models.QuestionPartAnswer.objects.filter(exam_answer=exam_answer)
+        graded_answers = filter(lambda answer: answer.is_graded(), question_part_answers)
 
-      graders = map(lambda answer: answer.grader.user.get_full_name(), graded_answers)
-      graders = ', '.join(set(graders))
+        graders = map(lambda answer: answer.grader.user.get_full_name(), graded_answers)
+        graders = ', '.join(set(graders))
 
-    student = {
-      'first': i == 0,
-      'fullName': student_course_user.user.get_full_name(),
-      'email': student_course_user.user.email,
-      'student_id': student_course_user.user.student_id,
-      'pk': student_course_user.user.pk,
-      'filterType': filter_type,
-      'score': filter_type if filter_type != 'unmapped' else 'no exam',
-      'graders': graders,
-    }
-    student_users_to_return.append(student)
+      student = {
+        'first': i == 0,
+        'fullName': student_course_user.user.get_full_name(),
+        'email': student_course_user.user.email,
+        'student_id': student_course_user.user.student_id,
+        'pk': student_course_user.user.pk,
+        'filterType': filter_type,
+        'score': filter_type if filter_type != 'unmapped' else 'no exam',
+        'graders': graders,
+      }
+      student_users_to_return.append(student)
 
-  to_return = {'studentUsers': student_users_to_return}
+    return {'studentUsers': student_users_to_return}
 
-  return http.HttpResponse(json.dumps(to_return), mimetype='application/json')
+  students = _get_students()
+  return http.HttpResponse(json.dumps(students), mimetype='application/json')
 
 
 @decorators.login_required

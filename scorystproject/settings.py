@@ -178,7 +178,7 @@ CACHEOPS = {
     # 'news.*': ('just_enable', 60*60),
 
     # Automatically cache all requests for questionpartanswer model for 15 min
-    'scorystapp.questionpartanswer': ('all', 60*15),
+    'scorystapp.*': ('all', 60*60*24),
 }
 
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'

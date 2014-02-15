@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, \
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
-from cacheops import cached_as
+import cacheops
 
 
 class UserManager(BaseUserManager):
@@ -242,51 +242,37 @@ class ExamAnswer(models.Model):
   
   def get_points(self):
     """ Returns the total number of points the student received on this exam. """
-
-    @cached_as(QuestionPartAnswer.objects.filter(exam_answer=self))
-    def _get_points(self):
-      """ Returns the total number of points the student received on this exam. """
-      question_part_answers = QuestionPartAnswer.objects.filter(exam_answer=self)
-      points = 0
-      for question_part_answer in question_part_answers:
-        points += question_part_answer.get_points()
-      return points
-    return _get_points(self)
+    question_part_answers = QuestionPartAnswer.objects.filter(exam_answer=self)
+    points = 0
+    for question_part_answer in question_part_answers:
+      points += question_part_answer.get_points()
+    return points
 
   def is_graded(self):
-    """ Returns true if this exam is graded, or false otherwise. """
-
-    @cached_as(QuestionPartAnswer.objects.filter(exam_answer=self))
-    def _is_graded(self):
+    @cacheops.cached_as(QuestionPartAnswer.objects.filter(exam_answer=self))
+    def _is_graded():
       """ Returns true if this exam is graded, or false otherwise. """
       question_part_answers = QuestionPartAnswer.objects.filter(exam_answer=self)
       for question_part_answer in question_part_answers:
         if not question_part_answer.is_graded():
           return False
       return True
-    return _is_graded(self)
+
+    return _is_graded()
 
   def get_question_points(self, question_number):
     """ Returns the total number of points the student received on this question_number. """
-
-    @cached_as(QuestionPartAnswer.objects.filter(exam_answer=self,
-      question_part__question_number=question_number))
-    def _get_question_points(self, question_number):
-      """ Returns the total number of points the student received on this question_number. """
-      question_part_answers = QuestionPartAnswer.objects.filter(exam_answer=self,
-        question_part__question_number=question_number)
-      points = 0
-      for question_part_answer in question_part_answers:
-        points += question_part_answer.get_points()
-      return points
-    return _get_question_points(self, question_number)
+    question_part_answers = QuestionPartAnswer.objects.filter(exam_answer=self,
+      question_part__question_number=question_number)
+    points = 0
+    for question_part_answer in question_part_answers:
+      points += question_part_answer.get_points()
+    return points
 
   def is_question_graded(self, question_number):
-    """ Returns true if this exam is graded, or false otherwise. """
-
-    @cached_as(QuestionPartAnswer.objects.filter(exam_answer=self,
+    @cacheops.cached_as(QuestionPartAnswer.objects.filter(exam_answer=self,
       question_part__question_number=question_number))
-    def _is_question_graded(self, question_number):
+    def _is_question_graded():
       """ Returns true if this exam is graded, or false otherwise. """
       question_part_answers = QuestionPartAnswer.objects.filter(exam_answer=self,
         question_part__question_number=question_number)
@@ -294,7 +280,8 @@ class ExamAnswer(models.Model):
         if not question_part_answer.is_graded():
           return False
       return True
-    return _is_question_graded(self, question_number)
+
+    return _is_question_graded()
 
   def __unicode__(self):
     if self.course_user:
@@ -338,9 +325,7 @@ class QuestionPartAnswer(models.Model):
   custom_points = models.FloatField(null=True, blank=True)
 
   def is_graded(self):
-    """ Returns true if this question part answer is graded, or false otherwise. """
-    
-    @cached_as(self)
+    @cacheops.cached_as(self)
     def _is_graded(self):
       """ Returns true if this question part answer is graded, or false otherwise. """
       return self.rubrics.count() > 0 or self.custom_points is not None
@@ -348,23 +333,18 @@ class QuestionPartAnswer(models.Model):
 
   def get_points(self):
     """ Returns the number of points the student received for this answer. """
+    # sum all rubric points
+    total_points = 0
+    for rubric in self.rubrics.all():
+      total_points += rubric.points
 
-    @cached_as(self)
-    def _get_points(self):
-      """ Returns the number of points the student received for this answer. """
-      # sum all rubric points
-      total_points = 0
-      for rubric in self.rubrics.all():
-        total_points += rubric.points
-
-      custom_points = self.custom_points if self.custom_points else 0
-      if self.exam_answer.exam.grade_down:
-        # if we're grading down, subtract total from max points
-        return self.question_part.max_points - total_points + custom_points
-      else:
-        # otherwise, we're awarding points
-        return total_points + custom_points
-    return _get_points(self)
+    custom_points = self.custom_points if self.custom_points else 0
+    if self.exam_answer.exam.grade_down:
+      # if we're grading down, subtract total from max points
+      return self.question_part.max_points - total_points + custom_points
+    else:
+      # otherwise, we're awarding points
+      return total_points + custom_points
 
   def __unicode__(self):
     if self.exam_answer.course_user:
