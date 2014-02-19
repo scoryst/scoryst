@@ -49,7 +49,7 @@ var MainView = IdempotentView.extend({
     var examPDFView = new ExamPDFView({
       el: this.$('.exam'),
       model: questionPartAnswer,
-      questionPartAnswers: this.questionPartAnswers
+      questionPartAnswers: this.questionPartAnswers,
     });
 
     this.registerSubview(examPDFView);
@@ -119,7 +119,7 @@ var MainView = IdempotentView.extend({
         // TODO: handle error
       }
     });
-  }
+  },
 });
 
 $(function() {

@@ -353,3 +353,19 @@ class QuestionPartAnswer(models.Model):
     else:
       return '(unmapped)\'s Q%d.%d Answer' % (self.question_part.question_number, 
         self.question_part.part_number)
+
+
+class Annotation(models.Model):
+  """ Represents an annotation for a student's exam answer page and question/part. """
+  exam_answer_page = models.ForeignKey(ExamAnswerPage, db_index=True)
+  question_part_answer = models.ForeignKey(QuestionPartAnswer, db_index=True)
+
+  # One of the rubric and comment fields should not be null
+  rubric = models.ForeignKey(Rubric, null=True, blank=True, db_index=True)
+  comment = models.TextField(null=True, blank=True, max_length=1000)
+
+  top_offset = models.FloatField()
+  left_offset = models.FloatField()
+
+  def get_exam_page_number(self):
+    return exam_page_answer.page_number

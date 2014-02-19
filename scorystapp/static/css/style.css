@@ -261,11 +261,7 @@ footer .amp {
 .exam-canvas {
   float: left;
   width: 90%;
-}
-
-.exam-canvas {
   border: 1px solid #ccc;
-  overflow: auto;
 }
 
 .exam-canvas img {
@@ -867,6 +863,67 @@ footer .amp {
 
 .grade h2.exam-preview {
   margin-top: 15px;
+}
+
+/* Annotations CSS */
+.grade .annotation {
+  position: relative;
+  width: 20px;
+}
+
+.grade .annotation-circle:hover {
+  cursor: pointer;
+}
+
+.grade .annotation-circle {
+  background: transparent;
+  z-index: 2000;
+  width: 20px;
+  height: 20px;
+
+  border: 4px solid #e74c3c;
+  border-radius: 200px;
+  -webkit-border-radius: 200px;
+  -moz-border-radius: 200px;
+  -ms-border-radius: 200px;
+  -o-border-radius: 200px;
+  -khtml-border-radius: 200px;
+
+  box-shadow: 0 0 3px #999;
+  -webkit-box-shadow: 0 0 3px #999;
+  -moz-box-shadow: 0 0 3px #999;
+  -ms-box-shadow: 0 0 3px #999;
+  -o-box-shadow: 0 0 3px #999;
+  -khtml-box-shadow: 0 0 3px #999;
+}
+
+.grade .annotation-comment {
+  position: absolute;
+  z-index: 3000;
+  background-color: #ecf0f1;
+  padding: 10px;
+  border-radius: 10px;
+  width: 250px;
+}
+
+.grade .annotation-comment button {
+  margin: 5px 5px 0 0;
+  float: left;
+}
+
+.grade .annotation-comment .close {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  position: relative;
+  top: 3px;
+  color: inherit;
+  float: right;
+}
+
+.grade .annotation-success {
+  display: none;
+  margin: 12px 0 0 5px;
+  color: #27ae60;
+  float: left;
 }
 
 /* Login page CSS */

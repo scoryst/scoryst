@@ -28,6 +28,9 @@ var ExamPDFView = IdempotentView.extend({
 
     this.setActiveQuestionPartAnswer(this.model, 0);
     this.addRemoteEventListeners();
+
+    this.annotations = options.annotations;
+    this.renderAnnotations(this.annotations);
   },
 
   addRemoteEventListeners: function() {
@@ -37,10 +40,51 @@ var ExamPDFView = IdempotentView.extend({
       function(questionPartAnswer, pageIndex) {
         pageIndex = pageIndex || 0;
         self.setActiveQuestionPartAnswer(questionPartAnswer, pageIndex);
+
+        this.renderAnnotations(this.annotations);
       });
 
     // events from other elements
     this.listenToDOM($(window), 'keydown', this.handleShortcuts);
+  },
+
+  renderAnnotations: function(annotations) {
+    var curPageNum = this.imageLoader.getCurPageNum();
+    this.fetchAnnotations(this.model, curPageNum, function(annotations) {
+      if (this.annotationView) {
+        this.deregisterSubview(this.annotationView);
+      }
+      this.annotationView = new AnnotationView({
+        el: this.$('.exam-canvas'),
+        questionPartAnswer: this.model,
+        annotations: annotations,
+        curPageNumber: curPageNum
+      });
+
+      this.registerSubview(this.annotationView);
+    });
+  },
+
+  fetchAnnotations: function(questionPartAnswer, curPageNum, callback) {
+    // TODO: Understand what these parameters are doing.
+    var annotations = new AnnotationCollection({
+      questionPartAnswer: questionPartAnswer,
+      examPageNumber: curPageNum,
+    }, {
+      questionPartAnswer: questionPartAnswer
+      // curPageNum: curPageNum
+    });
+
+    var self = this;
+    annotations.fetch({
+      success: function() {
+        _.bind(callback, self)(annotations);
+      },
+
+      error: function() {
+        // TOOD: handle error
+      }
+    });
   },
 
   goToPreviousPage: function(event, skipCurrentPart) {
@@ -86,6 +130,7 @@ var ExamPDFView = IdempotentView.extend({
     } else {
       // if that didn't work, there is no previous part, so do nothing
     }
+    this.renderAnnotations(this.annotations);
   },
 
   goToNextPage: function(event, skipCurrentPart) {

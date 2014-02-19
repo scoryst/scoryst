@@ -110,3 +110,18 @@ class CourseUserSerializer(serializers.ModelSerializer):
     model = models.CourseUser
     fields = ('id', 'privilege', 'user', 'is_current_user', 'course')
     read_only_fields = ('id', 'course')
+
+
+class ExamAnswerPageSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = models.ExamAnswerPage
+    fields = ('id', 'page_number')
+    read_only_fields = ('id', 'page_number')
+
+
+class AnnotationSerializer(serializers.ModelSerializer): 
+  class Meta:
+    model = models.Annotation
+    fields = ('id', 'exam_answer_page', 'question_part_answer', 'rubric', 'comment',
+      'top_offset', 'left_offset')
+    read_only_fields = ('id',)

@@ -307,6 +307,23 @@
   <button class="btn btn-primary btn-sm add-rubric">Add rubric</button>
   <div class="comment-container"></div>
 </script>
+
+<script type="text/x-handlebars-template" class="annotation-template">
+  <div class="annotation">
+    <div class="annotation-circle"></div>
+    <div class="annotation-comment">
+      <textarea class="form-control" rows="3" placeholder="Enter a comment"></textarea>
+      <button type="button" class="btn btn-primary btn-sm save">
+        Save
+      </button>
+      <button type="button" class="btn btn-danger btn-sm delete">
+        Delete
+      </button>
+      <i class="fa fa-check annotation-success"></i>
+      <button type="button" class="close"><i class="fa fa-compress"></i></button>
+    </div>
+  </div>
+</script>
 {% endverbatim %}
 {% endblock %}
 
@@ -318,6 +335,7 @@
 <script src="/static/js/lib/modal.js"></script>
 <script src="/static/js/lib/tooltip.js"></script>
 <script src="/static/js/lib/popover.js"></script>
+<script src="/static/js/lib/jquery-ui-1.10.4.custom.min.js"></script>
 
 <script src="/static/js/popover-confirm.js"></script>
 <script src="/static/js/image-loader.js"></script>
@@ -327,6 +345,7 @@
 <script src="/static/js/grade/models/utils.js"></script>
 <script src="/static/js/grade/models/question-part-answer.js"></script>
 <script src="/static/js/grade/models/rubric.js"></script>
+<script src="/static/js/grade/models/annotation.js"></script>
 
 <script src="/static/js/grade/views/rubric.js"></script>
 <script src="/static/js/grade/views/custom-points.js"></script>
@@ -334,6 +353,7 @@
 <script src="/static/js/grade/views/rubrics-nav-header.js"></script>
 <script src="/static/js/grade/views/rubrics-nav.js"></script>
 <script src="/static/js/grade/views/exam-nav.js"></script>
+<script src="/static/js/grade/views/annotation.js"></script>
 <script src="/static/js/grade/views/exam-pdf.js"></script>
 <script src="/static/js/grade/views/student-nav.js"></script>
 <script src="/static/js/grade/views/main.js"></script>
