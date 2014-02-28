@@ -149,6 +149,7 @@ $(function() {
 
   /* Change student by re-rendering main view. */
   Mediator.on('changeStudent', function() {
+    console.log('CHANGE STUDENT');
     mainView.removeSideEffects();
 
     mainView = new MainView({

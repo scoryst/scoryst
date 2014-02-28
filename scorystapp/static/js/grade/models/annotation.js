@@ -21,9 +21,9 @@ var AnnotationModel = Backbone.Model.extend({
 var AnnotationCollection = Backbone.Collection.extend({
   model: AnnotationModel,
 
-  initialize: function(options) {
+  initialize: function(models, options) {
     this.constructor.__super__.initialize.apply(this, arguments);
-    console.log(options);
+    console.log(options.questionPartAnswer);
     this.questionPartAnswer = options.questionPartAnswer.id;
     this.examPageNumber = options.examPageNumber;  /* TODO: Change. */
   },

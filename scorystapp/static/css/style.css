@@ -880,6 +880,7 @@ footer .amp {
   z-index: 2000;
   width: 20px;
   height: 20px;
+  position: absolute;  /* To eliminate interactions between annotations. */
 
   border: 4px solid #e74c3c;
   border-radius: 200px;
@@ -899,6 +900,7 @@ footer .amp {
 
 .grade .annotation-comment {
   position: absolute;
+  top: 20px;
   z-index: 3000;
   background-color: #ecf0f1;
   padding: 10px;

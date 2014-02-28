@@ -309,19 +309,21 @@
 </script>
 
 <script type="text/x-handlebars-template" class="annotation-template">
-  <div class="annotation">
-    <div class="annotation-circle"></div>
-    <div class="annotation-comment">
-      <textarea class="form-control" rows="3" placeholder="Enter a comment"></textarea>
-      <button type="button" class="btn btn-primary btn-sm save">
+  <div class="annotation-circle"></div>
+  <div class="annotation-comment">
+    <textarea class="form-control" rows="3" placeholder="Enter a comment" {{#if comment}}disabled="disabled"{{/if}}>{{#if comment}}{{comment}}{{/if}}</textarea>
+    <button type="button" class="btn btn-primary btn-sm {{#if comment}}edit{{else}}save{{/if}}">
+      {{#if comment}}
+        Edit
+      {{else}}
         Save
-      </button>
-      <button type="button" class="btn btn-danger btn-sm delete">
-        Delete
-      </button>
-      <i class="fa fa-check annotation-success"></i>
-      <button type="button" class="close"><i class="fa fa-compress"></i></button>
-    </div>
+      {{/if}}
+    </button>
+    <button type="button" class="btn btn-danger btn-sm delete">
+      Delete
+    </button>
+    <i class="fa fa-check annotation-success"></i>
+    <button type="button" class="close"><i class="fa fa-compress"></i></button>
   </div>
 </script>
 {% endverbatim %}

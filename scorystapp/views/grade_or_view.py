@@ -180,7 +180,6 @@ def list_annotations(request, cur_course_user, exam_answer_id, question_part_ans
     if serializer.is_valid():
       serializer.save()
       return response.Response(serializer.data)
-    print serializer.errors
     return response.Response(serializer.errors, status=422)
 
 
@@ -189,12 +188,20 @@ def list_annotations(request, cur_course_user, exam_answer_id, question_part_ans
 @decorators.valid_course_user_required
 @decorators.student_required
 def manage_annotation(request, cur_course_user, exam_answer_id, question_part_answer_id, exam_page_number, annotation_id):
+  annotation = shortcuts.get_object_or_404(models.Annotation, pk=annotation_id)
   if request.method == 'GET':
     serializer = serializers.AnnotationSerializer(annotation)
     return response.Response(serializer.data)
+
   elif request.method == 'PUT' or request.method == 'POST':
     if cur_course_user.privilege == models.CourseUser.STUDENT:
       return response.Response(status=403)
-
     serializer = serializers.AnnotationSerializer(annotation, data=request.DATA)  # TODO: FINISH THIS
-    return response.Response(serializer.data)
+    if serializer.is_valid():
+      serializer.save()
+      return response.Response(serializer.data)
+    return response.Response(serializer.errors, status=422)
+
+  elif request.method == 'DELETE':
+    annotation.delete()
+    return response.Response(status=204)

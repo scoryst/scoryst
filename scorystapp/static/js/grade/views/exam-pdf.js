@@ -6,9 +6,12 @@ var ExamPDFView = IdempotentView.extend({
   LEFT_BRACKET_KEY_CODE: 219,
   RIGHT_BRACKET_KEY_CODE: 221,
 
+  CIRCLE_RADIUS: 10,  // Specified in style.css as radius of annotation
+
   events: {
     'click .previous-page': 'goToPreviousPage',
-    'click .next-page': 'goToNextPage'
+    'click .next-page': 'goToNextPage',
+    'click': 'createAnnotation'
   },
 
   // TODO: comments
@@ -28,9 +31,6 @@ var ExamPDFView = IdempotentView.extend({
 
     this.setActiveQuestionPartAnswer(this.model, 0);
     this.addRemoteEventListeners();
-
-    this.annotations = options.annotations;
-    this.renderAnnotations(this.annotations);
   },
 
   addRemoteEventListeners: function() {
@@ -40,39 +40,85 @@ var ExamPDFView = IdempotentView.extend({
       function(questionPartAnswer, pageIndex) {
         pageIndex = pageIndex || 0;
         self.setActiveQuestionPartAnswer(questionPartAnswer, pageIndex);
-
-        this.renderAnnotations(this.annotations);
       });
 
     // events from other elements
     this.listenToDOM($(window), 'keydown', this.handleShortcuts);
   },
 
-  renderAnnotations: function(annotations) {
-    var curPageNum = this.imageLoader.getCurPageNum();
-    this.fetchAnnotations(this.model, curPageNum, function(annotations) {
-      if (this.annotationView) {
-        this.deregisterSubview(this.annotationView);
-      }
-      this.annotationView = new AnnotationView({
-        el: this.$('.exam-canvas'),
-        questionPartAnswer: this.model,
-        annotations: annotations,
-        curPageNumber: curPageNum
-      });
+  renderAnnotations: function() {
+    // Before rendering, remove all the old views.
+    this.deregisterSubview();
 
-      this.registerSubview(this.annotationView);
+    var curPageNum = this.curPageNum;  // TODO: Figure out correct page number.
+    var self = this;
+    this.fetchAnnotations(this.model, curPageNum, function(annotations) {
+      this.annotations = annotations;
+      annotations.forEach(function(annotation) {
+        var annotationView = new AnnotationView({
+          // el: self.$('.exam-canvas'),
+          questionPartAnswer: self.model,
+          model: annotation,
+          curPageNumber: curPageNum
+        });
+
+        self.$el.append(annotationView.render().$el);
+        self.registerSubview(annotationView);
+      });
+    });
+  },
+
+  createAnnotation: function(event) {
+    var $target = $(event.target);
+    if (!$target.is('.exam-canvas') && !$target.is('img')) {
+      return;
+    }
+
+    // Getting the X and Y relative to exam PDF
+    var parentOffset = this.$el.offset();
+    var examPDFX = event.pageX - parentOffset.left;
+    var examPDFY = event.pageY - parentOffset.top;
+
+    // Check to ensure that the circle is within the canvas
+    var minX = this.CIRCLE_RADIUS * 2 + this.$el.find('.previous-page').width();
+    if (examPDFX < minX || examPDFY < this.CIRCLE_RADIUS ||
+      examPDFX > this.$el.width() - minX ||
+      examPDFY > this.$el.height() - this.CIRCLE_RADIUS) {
+      return;
+    }
+
+    // Compute the offset to store
+    var leftOffset = examPDFX - this.CIRCLE_RADIUS * 2;
+    var topOffset = examPDFY - this.CIRCLE_RADIUS;
+    var annotation = new AnnotationModel({
+      question_part_answer: this.model.id,
+      exam_page_number: this.curPageNum,
+      left_offset: leftOffset,
+      top_offset: topOffset
+    });
+
+    this.annotations.add(annotation);
+
+    // Save, and add the annotation to the canvas.
+    var self = this;
+    annotation.save({}, {
+      success: function() {
+        var annotationView = new AnnotationView({
+          model: annotation,
+        });
+
+        var annotationEl = annotationView.render().$el;
+        self.$el.append(annotationEl);
+        annotationEl.find('textarea').focus();
+        self.registerSubview(annotationView);
+      }
     });
   },
 
   fetchAnnotations: function(questionPartAnswer, curPageNum, callback) {
-    // TODO: Understand what these parameters are doing.
-    var annotations = new AnnotationCollection({
+    var annotations = new AnnotationCollection({}, {
       questionPartAnswer: questionPartAnswer,
-      examPageNumber: curPageNum,
-    }, {
-      questionPartAnswer: questionPartAnswer
-      // curPageNum: curPageNum
+      examPageNumber: curPageNum
     });
 
     var self = this;
@@ -130,7 +176,6 @@ var ExamPDFView = IdempotentView.extend({
     } else {
       // if that didn't work, there is no previous part, so do nothing
     }
-    this.renderAnnotations(this.annotations);
   },
 
   goToNextPage: function(event, skipCurrentPart) {
@@ -192,8 +237,11 @@ var ExamPDFView = IdempotentView.extend({
 
     // update displayed page
     var page = this.activeQuestionPartAnswerPages[this.activePageIndex];
+    this.curPageNum = page;  // keep track of curPageNum for annotations.
     this.imageLoader.showPage(page, questionPart.question_number,
       questionPart.part_number);
+
+    this.renderAnnotations();
   },
 
   handleShortcuts: function(event) {
