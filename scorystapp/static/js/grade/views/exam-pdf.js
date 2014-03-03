@@ -96,7 +96,6 @@ var ExamPDFView = IdempotentView.extend({
       var commentIfUnsaved = annotationView.deleteIfUnsaved();
       if (commentIfUnsaved) {
         comment = commentIfUnsaved;
-        // break;
       }
     }
 
