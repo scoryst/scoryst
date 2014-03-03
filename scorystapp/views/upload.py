@@ -1,9 +1,12 @@
-from celery import Celery
+from celery import task as celery
 from django import shortcuts
 from django.core import files
 from django.conf import settings
+from django.db.models.fields import files as file_fields
 from scorystapp import models, forms, decorators, utils
 from scorystapp.views import helpers
+from workers import dispatcher
+from workers.orchard import client as orchard_client
 import sys
 import Image
 import numpy
@@ -11,6 +14,8 @@ import os
 import PyPDF2
 import shlex
 import subprocess
+import threading
+
 
 @decorators.login_required
 @decorators.valid_course_user_required
@@ -32,7 +37,7 @@ def upload(request, cur_course_user):
 
       # Break the pdf into corresponding student exams using a celery worker
       # Break those pdfs into jpegs and upload them to S3.
-      name_prefix = exam.name.replace(' ', '') + utils._generate_random_string(5)
+      name_prefix = exam.name.replace(' ', '') + utils.generate_random_string(5)
       _break_and_upload(exam, request.FILES['exam_file'], name_prefix)
 
       # We return to the roster page because the files are still being processed and map exams
@@ -62,29 +67,21 @@ def _break_and_upload(exam, f, name_prefix):
   _break_and_upload_celery.delay(exam, temp_pdf_name, name_prefix)
 
 
-app = Celery('tasks', broker=settings.BROKER_URL)
-@app.task
+@celery.task
 def _break_and_upload_celery(exam, temp_pdf_name, name_prefix):
   """
-  Split the pdf into smaller pdfs- one for each exam, as well as jpegs and then
-  calls create_unmapped_exam_answers 
+  Splits the given PDF into multiple smaller PDFs. Converts these PDFs into
+  JPEGs and uploads them to S3 (courtesy of the converter worker).
   """
-  temp_jpeg_name = '/tmp/%s%%d.jpg' % name_prefix
-  
-  # Split the pdf into jpegs
-  subprocess.call(shlex.split('convert -density 300 %s %s' % 
-    (temp_pdf_name, temp_jpeg_name)))
-
   entire_pdf = PyPDF2.PdfFileReader(file(temp_pdf_name, 'rb'))
-  
-  # Makes the assumption that all exams have the same number of pages
   num_pages = entire_pdf.getNumPages()
-  # Makes the assumption that each page has questions on one side and nothing on the other
+
+  # assume each page has questions on one side and nothing on the other
   num_pages_per_exam = exam.page_count * 2
   num_students = num_pages / num_pages_per_exam
 
   for cur_student in range(num_students):
-    # For each student, create a new pdf
+    # for each student, create a new pdf
     single_student_pdf = PyPDF2.PdfFileWriter()
 
     for cur_page in range(num_pages_per_exam):
@@ -93,46 +90,92 @@ def _break_and_upload_celery(exam, temp_pdf_name, name_prefix):
     
     single_student_pdf.write(open('/tmp/%s%d.pdf' % (name_prefix, cur_student), 'wb'))
 
-  # Delete the giant pdf file
+  # delete the giant pdf file
   os.remove(temp_pdf_name)  
-
   create_unmapped_exam_answers(exam, name_prefix, num_pages_per_exam, num_students)
 
 
 def create_unmapped_exam_answers(exam, name_prefix, num_pages_per_exam, num_students):
+  """
+  Associates a JPEG with every ExamAnswerPage. Creates QuestionPartAnswers for each
+  student. Runs the PDF -> JPEG converter worker for all student exams.
+  """
+  NUM_STUDENTS_PER_WORKER = 10
+  num_workers = (num_students - 1) / NUM_STUDENTS_PER_WORKER + 1
+
+  threads = []
   question_parts = models.QuestionPart.objects.filter(exam=exam)
+  orchard = orchard_client.OrchardClient(settings.ORCHARD_API_KEY)
   
-  for cur_student in range(num_students):
-    exam_answer = models.ExamAnswer(course_user=None, exam=exam, page_count=num_pages_per_exam)
-    temp_pdf_name = '/tmp/%s%d.pdf' % (name_prefix, cur_student)
+  for worker in range(num_workers):
+    print 'Spawning worker %d' % worker
+    offset = worker * NUM_STUDENTS_PER_WORKER
+    students = range(offset, min(num_students, offset + NUM_STUDENTS_PER_WORKER))
 
-    temp_pdf = file(temp_pdf_name, 'rb')
-    exam_answer.pdf.save('new', files.File(temp_pdf))
-    exam_answer.save()
-    os.remove(temp_pdf_name)
+    jpeg_prefixes = map(lambda student: 'exam-pages/%s' %
+      utils.generate_random_string(40), students)
+    pdf_paths = []
 
-    for cur_page in range(num_pages_per_exam):
-      exam_answer_page = models.ExamAnswerPage(exam_answer=exam_answer, page_number=cur_page+1)
-      
-      cur_page_num = cur_student * num_pages_per_exam + cur_page
-      temp_jpeg_name = '/tmp/%s%d.jpg' % (name_prefix, cur_page_num)
-      temp_jpeg = file(temp_jpeg_name, 'rb')
-      exam_answer_page.page_jpeg.save('new', files.File(temp_jpeg))
-      exam_answer_page.save()
-      temp_jpeg.close()   
+    for cur_student in students:
+      exam_answer = models.ExamAnswer(course_user=None, exam=exam,
+        page_count=num_pages_per_exam)
+      temp_pdf_name = '/tmp/%s%d.pdf' % (name_prefix, cur_student)
+      temp_pdf = file(temp_pdf_name, 'rb')
 
-    for question_part in question_parts:
-      answer_pages=''
-      for page in question_part.pages.split(','):
-        page = int(page)
-        answer_pages = answer_pages +  str(2 * page - 1) + ','
-      # Remove the trailing comma (,) from the end of answer_pages
-      answer_pages = answer_pages[:-1]
-      question_part_answer = models.QuestionPartAnswer(question_part=question_part,
-        exam_answer=exam_answer, pages=answer_pages)
-      question_part_answer.save()
+      exam_answer.pdf.save('new', files.File(temp_pdf))
+      exam_answer.save()
 
-    for cur_page in range(num_pages_per_exam):
-      cur_page_num = cur_student * num_pages_per_exam + cur_page
-      temp_jpeg_name = '/tmp/%s%d.jpg' % (name_prefix, cur_page_num)
-      os.remove(temp_jpeg_name)
+      os.remove(temp_pdf_name)
+      pdf_paths.append(exam_answer.pdf.name)
+
+      for cur_page in range(num_pages_per_exam):
+        # set the JPEG associated with each exam page
+        exam_answer_page = models.ExamAnswerPage(exam_answer=exam_answer,
+          page_number=cur_page + 1)
+        cur_page_num = cur_student * num_pages_per_exam + cur_page
+
+        # below is the JPEG name set by the converter worker
+        jpeg_name = '%s%d.jpeg' % (jpeg_prefixes[cur_student - offset], cur_page + 1)
+        jpeg_field = file_fields.ImageFieldFile(instance=None,
+          field=file_fields.FileField(), name=jpeg_name)
+
+        exam_answer_page.page_jpeg = jpeg_field
+        exam_answer_page.save()
+
+      for question_part in question_parts:
+        # create QuestionPartAnswer models for this student
+        answer_pages = ''
+
+        for page in question_part.pages.split(','):
+          page = int(page)
+
+          # assume each page has questions on one side and nothing on the other
+          answer_pages = answer_pages + str(2 * page - 1) + ','
+
+        # remove the trailing comma (,) from the end of answer_pages
+        answer_pages = answer_pages[:-1]
+        question_part_answer = models.QuestionPartAnswer(question_part=question_part,
+          exam_answer=exam_answer, pages=answer_pages)
+        question_part_answer.save()
+
+    host_name = utils.generate_random_string(20).lower()
+    host = orchard.create_host(host_name, 2048)
+
+    # spawn thread to dispatch converter worker
+    args = ('converter', orchard, host, {
+      's3': {
+        'token': settings.AWS_S3_ACCESS_KEY_ID,
+        'secret': settings.AWS_S3_SECRET_ACCESS_KEY,
+        'bucket': settings.AWS_STORAGE_BUCKET_NAME,
+      },
+
+      'pdf_paths': pdf_paths,
+      'jpeg_prefixes': jpeg_prefixes,
+    })
+    thread = threading.Thread(target=dispatcher.dispatch_worker, args=args)
+    threads.append(thread)
+
+  [thread.start() for thread in threads]
+
+  # wait until all threads have complete
+  [thread.join() for thread in threads]
