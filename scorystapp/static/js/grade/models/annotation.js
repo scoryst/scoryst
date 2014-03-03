@@ -23,7 +23,7 @@ var AnnotationCollection = Backbone.Collection.extend({
 
   initialize: function(models, options) {
     this.questionPartAnswer = options.questionPartAnswer.id;
-    this.examPageNumber = options.examPageNumber;  /* TODO: Change. */
+    this.examPageNumber = options.examPageNumber;
   },
 
   url: function() {
@@ -36,7 +36,6 @@ var AnnotationCollection = Backbone.Collection.extend({
     options.beforeSend = ModelUtils.beforeSendCSRFHandler;
 
     if (method !== 'read' && method !== 'create') {
-      // We only allow reading the list of annotations
       throw 'Can only read or create the list of annotations.';
     }
 
