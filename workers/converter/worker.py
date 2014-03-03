@@ -1,27 +1,30 @@
-import sys
-import argparse
-import json
+import traceback
 
-class IronWorker(object):
-  def __init__(self):
-    """ Initializes this IronWorker by reading arguments from ARGV. """
-    self._read_args()
+class Worker(object):
+  def __init__(self, working_dir):
+    """ Initializes this worker. Requires a working directory. """
+    self.working_dir = working_dir
+    self.log = []
 
-  def work(self):
+  def work(self, payload):
+    """ Does work, logging any error that occurs. """
+    try:
+      self._work(payload)
+    except Exception as error:
+      self._log(traceback.format_exc())
+      self.exited_cleanly = False
+    else:
+      self._log('Finished successfully')
+      self.exited_cleanly = True
+
+  def get_log(self):
+    """ Gets all log messages in a string. """
+    return '\n'.join(self.log) + '\n'
+
+  def _work(self, payload):
     """ Does work. Should be overridden by subclass. """
     pass
 
-  def _read_args(self):
-    """ Reads the arguments from ARGV. """
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-payload', '--payload', required=True)
-    parser.add_argument('-d', '--directory', required=True)
-    parser.add_argument('-id', '--id', required=True)
-
-    args = parser.parse_args()
-    with open(args.payload) as handle:
-      contents = handle.read()
-
-    self.payload = json.loads(contents)
-    self.directory = args.directory
-    self.id = args.id
+  def _log(self, message):
+    """ Adds the given message to the log. Useful for debugging. """
+    self.log.append(message)

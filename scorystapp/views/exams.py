@@ -1,4 +1,4 @@
-from celery import Celery
+from celery import task as celery
 from django import shortcuts, http
 from django.core import files
 from django.contrib import messages
@@ -232,8 +232,7 @@ def get_saved_exam(request, cur_course_user, exam_id):
   }
   return http.HttpResponse(json.dumps(return_object), mimetype='application/json')
 
-app = Celery('tasks', broker=settings.BROKER_URL)
-@app.task
+@celery.task
 def upload(temp_pdf_name, num_pages, exam):
   temp_pdf = open(temp_pdf_name, 'r')
   

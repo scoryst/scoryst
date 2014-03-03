@@ -6,4 +6,4 @@ cd converter
 virtualenv --no-site-packages .
 source bin/activate
 pip install -r requirements.txt
-python converter.py -payload payload -id 3 -d /tmp
+python converter.py -p payload -d /tmp
