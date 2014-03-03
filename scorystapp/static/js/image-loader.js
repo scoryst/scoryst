@@ -227,7 +227,7 @@ ImageLoader.prototype.handleZoomEvents = function() {
   var self = this;
 
   this.$canvas.mouseenter(function() {
-    // self.$zoomLens.show();
+    self.$zoomLens.show();
   });
 
   this.$canvas.mouseleave(function() {
