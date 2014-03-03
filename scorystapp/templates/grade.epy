@@ -314,6 +314,10 @@
   </div>
   <div class="annotation-comment">
     <textarea class="form-control" placeholder="Enter a comment" {{#if comment}}disabled="disabled"{{/if}}>{{#if comment}}{{comment}}{{/if}}</textarea>
+
+    {% endverbatim %}
+    {% if not is_student_view %}
+    {% verbatim %}
     <button type="button" class="btn btn-primary btn-sm {{#if comment}}edit{{else}}save{{/if}}">
       {{#if comment}}
         Edit
@@ -325,6 +329,9 @@
       Delete
     </button>
     <i class="fa fa-check annotation-success"></i>
+    {% endverbatim %}
+    {% endif %}
+    {% verbatim %}
     <button type="button" class="close"><i class="fa fa-compress"></i></button>
   </div>
 </script>
@@ -351,6 +358,7 @@
 <script src="/static/js/grade/models/rubric.js"></script>
 <script src="/static/js/grade/models/annotation.js"></script>
 
+<script src="/static/js/grade/views/utils.js"></script>
 <script src="/static/js/grade/views/rubric.js"></script>
 <script src="/static/js/grade/views/custom-points.js"></script>
 <script src="/static/js/grade/views/comment.js"></script>

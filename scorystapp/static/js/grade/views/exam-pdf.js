@@ -71,6 +71,9 @@ var ExamPDFView = IdempotentView.extend({
   },
 
   createAnnotation: function(event) {
+    if (ViewUtils.IS_STUDENT_VIEW) {
+      return;
+    }
     var $target = $(event.target);
 
     // getting the X and Y relative to exam PDF

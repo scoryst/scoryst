@@ -36,27 +36,29 @@ var AnnotationView = IdempotentView.extend({
     }
 
     // Make the annotation draggable.
-    this.$el.draggable({
-      containment: '.exam-canvas',
+    if (!ViewUtils.IS_STUDENT_VIEW) {
+      this.$el.draggable({
+        containment: '.exam-canvas',
 
-      // When the annotation has stopped being dragged, save new coordinates.
-      stop: function(event, annotation) {
-        // If the model has not been saved previously, don't save now.
-        if (self.model.isNew()) {
-          return;
+        // When the annotation has stopped being dragged, save new coordinates.
+        stop: function(event, annotation) {
+          // If the model has not been saved previously, don't save now.
+          if (self.model.isNew()) {
+            return;
+          }
+
+          // TODO: Success / error functions for saving offset?
+          self.model.save({
+            // Add 10 because of padding.
+            offset_top: parseFloat(self.$el.css('top')) + 10,
+            offset_left: parseFloat(self.$el.css('left')) + 10
+          }, {});
+
+          // Reopen the annotation.
+          self.toggleAnnotation();
         }
-
-        // TODO: Success / error functions for saving offset?
-        self.model.save({
-          // Add 10 because of padding.
-          offset_top: parseFloat(self.$el.css('top')) + 10,
-          offset_left: parseFloat(self.$el.css('left')) + 10
-        }, {});
-
-        // Reopen the annotation.
-        self.toggleAnnotation();
-      }
-    });
+      });
+    }
 
     return this;
   },
@@ -113,9 +115,14 @@ var AnnotationView = IdempotentView.extend({
   },
 
   delete: function(event) {
-    this.model.destroy({ wait: true });
-    this.removeSideEffects();
-    this.remove();
+    var self = this;
+    this.model.destroy({
+      success: function() {
+        self.removeSideEffects();
+        self.remove();
+      },
+      wait: true
+    });
   },
 
   removeSideEffects: function() {
