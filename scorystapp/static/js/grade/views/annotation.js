@@ -6,17 +6,18 @@ var AnnotationView = IdempotentView.extend({
   template: Handlebars.compile($('.annotation-template').html()),
 
   events: {
-    'click .annotation-circle': 'toggleAnnotation',
-    'click .close': 'closeAnnotation',
+    'click .annotation-circle-container': 'toggleAnnotation',
+    'click .close': 'toggleAnnotation',
     'click .save': 'saveComment',
     'click .edit': 'editComment',
-    'click .delete': 'delete'
+    'click .delete': 'delete',
   },
 
   // TODO: comments
   initialize: function(options) {
     this.constructor.__super__.initialize.apply(this, arguments);
     this.model = options.model;
+    this.unsavedComment = options.unsavedComment;
     this.render();
   },
 
@@ -24,9 +25,15 @@ var AnnotationView = IdempotentView.extend({
     var annotation = this.model.toJSON();
     this.$el.html(this.template(annotation));
     this.$el.addClass('annotation');
-    this.$el.css('top', annotation.top_offset + 'px');
-    this.$el.css('left', annotation.left_offset + 'px');
+    // Subtract 10 because of padding.
+    this.$el.css('top', annotation.offset_top - 10 + 'px');
+    this.$el.css('left', annotation.offset_left - 10 + 'px');
     var self = this;
+
+    // Add unsaved comment from previous annotation, if any.
+    if (this.unsavedComment) {
+      this.$el.find('textarea').val(this.unsavedComment);
+    }
 
     // Make the annotation draggable.
     this.$el.draggable({
@@ -34,13 +41,16 @@ var AnnotationView = IdempotentView.extend({
 
       // When the annotation has stopped being dragged, save new coordinates.
       stop: function(event, annotation) {
-        var topOffset = parseFloat(self.$el.css('top'));
-        var leftOffset = parseFloat(self.$el.css('left'));
+        // If the model has not been saved previously, don't save now.
+        if (self.model.isNew()) {
+          return;
+        }
 
         // TODO: Success / error functions for saving offset?
         self.model.save({
-          top_offset: topOffset,
-          left_offset: leftOffset
+          // Add 10 because of padding.
+          offset_top: parseFloat(self.$el.css('top')) + 10,
+          offset_left: parseFloat(self.$el.css('left')) + 10
         }, {});
 
         // Reopen the annotation.
@@ -51,32 +61,22 @@ var AnnotationView = IdempotentView.extend({
     return this;
   },
 
-  closeAnnotation: function(event) {
-    var $target = $(event.target);
-    var $annotation = $target.parents('.annotation');
-
-    // If the value in the comment box is nothing, delete the annotation
-    // completely. Otherwise, just hide the comment box.
-    if ($annotation.find('textarea').val().length > 0) {
-      $annotation.find('.annotation-comment').hide();
-    } else {
-      $annotation.remove();      
-    }
-  },
-
   toggleAnnotation: function(event) {
     this.$el.find('.annotation-comment').toggle();
   },
 
   saveComment: function(event) {
-    var $target = $(event.target);
+    var $target = $(event.currentTarget);
     var $textarea = $target.siblings('textarea');
 
-    if ($textarea.val().length == 0) {
+    // If an empty string or all spaces, do not allow comment to be saved.
+    if ($.trim($textarea.val()).length == 0) {
       return;
     }
 
+    console.log(this.model);
     var self = this;
+
     this.model.save({
       comment: $textarea.val()
     }, {
@@ -97,10 +97,19 @@ var AnnotationView = IdempotentView.extend({
   },
 
   editComment: function(event) {
-    var $target = $(event.target);
+    var $target = $(event.currentTarget);
     $target.text('Save');
     $target.removeClass('edit').addClass('save');
     $target.siblings('textarea').removeAttr('disabled').focus();
+  },
+
+  deleteIfUnsaved: function() {
+    var unsavedComment = this.$el.find('textarea').val();
+    if (this.model.isNew()) {
+      this.delete();
+      return unsavedComment;
+    }
+    return undefined;
   },
 
   delete: function(event) {

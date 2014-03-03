@@ -6,12 +6,12 @@ var ExamPDFView = IdempotentView.extend({
   LEFT_BRACKET_KEY_CODE: 219,
   RIGHT_BRACKET_KEY_CODE: 221,
 
-  CIRCLE_RADIUS: 10,  // Specified in style.css as radius of annotation
+  CIRCLE_RADIUS: 10,  // specified in style.css as radius of annotation
 
   events: {
     'click .previous-page': 'goToPreviousPage',
     'click .next-page': 'goToNextPage',
-    'click': 'createAnnotation'
+    'click img': 'createAnnotation'
   },
 
   // TODO: comments
@@ -47,72 +47,79 @@ var ExamPDFView = IdempotentView.extend({
   },
 
   renderAnnotations: function() {
-    // Before rendering, remove all the old views.
+    // before rendering, remove all the old views.
     this.deregisterSubview();
 
-    var curPageNum = this.curPageNum;  // TODO: Figure out correct page number.
+    var curPageNum = this.curPageNum;
     var self = this;
+    this.annotationViews = [];
     this.fetchAnnotations(this.model, curPageNum, function(annotations) {
-      this.annotations = annotations;
+      self.annotations = annotations;
       annotations.forEach(function(annotation) {
         var annotationView = new AnnotationView({
-          // el: self.$('.exam-canvas'),
           questionPartAnswer: self.model,
           model: annotation,
           curPageNumber: curPageNum
         });
 
-        self.$el.append(annotationView.render().$el);
+        self.$el.children('.exam-canvas').prepend(annotationView.render().$el);
         self.registerSubview(annotationView);
+
+        self.annotationViews.push(annotationView)
       });
     });
   },
 
   createAnnotation: function(event) {
     var $target = $(event.target);
-    if (!$target.is('.exam-canvas') && !$target.is('img')) {
-      return;
-    }
 
-    // Getting the X and Y relative to exam PDF
-    var parentOffset = this.$el.offset();
+    // getting the X and Y relative to exam PDF
+    var parentOffset = this.$el.children('.exam-canvas').offset();
     var examPDFX = event.pageX - parentOffset.left;
     var examPDFY = event.pageY - parentOffset.top;
 
-    // Check to ensure that the circle is within the canvas
-    var minX = this.CIRCLE_RADIUS * 2 + this.$el.find('.previous-page').width();
+    // check to ensure that the circle is within the canvas
+    var minX = this.CIRCLE_RADIUS;
     if (examPDFX < minX || examPDFY < this.CIRCLE_RADIUS ||
-      examPDFX > this.$el.width() - minX ||
-      examPDFY > this.$el.height() - this.CIRCLE_RADIUS) {
+        examPDFX > this.$el.width() - minX ||
+        examPDFY > this.$el.height() - this.CIRCLE_RADIUS) {
       return;
     }
 
-    // Compute the offset to store
-    var leftOffset = examPDFX - this.CIRCLE_RADIUS * 2;
-    var topOffset = examPDFY - this.CIRCLE_RADIUS;
+    // go through all annotations, and if any have never been saved,
+    // remove them from the canvas
+    var comment;
+    for (var i = 0; i < this.annotationViews.length; i++) {
+      var annotationView = this.annotationViews[i];
+      // returns the comment in the unsaved comment; if the comment is unsaved,
+      // or if the view has been previously saved, return undefined
+      var commentIfUnsaved = annotationView.deleteIfUnsaved();
+      if (commentIfUnsaved) {
+        comment = commentIfUnsaved;
+        // break;
+      }
+    }
+
     var annotation = new AnnotationModel({
       question_part_answer: this.model.id,
       exam_page_number: this.curPageNum,
-      left_offset: leftOffset,
-      top_offset: topOffset
+      offset_left: examPDFX - this.CIRCLE_RADIUS,
+      offset_top: examPDFY - this.CIRCLE_RADIUS
     });
 
     this.annotations.add(annotation);
 
-    // Save, and add the annotation to the canvas.
-    var self = this;
-    annotation.save({}, {
-      success: function() {
-        var annotationView = new AnnotationView({
-          model: annotation,
-        });
-
-        var annotationEl = annotationView.render().$el;
-        self.$el.append(annotationEl);
-        annotationEl.find('textarea').focus();
-        self.registerSubview(annotationView);
-      }
+    var annotationView = new AnnotationView({
+      model: annotation,
+      unsavedComment: commentIfUnsaved
     });
+
+    this.annotationViews.push(annotationView);
+
+    var annotationEl = annotationView.render().$el;
+    this.$el.children('.exam-canvas').prepend(annotationEl);
+    annotationEl.find('textarea').focus();
+    this.registerSubview(annotationView);
   },
 
   fetchAnnotations: function(questionPartAnswer, curPageNum, callback) {
@@ -121,14 +128,9 @@ var ExamPDFView = IdempotentView.extend({
       examPageNumber: curPageNum
     });
 
-    var self = this;
     annotations.fetch({
       success: function() {
-        _.bind(callback, self)(annotations);
-      },
-
-      error: function() {
-        // TOOD: handle error
+        callback(annotations);
       }
     });
   },

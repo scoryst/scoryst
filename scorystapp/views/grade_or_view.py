@@ -162,6 +162,7 @@ def manage_rubric(request, cur_course_user, exam_answer_id, question_part_answer
 @decorators.login_required
 @decorators.valid_course_user_required
 @decorators.student_required
+# TODO(kvmohan): Access control decorators
 def list_annotations(request, cur_course_user, exam_answer_id, question_part_answer_id, exam_page_number):
   """ Returns a list of Annotations for the provided Exam and QuestionPartAnswer """
   question_part_answer = shortcuts.get_object_or_404(models.QuestionPartAnswer, pk=question_part_answer_id)
@@ -187,6 +188,7 @@ def list_annotations(request, cur_course_user, exam_answer_id, question_part_ans
 @decorators.login_required
 @decorators.valid_course_user_required
 @decorators.student_required
+# TODO(kvmohan): Access control decorators
 def manage_annotation(request, cur_course_user, exam_answer_id, question_part_answer_id, exam_page_number, annotation_id):
   annotation = shortcuts.get_object_or_404(models.Annotation, pk=annotation_id)
   if request.method == 'GET':
@@ -203,5 +205,7 @@ def manage_annotation(request, cur_course_user, exam_answer_id, question_part_an
     return response.Response(serializer.errors, status=422)
 
   elif request.method == 'DELETE':
+    if cur_course_user.privilege == models.CourseUser.STUDENT:
+      return response.Response(status=403)
     annotation.delete()
     return response.Response(status=204)

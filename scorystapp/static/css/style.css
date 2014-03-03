@@ -742,7 +742,7 @@ footer .amp {
 .grade .zoom-lens, .create-exam .zoom-lens {
   display: none;
   background: #fff;
-  z-index: 1000;
+  z-index: 100;
   position: absolute;
   top: 0;
   left: 0;
@@ -871,16 +871,20 @@ footer .amp {
   width: 20px;
 }
 
-.grade .annotation-circle:hover {
+.grade .annotation-circle-container:hover {
   cursor: pointer;
+}
+
+.grade .annotation-circle-container {
+  padding: 10px;
+  position: absolute;
 }
 
 .grade .annotation-circle {
   background: transparent;
-  z-index: 2000;
+  z-index: 200;
   width: 20px;
   height: 20px;
-  position: absolute;  /* To eliminate interactions between annotations. */
 
   border: 4px solid #e74c3c;
   border-radius: 200px;
@@ -900,12 +904,13 @@ footer .amp {
 
 .grade .annotation-comment {
   position: absolute;
-  top: 20px;
-  z-index: 3000;
+  top: 30px;
+  z-index: 200;
   background-color: #ecf0f1;
   padding: 10px;
   border-radius: 10px;
   width: 250px;
+  margin-left: 10px;
 }
 
 .grade .annotation-comment button {
@@ -926,6 +931,10 @@ footer .amp {
   margin: 12px 0 0 5px;
   color: #27ae60;
   float: left;
+}
+
+.grade .annotation textarea {
+  height: 75px;
 }
 
 /* Login page CSS */

@@ -364,8 +364,8 @@ class Annotation(models.Model):
   rubric = models.ForeignKey(Rubric, null=True, blank=True, db_index=True)
   comment = models.TextField(null=True, blank=True, max_length=1000)
 
-  top_offset = models.FloatField()
-  left_offset = models.FloatField()
+  offset_top = models.FloatField()
+  offset_left = models.FloatField()
 
   def get_exam_page_number(self):
     return exam_page_answer.page_number

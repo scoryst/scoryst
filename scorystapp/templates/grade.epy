@@ -309,9 +309,11 @@
 </script>
 
 <script type="text/x-handlebars-template" class="annotation-template">
-  <div class="annotation-circle"></div>
+  <div class="annotation-circle-container">
+    <div class="annotation-circle"></div>
+  </div>
   <div class="annotation-comment">
-    <textarea class="form-control" rows="3" placeholder="Enter a comment" {{#if comment}}disabled="disabled"{{/if}}>{{#if comment}}{{comment}}{{/if}}</textarea>
+    <textarea class="form-control" placeholder="Enter a comment" {{#if comment}}disabled="disabled"{{/if}}>{{#if comment}}{{comment}}{{/if}}</textarea>
     <button type="button" class="btn btn-primary btn-sm {{#if comment}}edit{{else}}save{{/if}}">
       {{#if comment}}
         Edit
@@ -337,7 +339,7 @@
 <script src="/static/js/lib/modal.js"></script>
 <script src="/static/js/lib/tooltip.js"></script>
 <script src="/static/js/lib/popover.js"></script>
-<script src="/static/js/lib/jquery-ui-1.10.4.custom.min.js"></script>
+<script src="/static/js/lib/jquery-ui.custom.min.js"></script>
 
 <script src="/static/js/popover-confirm.js"></script>
 <script src="/static/js/image-loader.js"></script>
