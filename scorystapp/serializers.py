@@ -110,3 +110,42 @@ class CourseUserSerializer(serializers.ModelSerializer):
     model = models.CourseUser
     fields = ('id', 'privilege', 'user', 'is_current_user', 'course')
     read_only_fields = ('id', 'course')
+
+
+class ExamAnswerPageSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = models.ExamAnswerPage
+    fields = ('id', 'page_number')
+    read_only_fields = ('id', 'page_number')
+
+    def validate_grader(self, attrs, source):
+      """
+      Validates the following property: if the grader field is changed, the new
+      grader must be the logged in user.
+      """
+      new_grader = attrs.get(source)
+      if (not new_grader == self.object.grader and (
+            new_grader == None or
+            not new_grader.user == self.context['user'])):
+        raise serializers.ValidationError('New grader must be the logged in user.')
+      return attrs
+
+
+class AnnotationSerializer(serializers.ModelSerializer): 
+  class Meta:
+    model = models.Annotation
+    fields = ('id', 'exam_answer_page', 'question_part_answer', 'rubric', 'comment',
+      'offset_top', 'offset_left')
+    read_only_fields = ('id',)
+
+  def validate(self, attrs):
+    """
+    Validates that the exam_answer_page and the question_part_answer correspond to
+    the same exam.
+    """
+    exam_answer_page = attrs.get('exam_answer_page')
+    question_part_answer = attrs.get('question_part_answer')
+    if exam_answer_page.exam_answer != question_part_answer.exam_answer:
+      raise serializers.ValidationError('The exam answer page and question '
+        'part answer do not share the same exam')
+    return attrs

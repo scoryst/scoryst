@@ -156,3 +156,56 @@ def manage_rubric(request, cur_course_user, exam_answer_id, question_part_answer
   elif request.method == 'DELETE':
     rubric.delete()
     return response.Response(status=204)
+
+
+@rest_decorators.api_view(['GET', 'POST'])
+@decorators.login_required
+@decorators.valid_course_user_required
+@decorators.student_required
+# TODO(kvmohan): Access control decorators
+def list_annotations(request, cur_course_user, exam_answer_id, question_part_answer_id, exam_page_number):
+  """ Returns a list of Annotations for the provided Exam and QuestionPartAnswer """
+  question_part_answer = shortcuts.get_object_or_404(models.QuestionPartAnswer, pk=question_part_answer_id)
+  exam_answer_page = shortcuts.get_object_or_404(models.ExamAnswerPage,
+    exam_answer=exam_answer_id, page_number=int(exam_page_number))
+
+  if request.method == 'GET':
+    annotations = models.Annotation.objects.filter(exam_answer_page=exam_answer_page,
+      question_part_answer=question_part_answer)
+    serializer = serializers.AnnotationSerializer(annotations, many=True)
+
+    return response.Response(serializer.data)
+  elif request.method == 'POST':
+    request.DATA['exam_answer_page'] = exam_answer_page.pk
+    serializer = serializers.AnnotationSerializer(data=request.DATA)
+    if serializer.is_valid():
+      serializer.save()
+      return response.Response(serializer.data)
+    return response.Response(serializer.errors, status=422)
+
+
+@rest_decorators.api_view(['GET', 'PUT', 'DELETE'])
+@decorators.login_required
+@decorators.valid_course_user_required
+@decorators.student_required
+# TODO(kvmohan): Access control decorators
+def manage_annotation(request, cur_course_user, exam_answer_id, question_part_answer_id, exam_page_number, annotation_id):
+  annotation = shortcuts.get_object_or_404(models.Annotation, pk=annotation_id)
+  if request.method == 'GET':
+    serializer = serializers.AnnotationSerializer(annotation)
+    return response.Response(serializer.data)
+
+  elif request.method == 'PUT' or request.method == 'POST':
+    if cur_course_user.privilege == models.CourseUser.STUDENT:
+      return response.Response(status=403)
+    serializer = serializers.AnnotationSerializer(annotation, data=request.DATA)  # TODO: FINISH THIS
+    if serializer.is_valid():
+      serializer.save()
+      return response.Response(serializer.data)
+    return response.Response(serializer.errors, status=422)
+
+  elif request.method == 'DELETE':
+    if cur_course_user.privilege == models.CourseUser.STUDENT:
+      return response.Response(status=403)
+    annotation.delete()
+    return response.Response(status=204)

@@ -13,7 +13,6 @@
 
   // whether a student is viewing the grade page
   ModelUtils.IS_STUDENT_VIEW = /exams\/view\/(\d+)\/$/.test(window.location.href);
-  console.log('student view', ModelUtils.IS_STUDENT_VIEW);
 
   window.ModelUtils = ModelUtils;
 })(this, this.document);

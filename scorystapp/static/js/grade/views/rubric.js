@@ -82,6 +82,10 @@ var RubricView = IdempotentView.extend({
       return;
     }
 
+    if (ViewUtils.IS_STUDENT_VIEW) {
+      return;
+    }
+
     // clone rubrics, since we're going to modify them
     var rubrics = _.clone(this.questionPartAnswer.get('rubrics'));
     var rubricId = this.model.get('id');
