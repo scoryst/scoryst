@@ -921,8 +921,8 @@ footer .amp {
 .grade .annotation-comment .close {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   position: relative;
-  top: 3px;
-  color: inherit;
+  top: 7px;
+  color: #000;
   float: right;
 }
 
