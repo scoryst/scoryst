@@ -102,17 +102,18 @@ class Converter(worker.Worker):
     bucket -- the S3 bucket to upload to
     jpeg_prefix -- file in S3 will be named "[jpeg_prefix][page_number].jpeg"
     """
-    # ImageMagick requires 0-indexed page numbers; we use 1-indexed page
-    # numbers elsewhere
     subprocess.check_call(['convert', '-density', '300', '%s[%d]'
       % (local_pdf_path, page_number), local_jpeg_path])
     self._log('Finished converting page %d' % page_number)
 
     # store converted page in S3
     jpeg_key = s3.Key(bucket)
-    jpeg_key.key = '%s%d.jpeg' % (jpeg_prefix, page_number + 1)
 
+    # ImageMagick requires 0-indexed page numbers; we use 1-indexed page
+    # numbers elsewhere
+    jpeg_key.key = '%s%d.jpeg' % (jpeg_prefix, page_number + 1)
     jpeg_key.set_contents_from_filename(local_jpeg_path)
+
     jpeg_key.set_acl('public-read')
     self._log('Uploaded page %d' % page_number)
 

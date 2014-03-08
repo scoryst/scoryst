@@ -29,12 +29,23 @@ def dispatch_worker(worker_name, orchard, host, payload):
     container = docker.create_container(image['Id'], ports=[5000])
     docker.start(container['Id'], port_bindings={5000: 5000})
 
-    print "Waiting for container's HTTP server to start"
-    time.sleep(5)
+    print "Waiting for container's HTTP server to start..."
+    host_ip = host.ipv4_address
+    host_url = 'http://%s:5000' % host_ip
+
+    # periodically try to connect to container
+    while True:
+      try:
+        requests.get('%s/ping' % host_url, timeout=5)
+      except (requests.Timeout, requests.ConnectionError):
+        print "Couldn't connect, trying again..."
+        time.sleep(1)
+      else:
+        print 'Successfully connected!'
+        break
 
     print 'Making POST request to activate worker...'
     # make POST request to worker with payload
-    host_ip = host.ipv4_address
     headers = {'Content-type': 'application/json'}
     response = requests.post('http://%s:5000/work' % host_ip, data=json.dumps(payload),
       headers=headers)

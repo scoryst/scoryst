@@ -53,22 +53,23 @@ def upload(request, cur_course_user):
   })
 
 
-def _break_and_upload(exam, f, name_prefix):
+def _break_and_upload(exam, handle, name_prefix):
   """
-  Creates a temporary file in the /tmp/ folder and then passes it on to celery
-  which asynchronously will break and upload it.
+  Breaks and uploads the PDF file specified by handle. Creates a temporary
+  file with the given name prefix, and starts an asynchronous break and
+  upload job that runs in the background.
   """
   temp_pdf_name = '/tmp/%s.pdf' % name_prefix
   temp_pdf = open(temp_pdf_name, 'w')
   temp_pdf.seek(0)
-  temp_pdf.write(f.read())
+  temp_pdf.write(handle.read())
   temp_pdf.flush()
 
-  _break_and_upload_celery.delay(exam, temp_pdf_name, name_prefix)
+  _break_and_upload_task.delay(exam, temp_pdf_name, name_prefix)
 
 
 @celery.task
-def _break_and_upload_celery(exam, temp_pdf_name, name_prefix):
+def _break_and_upload_task(exam, temp_pdf_name, name_prefix):
   """
   Splits the given PDF into multiple smaller PDFs. Converts these PDFs into
   JPEGs and uploads them to S3 (courtesy of the converter worker).
@@ -90,15 +91,15 @@ def _break_and_upload_celery(exam, temp_pdf_name, name_prefix):
     
     single_student_pdf.write(open('/tmp/%s%d.pdf' % (name_prefix, cur_student), 'wb'))
 
-  # delete the giant pdf file
   os.remove(temp_pdf_name)  
-  create_unmapped_exam_answers(exam, name_prefix, num_pages_per_exam, num_students)
+  _create_and_upload_exam_answers(exam, name_prefix, num_pages_per_exam, num_students)
 
 
-def create_unmapped_exam_answers(exam, name_prefix, num_pages_per_exam, num_students):
+def _create_and_upload_exam_answers(exam, name_prefix, num_pages_per_exam, num_students):
   """
   Associates a JPEG with every ExamAnswerPage. Creates QuestionPartAnswers for each
-  student. Runs the PDF -> JPEG converter worker for all student exams.
+  student. Runs the PDF -> JPEG converter worker for all student exams, uploading the
+  JPEGs to S3.
   """
   NUM_STUDENTS_PER_WORKER = 10
   num_workers = (num_students - 1) / NUM_STUDENTS_PER_WORKER + 1
@@ -158,6 +159,8 @@ def create_unmapped_exam_answers(exam, name_prefix, num_pages_per_exam, num_stud
           exam_answer=exam_answer, pages=answer_pages)
         question_part_answer.save()
 
+    # TODO: if create_host is called simultaneously by two processes, it fails;
+    # we should talk to Orchard about this
     host_name = utils.generate_random_string(20).lower()
     host = orchard.create_host(host_name, 2048)
 

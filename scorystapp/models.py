@@ -287,7 +287,7 @@ class ExamAnswer(models.Model):
     if self.course_user:
       return '%s (%s)' % (self.exam.name, self.course_user.user.get_full_name())
     else:
-      return '%s (unmapped)' % self.exam.name 
+      return '%s (unmapped)' % self.exam.name
 
 
 class ExamAnswerPage(models.Model):
