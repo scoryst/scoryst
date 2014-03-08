@@ -3,8 +3,11 @@ import json
 import requests
 import subprocess
 import time
+import base64
 from scorystapp import utils
 from django.conf import settings
+from Crypto.Cipher import AES
+from Crypto import Random
 
 
 def dispatch_worker(worker_name, orchard, host, payload):
@@ -45,9 +48,16 @@ def dispatch_worker(worker_name, orchard, host, payload):
         break
 
     print 'Making POST request to activate worker...'
+    # encrypt payload
+    cipher = AES.new(settings.CONVERTER_AES_KEY, AES.MODE_CFB,
+      settings.CONVERTER_AES_INIT_VECTOR)
+    encrypted_payload = cipher.encrypt(json.dumps(payload))
+
     # make POST request to worker with payload
+    data = {'encrypted_payload': base64.b64encode(encrypted_payload)}
     headers = {'Content-type': 'application/json'}
-    response = requests.post('http://%s:5000/work' % host_ip, data=json.dumps(payload),
+
+    response = requests.post('%s/work' % host_url, data=json.dumps(data),
       headers=headers)
 
     print response.text
