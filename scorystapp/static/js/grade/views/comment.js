@@ -3,7 +3,7 @@ var CommentView = IdempotentView.extend({
   /* How long to display the comment success icon. */
   COMMENT_SUCCESS_DISPLAY_DURATION: 1000,
 
-  template: Handlebars.compile($('.comment-template').html()),
+  template: _.template($('.comment-template').html()),
   events: {
     'click .save-comment': 'saveComment',
     'click .edit-comment': 'editComment',

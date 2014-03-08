@@ -1,6 +1,6 @@
 // TODO: browserify
 var RubricsNavHeaderView = IdempotentView.extend({
-  template: Handlebars.compile($('.rubrics-nav-header-template').html()),
+  template: _.template($('.rubrics-nav-header-template').html()),
 
   /* Initializes this header. Requires a QuestionPartAnswer model. */
   initialize: function(options) {

@@ -253,6 +253,12 @@ footer .amp {
   color: #ac3326;
 }
 
+.success {
+  display: block;
+  color: #14963B;
+  margin: 5px 0;
+}
+
 /* CSS for create exam page */
 .exam {
   position: relative;
@@ -743,7 +749,7 @@ footer .amp {
   padding-right: 3px;
 }
 
-.grade .zoom-lens, .create-exam .zoom-lens {
+.grade .zoom-lens, .create-exam .zoom-lens, .map-exams .zoom-lens, .map-question-parts .zoom-lens {
   display: none;
   background: #fff;
   z-index: 1000;
@@ -771,7 +777,8 @@ footer .amp {
   -khtml-box-shadow: 0 0 3px #999;
 }
 
-.grade .zoom-lens img, .create-exam .zoom-lens img {
+.grade .zoom-lens img, .create-exam .zoom-lens img, 
+.map-exams .zoom-lens img, .map-question-parts .zoom-lens img {
   /* TODO: fix this hardcoded value. */
   width: 1700px;
   position: absolute;
@@ -1220,4 +1227,14 @@ footer .amp {
   -ms-border-radius: 5px;
   -khtml-border-radius: 5px;
   -o-border-radius: 5px;
+}
+
+.map-question-parts .pages {
+  width: 100px;
+  float: none;
+  display: inline;
+}
+
+.map-question-parts .success {
+  display: none;
 }

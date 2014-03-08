@@ -4,11 +4,9 @@ from scorystapp.views import helpers
 from scorystapp.performance import cache_helpers
 import json
 import numpy as np
-# TODO: Inefficient, optimize it later
 
-# TODO: Anyone with an account can see statistics as of now, Fix
-@decorators.login_required
-@decorators.valid_course_user_required
+
+@decorators.access_controlled
 def statistics(request, cur_course_user):
   """ Overview of all of the students' exams and grades for a particular exam. """
   cur_course = cur_course_user.course
@@ -21,9 +19,9 @@ def statistics(request, cur_course_user):
   })
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 def get_statistics(request, cur_course_user, exam_id):
+  """ Returns statistics for the entire exam and also for each question/part """
   @cache_helpers.cache_across_querysets([models.Exam(pk=exam_id),
     models.ExamAnswer.objects.filter(exam=exam_id, preview=False),
     models.QuestionPartAnswer.objects.filter(exam_answer__exam=exam_id)])
@@ -38,12 +36,9 @@ def get_statistics(request, cur_course_user, exam_id):
   return http.HttpResponse(json.dumps(statistics), mimetype='application/json')
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 def get_histogram_for_exam(request, cur_course_user, exam_id):
-  """
-  Fetches the histogram for the entire exam
-  """
+  """ Fetches the histogram for the entire exam """
   @cache_helpers.cache_across_querysets([models.Exam(pk=exam_id),
     models.ExamAnswer.objects.filter(exam=exam_id, preview=False),
     models.QuestionPartAnswer.objects.filter(exam_answer__exam=exam_id)])
@@ -58,12 +53,9 @@ def get_histogram_for_exam(request, cur_course_user, exam_id):
   return http.HttpResponse(json.dumps(histogram), mimetype='application/json')
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 def get_histogram_for_question(request, cur_course_user, exam_id, question_number):
-  """
-  Fetches the histogram for the given question_number for the exam
-  """
+  """ Fetches the histogram for the given question_number for the exam """
   exam = shortcuts.get_object_or_404(models.Exam, pk=exam_id)
   exam_answers = models.ExamAnswer.objects.filter(exam=exam, preview=False)
 
@@ -74,13 +66,10 @@ def get_histogram_for_question(request, cur_course_user, exam_id, question_numbe
     mimetype='application/json')
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 def get_histogram_for_question_part(request, cur_course_user, exam_id,
   question_number, part_number):
-  """
-  Fetches the histogram for the given question_part for the exam
-  """
+  """ Fetches the histogram for the given question_part for the exam """
   exam = shortcuts.get_object_or_404(models.Exam, pk=exam_id)
   question_part = models.QuestionPart.objects.get(exam=exam,
     question_number=question_number, part_number=part_number)
@@ -93,18 +82,14 @@ def get_histogram_for_question_part(request, cur_course_user, exam_id,
 
 
 def _mean(scores):
-  """
-  Calculates the mean among the scores
-  """
+  """ Calculates the mean among the scores """
   num_scores = len(scores)
   mean_score = sum(scores)/num_scores if num_scores else 0
   return round(mean_score, 2)
 
 
 def _median(scores):
-  """
-  Calculates the median among the scores
-  """
+  """ Calculates the median among the scores """
   num_scores = len(scores)
   sorted_scores = sorted(scores)
 
@@ -119,9 +104,7 @@ def _median(scores):
 
 
 def _standard_deviation(scores):
-  """
-  Calculates the standard deviation among scores
-  """
+  """ Calculates the standard deviation among scores """
   num_scores = len(scores)
   if num_scores == 0: return 0
 
@@ -132,16 +115,12 @@ def _standard_deviation(scores):
 
 
 def _min(scores):
-  """ 
-  Calculates the min among the scores
-  """
+  """ Calculates the min among the scores """
   return min(scores) if len(scores) else 0
 
 
 def _max(scores):
-  """ 
-  Calculates the max among the scores
-  """
+  """ Calculates the max among the scores """
   return max(scores) if len(scores) else 0
 
 
@@ -275,11 +254,8 @@ def _get_histogram(scores):
 
 
 def _get_step_size(max_score):
-  """
-  Calculates the appropriate step size for our histogram.
-  """
+  """ Calculates the appropriate step size for our histogram. """
   if max_score > 1000:
-    # Then the person who made this exam is a retard
     step_size = 200
   elif max_score > 500:
     step_size = 100

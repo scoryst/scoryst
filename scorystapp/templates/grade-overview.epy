@@ -11,7 +11,7 @@
       <div class="nav-container">
         <ul class="nav nav-tabs">
           {% for exam in exams %}
-            <li {% if forloop.first %} class="active" {% endif %}>
+            <li {% if forloop.last %} class="active" {% endif %}>
               <a href="" data-exam-id="{{exam.id}}">{{exam.name}}</a>
             </li>
           {% endfor %}
@@ -27,7 +27,7 @@
         </h2>
 
         <div class="table-container">
-          <!-- Exam info to be added in with handlebars template. -->
+          <!-- Exam info to be added in with template. -->
         </div>
       </div>
     {% else %}
@@ -43,174 +43,169 @@
           <h2>Students</h2>
 
           <div class="filtering">
-            <!-- Students filtering is added in with handlebars template. -->
+            <!-- Students filtering is added in with template. -->
           </div>
 
           <input class="form-control search" placeholder="Search by name, email or grader" />
 
           <div class="students-scroll default-skin">
             <ul class="nav nav-pills nav-stacked">
-              <!-- Students list is added in with handlebars template. -->
+              <!-- Students list is added in with template. -->
             </ul>
           </div>
         </div>
       </div>
 
       <div class="col-xs-8 exam-summary">
-        <h2><!-- Student's name in header is added with Handlebars template. --></h2>
+        <h2><!-- Student's name in header is added with template. --></h2>
 
         <div class="table-container">
-          <!-- Exam info to be added in with handlebars template. -->
+          <!-- Exam info to be added in with template. -->
         </div>
       </div>
     {% endif %}
   </div>
 </div>
 
-{% verbatim %}
-  <script type="text/x-handlebars-template" class="student-filtering-template">
-    <label class="checkbox-inline">
-      <input type="checkbox" class="graded" checked="true"> Graded ({{numGraded}})
-    </label>
-    <label class="checkbox-inline">
-      <input type="checkbox" class="ungraded" checked="true"> Ungraded ({{numUngraded}})
-    </label>
-    <label class="checkbox-inline">
-      <input type="checkbox" class="unmapped" checked="true"> No exam ({{numUnmapped}})
-    </label>
-  </script>
+<script type="text/template" class="student-filtering-template">
+  <label class="checkbox-inline">
+    <input type="checkbox" class="graded" checked="true"> Graded (<%= numGraded %>)
+  </label>
+  <label class="checkbox-inline">
+    <input type="checkbox" class="ungraded" checked="true"> Ungraded (<%= numUngraded %>)
+  </label>
+  <label class="checkbox-inline">
+    <input type="checkbox" class="unmapped" checked="true"> No exam (<%= numUnmapped %>)
+  </label>
+</script>
 
-  <script type="text/x-handlebars-template" class="student-heading-template">
-    <span>{{studentName}}'s Exam Summary</span>
-  </script>
+<script type="text/template" class="student-heading-template">
+  <span><%= studentName %>'s Exam Summary</span>
+</script>
 
-  <script type="text/x-handlebars-template" class="exam-template">
-    {{#if noMappedExam}}
-      <p>No student exam exists. If you think this is an error, contact us at <a href="mailto:support@scoryst.com">support@scoryst.com</a>.</p>
-    {{else}}
-      {{#if notYetReleased}}
-        <p>Your exam scores have not been released. If you think this is an error,
-        contact us at <a href="mailto:support@scoryst.com">support@scoryst.com</a>.</p>
-      {{else}}
-        <table class="table table-condensed">
-          <thead>
-            <tr>
-              <th></th>
-              <th>Question</th>
-              <th>Part</th>
-              <th>Points</th>
-              <th>Graded By</th>
-              <th></th>
+<script type="text/template" class="exam-template">
+  <% if (typeof(noMappedExam) !== "undefined" && noMappedExam) { %>
+    <p>No student exam exists. If you think this is an error, contact us at <a href="mailto:support@scoryst.com">support@scoryst.com</a>.</p>
+  <% } else { %>
+    <% if (typeof(notYetReleased) !== "undefined" && notYetReleased) { %>
+      <p>Your exam scores have not been released. If you think this is an error,
+      contact us at <a href="mailto:support@scoryst.com">support@scoryst.com</a>.</p>
+    <% } else { %>
+      <table class="table table-condensed">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Question</th>
+            <th>Part</th>
+            <th>Points</th>
+            <th>Graded By</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody data-exam-answer-id="<%= examAnswerId %>">
+          <% for (var i = 0; i < questions.length; i++) { %>  
+            <tr data-question="<%= questions[i].questionNumber %>" class="gray">
+              <td>
+                <a class="toggle" href="#"><i class="fa fa-chevron-down"></i></a>
+                <a class="toggle collapse" href="#"><i class="fa fa-chevron-up"></i></a>
+              </td>
+              <td><%= questions[i].questionNumber %></td>
+              <td> - </td>
+              <td>
+                <% if (questions[i].isGraded) { %>
+                  <%= questions[i].questionPoints %> / <%= questions[i].maxPoints %>
+                <% } else { %>
+                  ungraded 
+                <% } %>
+              </td>
+              <td>
+                <% if (questions[i].isGraded) { %>
+                  <%= questions[i].grader %>
+                <% } else { %>
+                  -
+                <% } %>
+              </td>
+              {% if not is_student %}
+                <% if (questions[i].isGraded) { %>
+                  <td><button type="button" class="btn btn-default btn-sm">Regrade</button></td>
+                <% } else { %>
+                  <td><button type="button" class="btn btn-danger btn-sm">Grade</button></td>
+                <% } %>
+              {% else %}
+                <td><button type="button" class="btn btn-default btn-sm">View</button></td>
+              {% endif %}
             </tr>
-          </thead>
-          <tbody data-exam-answer-id="{{examAnswerId}}">
-            {{#each questions}}
-              <tr data-question="{{questionNumber}}" class="gray">
-                <td>
-                  <a class="toggle" href="#"><i class="fa fa-chevron-down"></i></a>
-                  <a class="toggle collapse" href="#"><i class="fa fa-chevron-up"></i></a>
-                </td>
-                <td>{{questionNumber}}</td>
-                <td> - </td>
-                <td>
-                  {{#if isGraded}}
-                    {{questionPoints}} / {{maxPoints}}
-                  {{else}}
-                    ungraded 
-                  {{/if}}
-                </td>
-                <td>
-                  {{#if isGraded}}
-                    {{grader}}
-                  {{else}}
-                    -
-                  {{/if}}
-                </td>
-                {% endverbatim %}
-                {% if not is_student %}
-                  {% verbatim %}
-                    {{#if isGraded}}
-                      <td><button type="button" class="btn btn-default btn-sm">Regrade</button></td>
-                    {{else}}
-                      <td><button type="button" class="btn btn-danger btn-sm">Grade</button></td>
-                    {{/if}}
-                  {% endverbatim %}
-                {% else %}
-                  <td><button type="button" class="btn btn-default btn-sm">View</button></td>
-                {% endif %}
-                {% verbatim %}
-              </tr>
-              {{#each parts}}
-              <tr data-question="{{../questionNumber}}" data-part="{{partNumber}}" class="question-part">
-                <td></td>
-                <td>{{../questionNumber}}</td>
-                <td>{{partNumber}}</td>
-                <td>
-                  {{#if isGraded}}
-                    {{partPoints}} / {{maxPartPoints}}
-                  {{else}}
-                    -
-                  {{/if}}
-                </td>
-                <td>
-                  {{#if isGraded}}
-                    {{grader}}
-                  {{else}}
-                    -
-                  {{/if}}
-                </td>
-                <td></td>
-              </tr>
-              {{/each}}
-            {{/each}}
-
-            <tr class="gray">
+            <% var parts = questions[i].parts; %>
+            <% for (var j = 0; j < parts.length; j++) { %>
+            <tr data-question="<%= questions[i].questionNumber %>" data-part="<%= parts[j].partNumber %>" class="question-part">
               <td></td>
-              <td><strong>Total</strong></td>
-              <td><strong>-</strong></td>
-              <td><strong>
-                {{#if isGraded}}
-                  {{points}} / {{maxPoints}}
-                {{else}}
-                  ungraded
-                {{/if}}
-              </strong></td>
-              <td>-</td>
-              <td>-</td>
+              <td><%= questions[i].questionNumber %></td>
+              <td><%= parts[j].partNumber %></td>
+              <td>
+                <% if (parts[j].isGraded) { %>
+                  <%= parts[j].partPoints %> / <%= parts[j].maxPartPoints %>
+                <% } else { %>
+                  -
+                <% } %>
+              </td>
+              <td>
+                <% if (parts[j].isGraded) { %>
+                  <%= parts[j].grader %>
+                <% } else { %>
+                  -
+                <% } %>
+              </td>
+              <td></td>
             </tr>
-          </tbody>
-        </table>
-      {{/if}}
-    {{/if}}
-  </script>
+            <% } %>
+          <% } %>
 
-  <script type="text/x-handlebars-template" class="students-template">
-    {{#each studentUsers}}
-      <li {{#if first}}class="active"{{/if}}>
-        <a href="" data-user-id="{{pk}}" data-filter-type="{{filterType}}" class="name">
-          {{fullName}}
-          <span class="score">
-            {{score}}
-          </span>
-          <br />
-          <span class="email">
-            {{email}}
-          </span>
-          <span class="id">
-            ID: {{student_id}}
-          </span>
-          <span class="graders">
-            {{graders}}
-          </span>
-        </a>
-      </li>
-    {{/each}}
-  </script>
-{% endverbatim %}
+          <tr class="gray">
+            <td></td>
+            <td><strong>Total</strong></td>
+            <td><strong>-</strong></td>
+            <td><strong>
+              <% if (isGraded) { %>
+                <%= points %> / <%= maxPoints %>
+              <% } else { %>
+                ungraded
+              <% } %>
+            </strong></td>
+            <td>-</td>
+            <td>-</td>
+          </tr>
+        </tbody>
+      </table>
+    <% } %>
+  <% } %>
+</script>
+
+<script type="text/template" class="students-template">
+  <% for (var k = 0; k < studentUsers.length; k++) { %>
+    <li <% if (k == 0) { %>class="active"<% } %> >
+      <a href="" data-user-id="<%= studentUsers[k].pk %>" data-filter-type="<%= studentUsers[k].filterType %>" class="name">
+        <%= studentUsers[k].fullName %>
+        <span class="score">
+          <%= studentUsers[k].score %>
+        </span>
+        <br />
+        <span class="email">
+          <%= studentUsers[k].email %>
+        </span>
+        <span class="id">
+          ID: <%= studentUsers[k].student_id %>
+        </span>
+        <span class="graders">
+          <%= studentUsers[k].graders %>
+        </span>
+      </a>
+    </li>
+  <% } %>
+</script>
 {% endblock %}
 
 {% block js %}
-  <script src="/static/js/lib/handlebars.js"></script>
+  <script src="/static/js/lib/underscore.min.js"></script>
   <script src="/static/js/exam-overview.js"></script>
 
   {% if not is_student %}

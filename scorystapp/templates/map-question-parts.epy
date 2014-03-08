@@ -1,0 +1,72 @@
+{% extends 'layout.epy' %}
+
+{% block content %}
+  <div class="container map-question-parts">
+    <div class="row">
+      <div class="col-xs-4">
+        <h2>Map Student Pages to Questions</h2>
+        <input class="typeahead" type="text" placeholder="Student name" autocomplete="off" />
+        <div>
+          <div class="question-parts-div">
+            <!-- Gets inserted via options-template -->
+            <label for="questions">Question: </label>
+            <select class="questions">
+            </select>
+            <label for="parts">Part: </label>
+            <!-- Gets inserted via options-template -->
+            <select class="parts">
+            </select>
+          </div>
+          <span class="error"></span>
+          <span class="success">Save successful!</span>
+          <br />
+          <label for="pages">Pages: </label>
+          <input class="form-control pages" type="text" />
+          <button class="btn btn-primary save" type="submit">Save Current</button>
+        </div>
+
+        <p>
+          Currently on Page:
+          <span class="current-page-number">1</span>
+        </p>
+      </div>
+      <div class="col-xs-8 exam">
+
+        <div class="previous-page">
+          <i class="fa fa-angle-double-left"></i>
+        </div>
+
+        <div class="exam-canvas"></div>
+
+        <div class="next-page">
+          <i class="fa fa-angle-double-right"></i>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script type="text/template" class="options-template">
+    <% for (var i = 0; i < length; i++) { %>
+      <option><%= i + 1 %></option>
+    <% } %>
+  </script>
+
+  <script type="text/template" class="typeahead-template">
+    <strong><%= name %></strong>
+    <br />
+    <%= email %> <%= studentId %>
+  </script>
+
+{% endblock %}
+
+{% block js %}
+  <script src="/static/js/lib/underscore.min.js"></script>
+  <script src="/static/js/lib/typeahead.min.js"></script>
+  <script src="/static/js/image-loader.js"></script>
+  <script src="/static/js/map-question-parts.js"></script>
+{% endblock %}
+
+{% block css %}
+  <link rel="stylesheet" href="/static/css/typeahead.css" />
+{% endblock %}

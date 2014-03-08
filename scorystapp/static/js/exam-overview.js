@@ -15,8 +15,8 @@ var $examSummary = $('.exam-summary');  // Exam summary table.
 var $studentHeading = $('.exam-summary h2');
 
 var templates = {
-  renderExamTemplate: Handlebars.compile($examTemplate.html()),
-  renderStudentHeadingTemplate: Handlebars.compile($studentHeadingTemplate.html())
+  renderExamTemplate: _.template($examTemplate.html()),
+  renderStudentHeadingTemplate: _.template($studentHeadingTemplate.html())
 };
 
 // Get JSON data back to render the exam breakdown for the selected student.

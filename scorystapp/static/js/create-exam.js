@@ -13,11 +13,10 @@ $(function() {
   var $partTemplate = $('.part-template');
   var $rubricTemplate = $('.rubric-template');
 
-  // Handlebars templates
   var templates = {
-    renderQuestionTemplate: Handlebars.compile($questionTemplate.html()),
-    renderPartTemplate: Handlebars.compile($partTemplate.html()),
-    renderRubricTemplate: Handlebars.compile($rubricTemplate.html())
+    renderQuestionTemplate: _.template($questionTemplate.html()),
+    renderPartTemplate: _.template($partTemplate.html()),
+    renderRubricTemplate: _.template($rubricTemplate.html())
   };
 
   var lastQuestionNum = 0;

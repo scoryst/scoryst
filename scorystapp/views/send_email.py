@@ -66,15 +66,8 @@ def _send_added_to_course_email(request, course_users):
   for course_user in course_users:
     user = course_user.user
     
-    if int(course_user.privilege) == models.CourseUser.TA:
-      privilege = 'TA'
-      article = 'a'
-    elif int(course_user.privilege) == models.CourseUser.INSTRUCTOR:
-      privilege = 'instructor'
-      article = 'an'
-    else:
-      privilege = 'student'
-      article = 'a'
+    privilege = models.CourseUser.USER_PRIVILEGE_CHOICES[int(course_user.privilege)]
+    article = 'an' if privilege[1][0] in 'aeiouAEIOU' else 'a'
 
     context = {
       'article': article,
@@ -112,7 +105,6 @@ def send_added_to_course_email(request, course_users, send_to_students=False):
   Sends email to each course_user in course_users who is an instructor or a TA.
   Care is taken if course_user is unregistered
   """
-
   send_to = []
   for course_user in course_users:
     # Don't send emails to students when added to roster unless send_to_students is true

@@ -1,13 +1,10 @@
 from django import shortcuts, http
 from scorystapp import models, forms, decorators
 from scorystapp.performance import cache_helpers
-from scorystapp.views import helpers, grade_or_view, send_email, statistics
-import csv
+from scorystapp.views import helpers, grade_or_view, send_email
 import json
 
-
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 @decorators.instructor_or_ta_required
 def grade_overview(request, cur_course_user):
   """ Overview of all of the students' exams and grades for a particular exam. """
@@ -21,8 +18,7 @@ def grade_overview(request, cur_course_user):
   })
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 def student_grade_overview(request, cur_course_user):
   """ Overview of the logged in student's exams. """
   cur_course = cur_course_user.course
@@ -36,8 +32,7 @@ def student_grade_overview(request, cur_course_user):
   })  
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 def get_user_exam_summary(request, cur_course_user, user_id, exam_id):
   """ Returns an exam summary given the user's ID and the course. """
   student_name = shortcuts.get_object_or_404(models.User, id=user_id).get_full_name()
@@ -63,79 +58,15 @@ def get_user_exam_summary(request, cur_course_user, user_id, exam_id):
   return http.HttpResponse(json.dumps(data), mimetype='application/json')
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 @decorators.instructor_required
 def release_grades(request, cur_course_user, exam_id):
-  # TODO: Add released to model, so that instructor knows grades are released
   exam = shortcuts.get_object_or_404(models.Exam, pk=exam_id)
   send_email.send_exam_graded_email(request, exam)
   return shortcuts.redirect('/course/%d/grade/' % cur_course_user.course.pk)
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
-@decorators.instructor_or_ta_required
-def get_csv(request, cur_course_user, exam_id):
-  """
-  Returns a csv of the form (last_name, first_name, email, score_in_exam)
-  for each student who took the exam
-  """
-  exam = shortcuts.get_object_or_404(models.Exam, pk=exam_id)
-
-  # Create the HttpResponse object with the appropriate CSV header.
-  response = http.HttpResponse(content_type='text/csv')
-  
-  filename = "%s-scores.csv" % exam.name
-  # Replace spaces in the exam name with dashes and convert to lower case
-  filename = filename.replace(' ', '-').lower()
-
-  response['Content-Disposition'] = 'attachment; filename="%s"' % filename
-  
-  question_parts = models.QuestionPart.objects.filter(exam=exam).order_by('-question_number')
-  if question_parts.count() > 0:
-    num_questions  = question_parts[0].question_number
-  else:
-    num_questions = 0
-
-  fieldnames=['Last Name', 'First Name', 'ID', 'Email', 'Total Score']
-  for i in range(num_questions):
-    fieldnames.append('Question %d' % (i + 1))
-
-  writer = csv.DictWriter(response, fieldnames=fieldnames)
-
-  exam_answers = models.ExamAnswer.objects.filter(exam=exam, preview=False
-    ).order_by('course_user__user__last_name')
-
-  writer.writeheader()
-  
-  for exam_answer in exam_answers:
-    user = exam_answer.course_user.user
-    is_entire_exam_graded = exam_answer.is_graded()
-    score = exam_answer.get_points()
-
-    if not is_entire_exam_graded:
-      score = 'ungraded'
-
-    row = {
-      'Last Name': user.last_name, 
-      'First Name': user.first_name, 
-      'ID': user.student_id, 
-      'Email': user.email, 
-      'Total Score': score
-    }
-    for i in range(num_questions):
-      if exam_answer.is_question_graded(i + 1):
-        row['Question %d' % (i + 1)] = exam_answer.get_question_points(i + 1)
-      else:
-        row['Question %d' % (i + 1)] = 'ungraded'
-    writer.writerow(row)
-
-  return response
-
-
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 @decorators.instructor_or_ta_required
 def get_students(request, cur_course_user, exam_id):
   """
@@ -189,8 +120,7 @@ def get_students(request, cur_course_user, exam_id):
   return http.HttpResponse(json.dumps(students), mimetype='application/json')
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 @decorators.instructor_or_ta_required
 def get_overview(request, cur_course_user, exam_id):
   """ Returns information about the exam, not specific to any student. """
@@ -231,6 +161,7 @@ def get_overview(request, cur_course_user, exam_id):
   return http.HttpResponse(json.dumps(overview), mimetype='application/json')
 
 
+# TODO (@cglu): Please decompose or start using serializers.
 def _get_summary_for_exam(exam_answer_id, question_number=0, part_number=0):
   """
   Returns the questions and question answers as a dict.

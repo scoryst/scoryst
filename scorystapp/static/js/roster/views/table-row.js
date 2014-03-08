@@ -1,7 +1,7 @@
 var TableRowView = IdempotentView.extend({
   templates: {
-    rosterTemplate: Handlebars.compile($('.roster-template').html()),
-    editRosterTemplate: Handlebars.compile($('.edit-roster-template').html()),
+    rosterTemplate: _.template($('.roster-template').html()),
+    editRosterTemplate: _.template($('.edit-roster-template').html()),
   },
 
   events: {

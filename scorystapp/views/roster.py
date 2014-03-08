@@ -1,9 +1,10 @@
 from django import forms as django_forms, http, shortcuts
-from scorystapp import models, forms, decorators, utils
+from scorystapp import models, forms, decorators, utils, serializers
 from scorystapp.views import helpers, send_email
+from rest_framework import decorators as rest_decorators, response
 
-@decorators.login_required
-@decorators.valid_course_user_required
+
+@decorators.access_controlled
 @decorators.instructor_or_ta_required
 def roster(request, cur_course_user):
   """ Allows the instructor to manage a course roster. """
@@ -24,7 +25,7 @@ def roster(request, cur_course_user):
         try:
           user = models.User.objects.get(email=email)
         except models.User.DoesNotExist:
-          password = utils._generate_random_string(50)
+          password = utils.generate_random_string(50)
           user = models.User.objects.create_user(email, first_name, last_name,
             student_id, password)
         else:
@@ -60,8 +61,7 @@ def roster(request, cur_course_user):
   })
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 @decorators.instructor_required
 def delete_from_roster(request, cur_course_user, course_user_id):
   """ Allows the instructor to delete a user from the course roster. """
@@ -69,14 +69,9 @@ def delete_from_roster(request, cur_course_user, course_user_id):
   models.CourseUser.objects.filter(pk=course_user_id, course=cur_course.pk).delete()
   return shortcuts.redirect('/course/%d/roster' % cur_course.pk)
 
-from scorystapp import models, decorators, serializers
-from rest_framework import decorators as rest_decorators, response
 
-
-# TODO: confirm security is OK for the API methods below
 @rest_decorators.api_view(['GET'])
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 @decorators.instructor_or_ta_required
 def list_course_users(request, cur_course_user):
   """
@@ -90,23 +85,19 @@ def list_course_users(request, cur_course_user):
   return response.Response(serializer.data)
 
 
-@rest_decorators.api_view(['GET', 'PUT'])  # TODO: OK?
-@decorators.login_required
-@decorators.valid_course_user_required
+@rest_decorators.api_view(['GET', 'PUT'])
+@decorators.access_controlled
 @decorators.instructor_or_ta_required
 def manage_course_user(request, cur_course_user, course_user_id):
   """ Manages a single CourseUser by allowing reads/updates. """
   course_user = shortcuts.get_object_or_404(models.CourseUser, pk=course_user_id)
 
   if request.method == 'GET':
-    # user wants to get a course user
     serializer = serializers.CourseUserSerializer(course_user)
     return response.Response(serializer.data)
   elif request.method == 'PUT':
-    # User must be an instructor
     if cur_course_user.privilege != models.CourseUser.INSTRUCTOR:
       return response.Response(status=403)
-    # user wants to update a course user
     serializer = serializers.CourseUserSerializer(course_user,
       data=request.DATA, context={ 'course_user': cur_course_user })
 

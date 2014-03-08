@@ -16,8 +16,8 @@ $(function() {
   var $studentScroll = $('.students-scroll');
 
   var templates = {
-    renderStudentFilteringTemplate: Handlebars.compile($studentFilteringTemplate.html()),
-    renderStudentsTemplate: Handlebars.compile($studentsTemplate.html())
+    renderStudentFilteringTemplate: _.template($studentFilteringTemplate.html()),
+    renderStudentsTemplate: _.template($studentsTemplate.html())
   };
 
   var curExamId = $exams.find('li.active').children().attr('data-exam-id');
@@ -48,7 +48,7 @@ $(function() {
       url: curExamId + '/get-overview/',
       dataType: 'json'
     }).done(function(data) {
-      // Add the examId to be sent to handlebars
+      // Add the examId to be sent to underscore template
       data['examId'] = curExamId;
       $studentFiltering.html(templates.renderStudentFilteringTemplate(data));
       

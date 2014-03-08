@@ -34,7 +34,7 @@
             Go back and edit
           </a>
 
-          <a class="btn btn-sm btn-primary" href="save">
+          <a class="btn btn-sm btn-primary" href="done">
             Finish previewing
             <i class="fa fa-chevron-right"></i>
           </a>
@@ -122,11 +122,11 @@
       </div>
 
       <div class="well exam-nav">
-        <!-- Exam nav will be inserted here using the handlebars template. -->
+        <!-- Exam nav will be inserted here using the template. -->
       </div>
 
       <div class="well rubrics-nav">
-        <!-- Rubric nav will be inserted here using the handlebars template. -->
+        <!-- Rubric nav will be inserted here using the template. -->
       </div>
 
       <a href="exam-pdf" target="_blank">
@@ -157,16 +157,15 @@
   </div>
 </div>
 
-{% verbatim %}
-<script type="text/x-handlebars-template" class="exam-nav-template">
+<script type="text/template" class="exam-nav-template">
   <div class="toggle-exam-nav">
     <h3 class="nav-title">
       Exam
-      {{#if is_exam_graded}}
-        <span class="green">({{exam_points}} / {{exam_max_points}})</span>
-      {{else}}
+      <% if (is_exam_graded) { %>
+        <span class="green">(<%= exam_points %> / <%= exam_max_points %>)</span>
+      <% } else { %>
         <span class="red">(ungraded)</span>
-      {{/if}}
+      <% } %>
     </h3>
 
     <i class="fa fa-plus-circle"></i>
@@ -174,101 +173,85 @@
   </div>
 
   <p class="active-question-part">
-    Grading question {{active_question_part_answer.question_part.question_number}},
-    part {{active_question_part_answer.question_part.part_number}} 
+    Grading question <%= active_question_part_answer.question_part.question_number %>,
+    part <%= active_question_part_answer.question_part.part_number %> 
   </p>
 
   <ul>
-    {{#each question_part_answers}}
-      {{#if question_part.starts_new_question}}
-      <li>Question {{question_part.question_number}}</li>
-      {{/if}}
+    <% for (var i = 0; i < question_part_answers.length; i++) { %>
+      <% var question_part = question_part_answers[i].question_part; %>
+      <% if (question_part.starts_new_question) { %>
+        <li>Question <%= question_part.question_number %></li>
+      <% } %>
 
-      <li {{#if active}} class="active" {{/if}}>
-        <a href="#" data-question-part-answer="{{id}}">
-          Part {{question_part.part_number}}: 
-          {{#if is_graded}}
-            {{points}} / {{question_part.max_points}}
-          {{else}}
+      <li <% if (question_part_answers[i].active) { %> class="active" <% } %> >
+        <a href="#" data-question-part-answer="<%= question_part_answers[i].id %>">
+          Part <%= question_part.part_number %>: 
+          <% if (question_part_answers[i].is_graded) { %>
+            <%= question_part_answers[i].points %> / <%= question_part.max_points %>
+          <% } else { %>
             ungraded
-          {{/if}}
+          <% } %>
         </a>
       </li>
-    {{/each}}
+    <% } %>
   </ul>
 </script>
 
-<script type="text/x-handlebars-template" class="rubric-template">
-  {{#if editing}}
-    <input type="text" name="description" class="form-control rubric-description" value="{{description}}" />
-  {{else}}
-    {{description}}
-  {{/if}}
+<script type="text/template" class="rubric-template">
+  <% if (editing) { %>
+    <input type="text" name="description" class="form-control rubric-description" value="<%= description %>" />
+  <% } else { %>
+    <%= description %>
+  <% } %>
 
   <a href="#" class="destroy"><i class="fa fa-trash-o"></i></a>
-  {{#if editing}}
+  <% if (editing) { %>
     <a href="#" class="save"><i class="fa fa-save"></i></a>
-  {{else}}
+  <% } else { %>
     <a href="#" class="edit"><i class="fa fa-pencil"></i></a>
-  {{/if}}
+  <% } %>
 
-  <strong class="{{color}}">
-    {{#if editing}}
-      <input type="text" name="points" class="form-control rubric-points" value="{{display_points}}" />
-    {{else}}
-      {{display_points}}
-    {{/if}}
+  <strong class="<%= color %>">
+    <% if (editing) { %>
+      <input type="text" name="points" class="form-control rubric-points" value="<%= display_points %>" />
+    <% } else { %>
+      <%= display_points %>
+    <% } %>
   </strong>
 </script>
 
-<script type="text/x-handlebars-template" class="custom-points-template">
+<script type="text/template" class="custom-points-template">
   Custom points
-  {% endverbatim %}
-
   {% if not is_student_view %}
-    {% verbatim %}
-      <input class="form-control custom-points" type="text" value="{{custom_points}}" />
-    {% endverbatim %}
+      <input class="form-control custom-points" type="text" value="<%= custom_points %>" />
   {% else %}
-    {% verbatim %}
-      <input class="form-control custom-points" type="text" value="{{custom_points}}" disabled="true" />
-    {% endverbatim %}
+      <input class="form-control custom-points" type="text" value="<%= custom_points %>" disabled="true" />
   {% endif %}
-
-  {% verbatim %}
 </script>
 
-<script type="text/x-handlebars-template" class="comment-template">
-  {% endverbatim %}
-
+<script type="text/template" class="comment-template">
+  
   {% if not is_student_view %}
-    {% verbatim %}
-      <textarea class="form-control comment-textarea" placeholder="Add comment" {{#if grader_comments }} disabled="true" {{/if}}
->{{grader_comments}}</textarea>
-    {% endverbatim %}
+      <textarea class="form-control comment-textarea" placeholder="Add comment" <% if (grader_comments) { %> disabled="true" <% } %> >
+        <%= grader_comments %>
+      </textarea>
   {% else %}
-    {% verbatim %}
-      <textarea class="form-control comment-textarea" disabled="true">{{grader_comments}}</textarea>
-    {% endverbatim %}
+      <textarea class="form-control comment-textarea" disabled="true"><%= grader_comments %></textarea>
   {% endif %}
 
   {% if not is_student_view %}
-    {% verbatim %}
-      <button class="btn btn-sm btn-primary save-comment {{#if grader_comments}} hidden {{/if}}">Save comment</button>
-      <button class="btn btn-sm btn-primary edit-comment {{#unless grader_comments}} hidden {{/unless}}">Edit comment</button>
+      <button class="btn btn-sm btn-primary save-comment <% if (grader_comments) { %> hidden <% } %>">Save comment</button>
+      <button class="btn btn-sm btn-primary edit-comment <% if (!grader_comments) { %> hidden <% } %>">Edit comment</button>
       <i class="fa fa-check comment-success"></i>
 
-      <a href="#" class="delete-comment {{#unless grader_comments}} hidden {{/unless}}">
+      <a href="#" class="delete-comment <% if (!grader_comments) { %> hidden <% } %>">
         <i class="fa fa-trash-o fa-lg"></i>
       </a>
-    {% endverbatim %}
   {% endif %}
-
-  {% verbatim %}
 </script>
 
-{% endverbatim %}
-<script type="text/x-handlebars-template" class="rubrics-nav-header-template">
+<script type="text/template" class="rubrics-nav-header-template">
   <h3 class="nav-title">
     Rubrics
     {% if not is_preview %}
@@ -276,22 +259,21 @@
     {% endif %}
   </h3>
 
-  {% verbatim %}
   <span class="points">
-    {{#if is_graded}}
-      {{points}}
-    {{else}}
+    <% if (is_graded) { %>
+      <%= points %>
+    <% } else { %>
       - 
-    {{/if}}
-    / {{question_part.max_points}}
+    <% } %>
+    / <%= question_part.max_points %>
   </span>
 
-  {{#if is_graded}}
-    <span class="grader">(Grader: {{grader_name}})</span>
-  {{/if}}
+  <% if (is_graded) { %>
+    <span class="grader">(Grader: <%= grader_name %>)</span>
+  <% } %>
 </script>
 
-<script type="text/x-handlebars-template" class="rubrics-nav-template">
+<script type="text/template" class="rubrics-nav-template">
   <div class="rubrics-nav-header"></div>
 
   <p class="editing-message">
@@ -307,14 +289,11 @@
   <button class="btn btn-primary btn-sm add-rubric">Add rubric</button>
   <div class="comment-container"></div>
 </script>
-{% endverbatim %}
 {% endblock %}
-
 
 {% block js %}
 <script src="/static/js/lib/underscore.min.js"></script>
 <script src="/static/js/lib/backbone.min.js"></script>
-<script src="/static/js/lib/handlebars.js"></script>
 <script src="/static/js/lib/modal.js"></script>
 <script src="/static/js/lib/tooltip.js"></script>
 <script src="/static/js/lib/popover.js"></script>

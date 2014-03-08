@@ -10,7 +10,6 @@ ADMINS = (
   ('Catherine Lu', 'catherineglu@gmail.com'),
   ('Karanveer Mohan', 'karanveer.1992@gmail.com'),
   ('Karthik Viswanathan', 'karthik.ksv@gmail.com'),
-  # ('Your Name', 'your_email@example.com'),
 )
 
 SERVER_EMAIL = 'Scoryst Support <support@scoryst.com>'
@@ -155,7 +154,6 @@ INSTALLED_APPS = (
 CACHEOPS_REDIS = {
     'host': 'localhost', # redis-server is on same machine
     'port': 6379,        # default redis port
-    # TODO (kvis): What is going on? Thanks.
     'db': 1,             # SELECT non-default redis database
                          # using separate redis db or redis instance
                          # is highly recommended
@@ -163,24 +161,8 @@ CACHEOPS_REDIS = {
 }
 
 CACHEOPS = {
-    # Automatically cache any User.objects.get() calls for 15 minutes
-    # This includes request.user or post.author access,
-    # where Post.author is a foreign key to auth.User
-    # 'auth.user': ('get', 60*15),
-
-    # Automatically cache all gets, queryset fetches and counts
-    # to other django.contrib.auth models for an hour
-    # 'auth.*': ('all', 60*60),
-
-    # Enable manual caching on all news models with default timeout of an hour
-    # Use News.objects.cache().get(...)
-    #  or Tags.objects.filter(...).order_by(...).cache()
-    # to cache particular ORM request.
-    # Invalidation is still automatic
-    # 'news.*': ('just_enable', 60*60),
-
-    # Automatically cache all requests for questionpartanswer model for 15 min
-    'scorystapp.*': ('all', 60*60*24),
+    # Automatically cache all requests for all scoryst models for 30 days
+    'scorystapp.*': ('all', 60*60*24*30),
 }
 
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'

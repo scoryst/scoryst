@@ -20,7 +20,7 @@
             </tr>
           </thead>
           <tbody>
-          <!-- The tbody is rendered using handlebars. -->
+          <!-- The tbody is rendered using undescore templates. -->
           </tbody>
         </table>
       </div>
@@ -57,75 +57,61 @@
   </div>
 </div>
 
-{% verbatim %}
-<script class="roster-template" type="text/x-handlebars-template">
-  <td class="first-name">{{user.first_name}}</td>
-  <td class="last-name">{{user.last_name}}</td>
-  <td class="student-id">{{user.student_id}}</td>
-  <td class="privilege">{{privilege}}</td>
-  {% endverbatim %}
+<script class="roster-template" type="text/template">
+  <td class="first-name"><%= user.first_name %></td>
+  <td class="last-name"><%= user.last_name %></td>
+  <td class="student-id"><%= user.student_id %></td>
+  <td class="privilege"><%= privilege %></td>
   {% if is_instructor %}
-  {% verbatim %}
-  {{!-- {{TODO: The above line is ugly. Fix}} --}}
 
   <td class="actions">
-    {{#unless is_current_user}}
+    <% if (!is_current_user) { %>
     <a href="#" class="edit">
       <i class="fa fa-pencil"></i>
     </a>
-    {{/unless}}
+    <% } %>
   </td>
 
-  {% endverbatim %}
   {% endif %}
-  {% verbatim %}
-  
 </script>
 
-<script class="edit-roster-template" type="text/x-handlebars-template">
-  <td><input type="text" value="{{firstName}}" class="first-name"></td>
-  <td><input type="text" value="{{lastName}}" class="last-name"></td>
-  <td><input type="text" value="{{studentId}}" class="student-id"></td>
+<script class="edit-roster-template" type="text/template">
+  <td><input type="text" value="<%= firstName %>" class="first-name" /></td>
+  <td><input type="text" value="<%= lastName %>" class="last-name" /></td>
+  <td><input type="text" value="<%= studentId %>" class="student-id" /></td>
   <td class="privilege">
     <select>
-      <option {{#if currentlyIsInstructor}} selected="selected" {{/if}}>
+      <option <% if (currentlyIsInstructor) { %> selected="selected" <% } %> >
         Instructor
       </option>
-      <option {{#if currentlyIsTA}} selected="selected" {{/if}}>
+      <option <% if (currentlyIsTA) { %> selected="selected" <% } %> >
         TA
       </option>
-      <option {{#if currentlyIsStudent}} selected="selected" {{/if}}>
+      <option <% if (currentlyIsStudent) { %> selected="selected" <% } %> >
         Student
       </option>
     </select>
   </td>
-  {% endverbatim %}
   {% if is_instructor %}
-  {% verbatim %}
-  {{!-- {{TODO: The above line is ugly. Fix}} --}}
 
   <td class="actions">
-    {{#unless is_current_user}}
+    <% if (typeof(is_current_user) == "undefined" || !is_current_user) { %>
     <a href="#" class="save">
       <i class="fa fa-save"></i>
     </a>
-    <a href="/course/{{course}}/roster/delete/{{id}}"
+    <a href="/course/<%= course %>/roster/delete/<%= id %>"
         class="delete">
       <i class="fa fa-trash-o"></i>
     </a>
-    {{/unless}}
+    <% } %>
   </td>
-  {% endverbatim %}
   {% endif %}
-  {% verbatim %}
 </script>
-{% endverbatim %}
 {% endblock %}
 
 {% block js %}
 <script src="/static/js/lib/underscore.min.js"></script>
 <script src="/static/js/lib/backbone.min.js"></script>
-<script src="/static/js/lib/handlebars.js"></script>
 <script src="/static/js/lib/tooltip.js"></script>
 <script src="/static/js/lib/popover.js"></script>
 <script src="/static/js/lib/jquery.tablesorter.min.js"></script>

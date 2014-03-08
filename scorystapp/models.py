@@ -7,6 +7,11 @@ from django.utils import timezone
 import cacheops
 
 
+"""
+CourseUser Models
+Models: UserManager, User, Course, CourseUser
+"""
+
 class UserManager(BaseUserManager):
   """ Manages the creation of user accounts. """
 
@@ -145,27 +150,32 @@ class CourseUser(models.Model):
       self.USER_PRIVILEGE_CHOICES[self.privilege][1])
 
 
+"""
+Exam Models
+Models: Exam, ExamPage, QuestionPart, Rubric
+"""
+
 class Exam(models.Model):
   """ Represents a particular exam associated with a course. """
-  def upload_pdf_to(instance, filename):
-    # TODO: bad method name
-    # TODO: documentation
-    name = utils._generate_random_string(40)
+  def generate_remote_pdf_name(instance, filename):
+    """ Generates a name of the form exam-pdf/<random_string><timestamp>.pdf """
+    name = utils.generate_random_string(40)
     return 'exam-pdf/%s%s.pdf' % (
-      name, timezone.now().strftime("%Y%m%d%H%M%S")
+      name, timezone.now().strftime('%Y%m%d%H%M%S')
     )
 
   course = models.ForeignKey(Course, db_index=True)
   name = models.CharField(max_length=200)
   page_count = models.IntegerField()
 
-  # Blank is allowed because it is loaded asynchronously and the
+  # Blank is allowed because exam_pdf is loaded asynchronously and the
   # exam needs to be saved before it is fully loaded
-  exam_pdf = models.FileField(upload_to=upload_pdf_to, blank=True)
-  solutions_pdf = models.FileField(upload_to=upload_pdf_to, blank=True)
+  exam_pdf = models.FileField(upload_to=generate_remote_pdf_name, blank=True)
+  solutions_pdf = models.FileField(upload_to=generate_remote_pdf_name, blank=True)
 
   # Whether the exam is being graded up or graded down 
   grade_down = models.BooleanField(default=True)
+  cap_score = models.BooleanField(default=True)
 
   def get_points(self):
     question_parts = QuestionPart.objects.filter(exam=self)
@@ -180,17 +190,17 @@ class Exam(models.Model):
 
 class ExamPage(models.Model):
   """ JPEG representation of one page of the exam """
-  def upload_jpeg_to(instance, filename):
-    # TODO: bad method name
-    # TODO: documentation
-    name = utils._generate_random_string(40)
+  def generate_remote_jpeg_name(instance, filename):
+    """ Generates a name of the form exam-jpeg/<random_string><timestamp>.jpeg """
+    name = utils.generate_random_string(40)
     return 'exam-pages/%s%s.jpeg' % (
-      name, timezone.now().strftime("%Y%m%d%H%M%S")
+      name, timezone.now().strftime('%Y%m%d%H%M%S')
     )
 
   exam = models.ForeignKey(Exam, db_index=True)
   page_number = models.IntegerField()
-  page_jpeg = models.ImageField(upload_to=upload_jpeg_to, blank=True)
+  page_jpeg = models.ImageField(upload_to=generate_remote_jpeg_name, blank=True)
+  page_jpeg_large = models.ImageField(upload_to=generate_remote_jpeg_name, blank=True)
 
   def __unicode__(self):
     return '%s (Page %d)' % (self.exam.name, self.page_number,)
@@ -199,8 +209,8 @@ class ExamPage(models.Model):
 class QuestionPart(models.Model):
   """ Represents a particular question/part associated with an exam. """
   exam = models.ForeignKey(Exam, db_index=True)
-  question_number = models.IntegerField()         # Question number on the exam
-  part_number = models.IntegerField(null=True)    # Part number on the exam.
+  question_number = models.IntegerField()
+  part_number = models.IntegerField(null=True)
 
   max_points = models.FloatField()
   pages = models.CommaSeparatedIntegerField(max_length=200)
@@ -221,14 +231,18 @@ class Rubric(models.Model):
       self.question_part.part_number, self.description)
 
 
+"""
+ExamAnswer Models
+Models: ExamAnswer, ExamAnswerPage, QuestionPartAnswer
+"""
+
 class ExamAnswer(models.Model):
   """ Represents a student's exam. """
-  def upload_pdf_to(instance, filename):
-    # TODO: bad method name
-    # TODO: documentation
-    name = utils._generate_random_string(40)
+  def generate_remote_pdf_name(instance, filename):
+    """ Generates a name of the form exam-pdf/<random_string><timestamp>.pdf """
+    name = utils.generate_random_string(40)
     return 'exam-pdf/%s%s.pdf' % (
-      name, timezone.now().strftime("%Y%m%d%H%M%S")
+      name, timezone.now().strftime('%Y%m%d%H%M%S')
     )
 
   exam = models.ForeignKey(Exam, db_index=True)
@@ -236,7 +250,7 @@ class ExamAnswer(models.Model):
 
   page_count = models.IntegerField()
   preview = models.BooleanField(default=False)
-  pdf = models.FileField(upload_to=upload_pdf_to)
+  pdf = models.FileField(upload_to=generate_remote_pdf_name)
   released = models.BooleanField(default=False)
 
   
@@ -292,17 +306,17 @@ class ExamAnswer(models.Model):
 
 class ExamAnswerPage(models.Model):
   """ JPEG representation of one page of the students exam answer """
-  def upload_jpeg_to(instance, filename):
-    # TODO: bad method name
-    # TODO: documentation
-    name = utils._generate_random_string(40)
+  def generate_remote_jpeg_name(instance, filename):
+    """ Generates a name of the form exam-jpeg/<random_string><timestamp>.jpeg """
+    name = utils.generate_random_string(40)
     return 'exam-pages/%s%s.jpeg' % (
       name, timezone.now().strftime("%Y%m%d%H%M%S")
     )
 
   exam_answer = models.ForeignKey(ExamAnswer, db_index=True)
   page_number = models.IntegerField()
-  page_jpeg = models.ImageField(upload_to=upload_jpeg_to, blank=True)
+  page_jpeg = models.ImageField(upload_to=generate_remote_jpeg_name, blank=True)
+  page_jpeg_large = models.ImageField(upload_to=generate_remote_jpeg_name, blank=True)
 
   def __unicode__(self):
     if self.exam_answer.course_user:
@@ -341,10 +355,15 @@ class QuestionPartAnswer(models.Model):
     custom_points = self.custom_points if self.custom_points else 0
     if self.exam_answer.exam.grade_down:
       # if we're grading down, subtract total from max points
-      return self.question_part.max_points - total_points + custom_points
+      points = self.question_part.max_points - total_points + custom_points
     else:
       # otherwise, we're awarding points
-      return total_points + custom_points
+      points = total_points + custom_points
+
+    if self.exam_answer.exam.cap_score:
+      points = max(0, points)
+      points = min(self.question_part.max_points, points)
+    return points
 
   def __unicode__(self):
     if self.exam_answer.course_user:

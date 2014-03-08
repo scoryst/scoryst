@@ -1,7 +1,7 @@
 // TODO: browserify
 var RubricView = IdempotentView.extend({
   tagName: 'li',
-  template: Handlebars.compile($('.rubric-template').html()),
+  template: _.template($('.rubric-template').html()),
 
   events: {
     'click': 'toggle',

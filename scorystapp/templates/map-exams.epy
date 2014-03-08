@@ -1,13 +1,13 @@
 {% extends 'layout.epy' %}
 
 {% block content %}
-  <div class="container">
+  <div class="container map-exams">
     <div class="row">
       <div class="col-xs-4">
         <h2>Assign Students to Exams</h2>
         <p>
-          <input type="radio" name="show-mapped" value="unmapped"/> Show only unmapped <br />
-          <input type="radio" name="show-mapped" checked="true" value="all"/> Show all exams
+          <input type="radio" name="show-mapped" value="unmapped" /> Show only unmapped <br />
+          <input type="radio" name="show-mapped" checked="true" value="all" /> Show all exams
         </p>
         <p>
           <button class="btn btn-default btn-sm previous-exam" type="button">
@@ -19,7 +19,7 @@
           </button>
         </p>
         <hr>
-        <input class="typeahead" type="text" placeholder="Student name" autocomplete="off">
+        <input class="typeahead" type="text" placeholder="Student name" autocomplete="off" />
 
       </div>
       <div class="col-xs-8 exam">
@@ -37,10 +37,17 @@
       </div>
     </div>
   </div>
+
+  <script type="text/template" class="typeahead-template">
+    <div><strong><%= name %></strong></div>
+    <div><%= email %> <%= studentId %></div>
+    <% if (mapped) { %><div class="error">ALREADY MAPPED</div><% } %>
+  </script>
+
 {% endblock %}
 
 {% block js %}
-  <script src="/static/js/lib/handlebars.js"></script>
+  <script src="/static/js/lib/underscore.min.js"></script>
   <script src="/static/js/lib/typeahead.min.js"></script>
   <script src="/static/js/image-loader.js"></script>
   <script src="/static/js/map-exams.js"></script>

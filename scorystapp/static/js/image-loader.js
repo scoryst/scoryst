@@ -34,6 +34,7 @@ function ImageLoader(curPageNum, preloadPageConfig, preloadStudentConfig) {
   this.$zoomLens = $('<div />').addClass('zoom-lens');
   this.$zoomImg = $('<img />').appendTo(this.$zoomLens);
   this.$zoomLens.appendTo($examCanvas);
+  this.zoomLensEnabled = true;
 
   // Needed for resizing page navigation etc.
   this.$window = $(window);
@@ -126,7 +127,7 @@ ImageLoader.prototype.loadImage = function() {
   // Resize after showing the loading gif
   this.resized = false;
   this.$canvas.attr('src', 'get-exam-jpeg/' + this.curPageNum);
-  this.$zoomImg.attr('src', 'get-exam-jpeg/' + this.curPageNum);
+  this.$zoomImg.attr('src', 'get-exam-jpeg-large/' + this.curPageNum);
 };
 
 // Shows the page at offset from the current page. Use it when you wish to go to
@@ -223,11 +224,21 @@ ImageLoader.prototype.resizePageNavigation = function() {
   this.$nextPage.height(this.$canvas.height());
 };
 
+ImageLoader.prototype.enableZoomLens = function() {
+  this.zoomLensEnabled = true;
+};
+
+ImageLoader.prototype.disableZoomLens = function() {
+  this.zoomLensEnabled = false;
+};
+
 ImageLoader.prototype.handleZoomEvents = function() {
   var self = this;
 
   this.$canvas.mouseenter(function() {
-    self.$zoomLens.show();
+    if (self.zoomLensEnabled) {
+      self.$zoomLens.show();
+    }
   });
 
   this.$canvas.mouseleave(function() {
@@ -239,12 +250,12 @@ ImageLoader.prototype.handleZoomEvents = function() {
     var x = event.offsetX;
 
     /* TODO: fix hardcoded values (important). */
-    var topOffset = -(y - 50) * 2200 / 871;
-    var leftOffset = -(x - 50) * 1700 / 673;
+    var offsetTop = -(y - 50) * 2200 / 871;
+    var offsetLeft = -(x - 50) * 1700 / 673;
 
     self.$zoomLens.css('top', y + 20);
     self.$zoomLens.css('left', x + 20);
-    self.$zoomImg.css('top', topOffset);
-    self.$zoomImg.css('left', leftOffset);
+    self.$zoomImg.css('top', offsetTop);
+    self.$zoomImg.css('left', offsetLeft);
   });
 };

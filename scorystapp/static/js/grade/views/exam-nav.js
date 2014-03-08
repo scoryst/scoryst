@@ -1,6 +1,6 @@
 // TODO: browserify
 var ExamNavView = IdempotentView.extend({
-  template: Handlebars.compile($('.exam-nav-template').html()),
+  template: _.template($('.exam-nav-template').html()),
   events: {
     'click a': 'triggerChangeQuestionPart',
     'click .toggle-exam-nav': 'toggleExamNav'

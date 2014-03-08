@@ -12,8 +12,7 @@ import PyPDF2
 import shlex
 import subprocess
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 @decorators.instructor_or_ta_required
 def upload(request, cur_course_user):
   """
@@ -32,7 +31,7 @@ def upload(request, cur_course_user):
 
       # Break the pdf into corresponding student exams using a celery worker
       # Break those pdfs into jpegs and upload them to S3.
-      name_prefix = exam.name.replace(' ', '') + utils._generate_random_string(5)
+      name_prefix = exam.name.replace(' ', '') + utils.generate_random_string(5)
       _break_and_upload(exam, request.FILES['exam_file'], name_prefix)
 
       # We return to the roster page because the files are still being processed and map exams

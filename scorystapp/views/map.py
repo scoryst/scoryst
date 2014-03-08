@@ -4,8 +4,7 @@ from scorystapp.views import helpers, grade, grade_or_view
 import json
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 @decorators.instructor_or_ta_required
 def map(request, cur_course_user, exam_id, exam_answer_id=None):
   """ Renders the map exams page """
@@ -13,16 +12,16 @@ def map(request, cur_course_user, exam_id, exam_answer_id=None):
   # If no exam_answer_id is given, show the first exam_answer
   if exam_answer_id is None:
     exam_answers = models.ExamAnswer.objects.filter(exam_id=exam_id, preview=False)
-    # TODO: length is 0
-    if exam_answers.count():
+    # TODO: How should I handle it best if length is 0?
+    if not exam_answers.count() == 0:
       exam_answer_id = exam_answers[0].id
-      return shortcuts.redirect('/course/%s/exams/%s/map/%s/' % (cur_course_user.course.id, exam_id, exam_answer_id))
+      return shortcuts.redirect('/course/%s/exams/%s/map/%s/' %
+        (cur_course_user.course.id, exam_id, exam_answer_id))
 
   return helpers.render(request, 'map-exams.epy', {'title': 'Map Exams'})
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 @decorators.instructor_or_ta_required
 def get_all_course_students(request, cur_course_user, exam_id):
   """
@@ -55,17 +54,16 @@ def get_all_course_students(request, cur_course_user, exam_id):
   return http.HttpResponse(json.dumps(students_to_return), mimetype='application/json')
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 @decorators.instructor_or_ta_required
 def get_all_exams(request, cur_course_user, exam_id, exam_answer_id):
   """
-  Returns a list where each element is a dict of exam_answer_id, url to the jpeg image of the 
+  Returns a list where each element is a dict of exam_answer_id, url to the jpeg image of the
   first page of the exam and whether or not the exam is already mapped to a student
   """
   exam_answers = models.ExamAnswer.objects.filter(exam_id=exam_id, preview=False)
   exam_answers_list = []
-  
+
   index = 0
   for exam_answer in exam_answers:
     if exam_answer.pk == int(exam_answer_id):
@@ -85,8 +83,7 @@ def get_all_exams(request, cur_course_user, exam_id, exam_answer_id):
   return http.HttpResponse(json.dumps(return_object), mimetype='application/json')
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 @decorators.instructor_or_ta_required
 def map_exam_to_student(request, cur_course_user, exam_id, exam_answer_id, course_user_id):
   """
@@ -102,18 +99,21 @@ def map_exam_to_student(request, cur_course_user, exam_id, exam_answer_id, cours
   return http.HttpResponse(status=200)
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 @decorators.instructor_or_ta_required
 def get_exam_jpeg(request, cur_course_user, exam_id, exam_answer_id, page_number):
-  """
-  Gets the jpeg corresponding to exam_answer_id and page_number
-  """
+  """ Gets the jpeg corresponding to exam_answer_id and page_number """
   return grade_or_view._get_exam_jpeg(request, cur_course_user, exam_answer_id, page_number)
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
+@decorators.instructor_or_ta_required
+def get_exam_jpeg_large(request, cur_course_user, exam_id, exam_answer_id, page_number):
+  """ Gets the large jpeg corresponding to exam_answer_id and page_number """
+  return grade_or_view._get_exam_jpeg_large(request, cur_course_user, exam_answer_id, page_number)
+
+
+@decorators.access_controlled
 @decorators.instructor_or_ta_required
 def get_offset_student_jpeg(request, cur_course_user, exam_id, exam_answer_id, offset, page_number):
   """
@@ -122,13 +122,12 @@ def get_offset_student_jpeg(request, cur_course_user, exam_id, exam_answer_id, o
   """
   # Ensure the exam_answer_id exists
   cur_exam_answer = shortcuts.get_object_or_404(models.ExamAnswer, pk=exam_answer_id)
-  
+
   next_exam_answer = grade._get_offset_student_exam(exam_answer_id, offset)
   return grade_or_view._get_exam_jpeg(request, cur_course_user, next_exam_answer.pk, page_number)
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 @decorators.instructor_or_ta_required
 def get_exam_page_count(request, cur_course_user, exam_id, exam_answer_id):
   """

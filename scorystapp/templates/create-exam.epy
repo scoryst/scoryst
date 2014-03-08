@@ -73,11 +73,10 @@
     </form>
   </div>
 
-  {% verbatim %}
-  <script type="text/x-handlebars-template" class="question-template">
-    <li data-question="{{questionNum}}" class="question-li">
+  <script type="text/template" class="question-template">
+    <li data-question="<%= questionNum %>" class="question-li">
       <h3>
-        Question {{questionNum}}
+        Question <%= questionNum %>
         <i class="fa fa-chevron-circle-down"></i>
         <i class="fa fa-trash-o fa-sm"></i>
       </h3>
@@ -92,16 +91,16 @@
             Part
           </h4>
 
-          <div class="part-meta" data-question="{{questionNum}}">
+          <div class="part-meta" data-question="<%= questionNum %>">
             <div class="form-group points">
               Points: <input type="text" class="form-control"
-                data-question="{{questionNum}}" data-part="{{partNum}}"
+                data-question="<%= questionNum %>"
                 placeholder="10" readonly="true">
             </div>
 
             <div class="form-group pages">
               Spans pages: <input type="text" class="form-control"
-                data-question="{{questionNum}}" data-part="{{partNum}}"
+                data-question="<%= questionNum %>"
                 placeholder="1, 2, 3" readonly="true">
             </div>
           </div>
@@ -110,10 +109,10 @@
     </li>
   </script>
 
-  <script type="text/x-handlebars-template" class="part-template">
-    <li data-question="{{questionNum}}" data-part="{{partNum}}" class="part-li">
+  <script type="text/template" class="part-template">
+    <li data-question="<%= questionNum %>" data-part="<%= partNum %>" class="part-li">
       <h4>
-        Part {{partNum}}
+        Part <%= partNum %>
         <i class="fa fa-chevron-circle-down"></i>
         <i class="fa fa-trash-o"></i>
       </h4>
@@ -122,14 +121,14 @@
         <div class="part-meta">
           <div class="form-group points">
             Points: <input type="text" class="form-control"
-              data-question="{{questionNum}}" data-part="{{partNum}}"
-              placeholder="10" value="{{points}}">
+              data-question="<%= questionNum %>" data-part="<%= partNum %>"
+              placeholder="10" value="<%= points %>">
           </div>
 
           <div class="form-group pages">
             Spans pages: <input type="text" class="form-control"
-              data-question="{{questionNum}}" data-part="{{partNum}}"
-              placeholder="1, 2, 3" value="{{pages}}">
+              data-question="<%= questionNum %>" data-part="<%= partNum %>"
+              placeholder="1, 2, 3" value="<%= pages %>">
           </div>
         </div>
 
@@ -148,26 +147,24 @@
     </li>
   </script>
 
-  <script type="text/x-handlebars-template" class="rubric-template">
-    <li class="rubric-li" data-question="{{questionNum}}" data-part="{{partNum}}">
+  <script type="text/template" class="rubric-template">
+    <li class="rubric-li" data-question="<%= questionNum %>" data-part="<%= partNum %>">
       <span class="form-group form-group-rubric-points">
         <input type="text" class="rubric-points form-control"
-          placeholder="3" value="{{points}}"></input> points 
-        <span class="awarded-or-deducted">{{awardedOrDeducted}}</span> for
+          placeholder="3" value="<%= points %>"></input> points 
+        <span class="awarded-or-deducted"><%= awardedOrDeducted %></span> for
       </span>
       <span class="form-group form-group-rubric-description">
         <input type="text" class="rubric-description form-control"
-          placeholder="off by one error" value="{{description}}"></input>
+          placeholder="off by one error" value="<%= description %>"></input>
         <i class="fa fa-trash-o"></i>
       </span>
     </li>
   </script>
-  {% endverbatim %}
-
 {% endblock %}
 
 {% block js %}
-  <script src="/static/js/lib/handlebars.js"></script>
+  <script src="/static/js/lib/underscore.min.js"></script>
   <script src="/static/js/image-loader.js"></script>
   <script src="/static/js/lib/tooltip.js"></script>
   <script src="/static/js/lib/popover.js"></script>

@@ -10,8 +10,7 @@ import os
 import PyPDF2
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 @decorators.instructor_or_ta_required
 def exams(request, cur_course_user):
   """
@@ -65,8 +64,7 @@ def exams(request, cur_course_user):
   })
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 @decorators.instructor_or_ta_required
 def delete_exam(request, cur_course_user, exam_id):
   """ Allows the instructor/TA to delete a user from the course roster. """
@@ -81,8 +79,7 @@ def delete_exam(request, cur_course_user, exam_id):
   return shortcuts.redirect('/course/%d/exams/' % cur_course.pk)
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 @decorators.instructor_or_ta_required
 def create_exam(request, cur_course_user, exam_id):
   """
@@ -158,7 +155,6 @@ def _create_preview_exam_answer(cur_course_user, exam):
     question_part_answer = models.QuestionPartAnswer(exam_answer=exam_answer,
       question_part=question_part, pages=question_part.pages)
     question_part_answer.save()
-  # TODO: Race condition where uploading images hasn't finished. FML
 
   exam_pages = models.ExamPage.objects.filter(exam=exam)
   for exam_page in exam_pages:
@@ -169,8 +165,7 @@ def _create_preview_exam_answer(cur_course_user, exam):
   return exam_answer
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 @decorators.instructor_or_ta_required
 def get_empty_exam_jpeg(request, cur_course_user, exam_id, page_number):
   """ Returns the URL where the jpeg of the empty uploaded exam can be found """
@@ -178,8 +173,15 @@ def get_empty_exam_jpeg(request, cur_course_user, exam_id, page_number):
   return shortcuts.redirect(exam_page.page_jpeg.url)
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
+@decorators.instructor_or_ta_required
+def get_empty_exam_jpeg_large(request, cur_course_user, exam_id, page_number):
+  """ Returns the URL where the large jpeg of the empty uploaded exam can be found """
+  exam_page = shortcuts.get_object_or_404(models.ExamPage, exam_id=exam_id, page_number=page_number)
+  return shortcuts.redirect(exam_page.page_jpeg_large.url)
+
+
+@decorators.access_controlled
 @decorators.instructor_or_ta_required
 def get_empty_exam_page_count(request, cur_course_user, exam_id):
   """ Returns the number of pages in the exam """
@@ -187,8 +189,7 @@ def get_empty_exam_page_count(request, cur_course_user, exam_id):
   return http.HttpResponse(exam.page_count)
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 @decorators.instructor_or_ta_required
 def get_saved_exam(request, cur_course_user, exam_id):
   """
@@ -232,6 +233,7 @@ def get_saved_exam(request, cur_course_user, exam_id):
   }
   return http.HttpResponse(json.dumps(return_object), mimetype='application/json')
 
+
 app = Celery('tasks', broker=settings.BROKER_URL)
 @app.task
 def upload(temp_pdf_name, num_pages, exam):
@@ -254,12 +256,14 @@ def upload(temp_pdf_name, num_pages, exam):
   # Delete the pdf file
   os.remove(temp_pdf_name)
 
+
+# TODO: Use celery
 def _upload_exam_pdf_as_jpeg_to_s3(f, exam):
   """
   Given a file f, which is expected to be an exam pdf, breaks it into jpegs for each
-  page and uploads them to s3. Returns the number of pages in the pdf file
+  page and uploads them to s3. Returns the number of pages in the pdf file.
   """
-  temp_pdf_name = '/tmp/temp%s.pdf' % utils._generate_random_string(5)
+  temp_pdf_name = '/tmp/temp%s.pdf' % utils.generate_random_string(5)
   temp_pdf = open(temp_pdf_name, 'w')
   temp_pdf.seek(0)
   temp_pdf.write(f.read())
@@ -269,7 +273,7 @@ def _upload_exam_pdf_as_jpeg_to_s3(f, exam):
   upload.delay(temp_pdf_name, pdf.getNumPages(), exam)
   return pdf.getNumPages()
 
-# TODO: Use celery
+
 def _upload_exam_pdf_to_s3(f, exam, exam_pdf_field):
   """ Uploads a pdf file representing an exam or its solutions to s3 """
   def upload(f, exam):
@@ -296,7 +300,6 @@ def _validate_exam_creation(questions):
 
   # Loop over all the questions
   for question in questions:
-    # TOOD: Better way to not have null question?
     if not question:
       continue
     question_number += 1

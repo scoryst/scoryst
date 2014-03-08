@@ -3,7 +3,7 @@ var CustomPointsView = IdempotentView.extend({
   tagName: 'li',
   className: 'custom-points',
 
-  template: Handlebars.compile($('.custom-points-template').html()),
+  template: _.template($('.custom-points-template').html()),
   events: {
     'click': 'focusOrDeselect',
     'keydown input': 'updateCustomPoints'

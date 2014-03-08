@@ -4,7 +4,8 @@ from django.contrib.auth import authenticate
 import PyPDF2
 
 
-# TODO: Currently not in use
+# TODO: Currently not in use. 
+# Will be needed once we allow anyone to create an account
 class UserSignupForm(forms.Form):
   """ Allow a student to sign up. """
   username = forms.CharField(max_length=100)
@@ -97,49 +98,24 @@ class ExamUploadForm(forms.Form):
     Ensure that the exam_file is less than MAX_ALLOWABLE_PDF_SIZE and is a valid
     pdf 
     """
-    data = self.cleaned_data.get('exam_file')
-    if data:
-      if data.size > ExamUploadForm.MAX_ALLOWABLE_PDF_SIZE:
-        max_size_in_mb = ExamUploadForm.MAX_ALLOWABLE_PDF_SIZE / float(1024 * 1024)
-        user_size_in_mb = data.size / float(1024 * 1024)
-        raise forms.ValidationError('Max size allowed is %d MB but file size is %d MB' %
-          (max_size_in_mb, user_size_in_mb))
-      
-      if 'pdf' not in data.content_type and 'octet-stream' not in data.content_type:
-        raise forms.ValidationError('Only PDF files are acceptable')
-      try:
-        PyPDF2.PdfFileReader(data)
-      except:
-        raise forms.ValidationError('The PDF file is invalid and may be corrupted')
-      data.seek(0, 0)  # Undo work of PdfFileReader
-    return data
+    exam_file = self.cleaned_data.get('exam_file')
+    if exam_file:
+      _validate_pdf_file(exam_file, ExamUploadForm.MAX_ALLOWABLE_PDF_SIZE)
+    return exam_file
 
-  # TODO: Decompose out common code between this and clean_exam_file
   def clean_exam_solutions_file(self):
     """
     Ensure that the exam_solutions_file is less than MAX_ALLOWABLE_PDF_SIZE and 
     is a valid pdf
     """
-    data = self.cleaned_data['exam_solutions_file']
-    if data:
-      if data.size > ExamUploadForm.MAX_ALLOWABLE_PDF_SIZE:
-        max_size_in_mb = ExamUploadForm.MAX_ALLOWABLE_PDF_SIZE / float(1024 * 1024)
-        user_size_in_mb = data.size / float(1024 * 1024)
-        raise forms.ValidationError('Max size allowed is %d MB but solution size is %d MB' %
-          (max_size_in_mb, user_size_in_mb))
-      
-      if 'pdf' not in data.content_type and 'octet-stream' not in data.content_type:
-        raise forms.ValidationError('Only PDF files are acceptable')
-      try:
-        PyPDF2.PdfFileReader(data)
-      except:
-        raise forms.ValidationError('The PDF file is invalid and may be corrupted')
-      data.seek(0, 0)  # Undo work of PdfFileReader
-    return data
+    exam_solutions_file = self.cleaned_data['exam_solutions_file']
+    if exam_solutions_file:
+      _validate_pdf_file(exam_solutions_file, ExamUploadForm.MAX_ALLOWABLE_PDF_SIZE)
+    return exam_solutions_file
 
 
 class StudentExamsUploadForm(forms.Form):
-  """ Allows an exam to be uploaded along with the empty and solutions pdf file """
+  """ Allows student exams to be uploaded """
 
   def __init__(self, *args, **kwargs):
     """ We pass in exam_choices from upload.py and retrieve the argument here  """
@@ -148,7 +124,8 @@ class StudentExamsUploadForm(forms.Form):
     self.fields['exam_name'].choices = exam_choices
 
   # 100MB
-  # TODO:Change back to 25?
+  # TODO: Decide our max size. 100MB seems plausible if the pdf had 40 students
+  # but it also might be too large for us to handle when we expand.
   MAX_ALLOWABLE_PDF_SIZE = 1024 * 1024 * 100
 
   exam_name = forms.ChoiceField()
@@ -159,22 +136,27 @@ class StudentExamsUploadForm(forms.Form):
     Ensure that the exam_file is less than MAX_ALLOWABLE_PDF_SIZE and is a valid
     pdf 
     """
-    data = self.cleaned_data.get('exam_file')
-    if data:
-      if data.size > ExamUploadForm.MAX_ALLOWABLE_PDF_SIZE:
-        max_size_in_mb = ExamUploadForm.MAX_ALLOWABLE_PDF_SIZE / float(1024 * 1024)
-        user_size_in_mb = data.size / float(1024 * 1024)
-        raise forms.ValidationError('Max size allowed is %d MB but file size is %d MB' %
-          (max_size_in_mb, user_size_in_mb))
-      
-      if 'pdf' not in data.content_type and 'octet-stream' not in data.content_type:
-        raise forms.ValidationError('Only PDF files are acceptable')
-      try:
-        PyPDF2.PdfFileReader(data)
-      except:
-        raise forms.ValidationError('The PDF file is invalid and may be corrupted')
-      data.seek(0, 0)  # Undo work of PdfFileReader
-    return data
+    exam_file = self.cleaned_data.get('exam_file')
+    if exam_file:
+      _validate_pdf_file(exam_file, ExamUploadForm.MAX_ALLOWABLE_PDF_SIZE)
+    return exam_file
+
+
+def _validate_pdf_file(pdf_file, max_size):
+  """ Validates the pdf_file and ensures it is less than max_size (which is in bytes). """
+  if pdf_file.size > max_size:
+    max_size_in_mb = max_size / float(1024 * 1024)
+    user_size_in_mb = pdf_file.size / float(1024 * 1024)
+    raise forms.ValidationError('Max size allowed is %d MB but file size is %d MB' %
+      (max_size_in_mb, user_size_in_mb))
+  
+  if 'pdf' not in pdf_file.content_type and 'octet-stream' not in pdf_file.content_type:
+    raise forms.ValidationError('Only PDF files are acceptable')
+  try:
+    PyPDF2.PdfFileReader(pdf_file)
+  except:
+    raise forms.ValidationError('The PDF file is invalid and may be corrupted')
+  pdf_file.seek(0)  # Undo work of PdfFileReader
 
 
 class CourseForm(forms.ModelForm):

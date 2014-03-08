@@ -7,7 +7,7 @@
       <div class="nav-container">
         <ul class="nav nav-tabs">
           {% for exam in exams %}
-            <li {% if forloop.first %}class="active"{% endif %}>
+            <li {% if forloop.last %}class="active"{% endif %}>
               <a href="" data-exam-id="{{exam.id}}">{{exam.name}}</a>
             </li>
           {% endfor %}
@@ -34,7 +34,7 @@
     <div class="col-xs-6 exam-summary">
       
       <div class="table-container">
-        <!-- Statistics info to be added in with handlebars template. -->
+        <!-- Statistics info to be added in with template. -->
       </div>
     </div>
     <div class="col-xs-6 histogram-div">
@@ -43,8 +43,7 @@
   </div>
 </div>
 
-{% verbatim %}
-<script type="text/x-handlebars-template" class="statistics-template">
+<script type="text/template" class="statistics-template">
   <table class="table table-condensed">
     <thead>
       <tr>
@@ -59,52 +58,53 @@
       </tr>
     </thead>
     <tbody>
-      {{#each question_statistics}}
+      <% for (var i = 0; i < question_statistics.length; i++) { %>
       <tr class="row-body question">
         <td>
           <a class="toggle" href="#"><i class="fa fa-chevron-down"></i></a>
           <a class="toggle collapse" href="#"><i class="fa fa-chevron-up"></i></a>
         </td>
-        <td class="question-number">{{question_number}}</td>
+        <td class="question-number"><%= question_statistics[i].question_number %></td>
         <td>-</td>
-        <td>{{mean}}</td>
-        <td>{{median}}</td>
-        <td>{{std_dev}}</td>
-        <td>{{min}}</td>
-        <td>{{max}}</td>
+        <td><%= question_statistics[i].mean %></td>
+        <td><%= question_statistics[i].median %></td>
+        <td><%= question_statistics[i].std_dev %></td>
+        <td><%= question_statistics[i].min %></td>
+        <td><%= question_statistics[i].max %></td>
         
       </tr>
-        {{#each question_part_statistics}}
-        <tr class="row-body question-part" data-question={{question_number}}>
+        <% var question_part_statistics = question_statistics[i].question_part_statistics; %>
+        <% for (var j = 0; j < question_part_statistics.length; j++) { %>
+        <tr class="row-body question-part" data-question=<%= question_part_statistics[j].question_number %>>
           <td></td>
-          <td class="question-number">{{question_number}}</td>
-          <td class="part-number">{{part_number}}</td>
-          <td>{{mean}}</td>
-          <td>{{median}}</td>
-          <td>{{std_dev}}</td>
-          <td>{{min}}</td>
-          <td>{{max}}</td>
+          <td class="question-number"><%= question_part_statistics[j].question_number %></td>
+          <td class="part-number"><%= question_part_statistics[j].part_number %></td>
+          <td><%= question_part_statistics[j].mean %></td>
+          <td><%= question_part_statistics[j].median %></td>
+          <td><%= question_part_statistics[j].std_dev %></td>
+          <td><%= question_part_statistics[j].min %></td>
+          <td><%= question_part_statistics[j].max %></td>
         </tr>
-        {{/each}}
-      {{/each}}
+        <% } %>
+      <% } %>
       <tr class="row-body question selected">
         <td></td>
         <td class="question-number total">Total</td>
         <td>-</td>
-        <td>{{exam_statistics.mean}}</td>
-        <td>{{exam_statistics.median}}</td>
-        <td>{{exam_statistics.std_dev}}</td>
-        <td>{{exam_statistics.min}}</td>
-        <td>{{exam_statistics.max}}</td>
+        <td><%= exam_statistics.mean %></td>
+        <td><%= exam_statistics.median %></td>
+        <td><%= exam_statistics.std_dev %></td>
+        <td><%= exam_statistics.min %></td>
+        <td><%= exam_statistics.max %></td>
       </tr>
     </tbody>
   </table>
 </script>
-{% endverbatim %}
+
 {% endblock %}
 
 {% block js %}
-<script src="/static/js/lib/handlebars.js"></script>
+<script src="/static/js/lib/underscore.min.js"></script>
 <script src="/static/js/lib/chart.js"></script>
 <script src="/static/js/statistics.js"></script>
 {% endblock %}

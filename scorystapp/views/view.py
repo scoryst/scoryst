@@ -3,8 +3,7 @@ from scorystapp import models, decorators
 from scorystapp.views import helpers
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 @decorators.student_required
 def view_exam(request, cur_course_user, exam_answer_id):
   """
@@ -22,8 +21,7 @@ def view_exam(request, cur_course_user, exam_answer_id):
   })
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 @decorators.instructor_or_ta_required
 def preview_exam(request, cur_course_user, exam_answer_id):
   """
@@ -42,8 +40,7 @@ def preview_exam(request, cur_course_user, exam_answer_id):
   })
 
 
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 @decorators.instructor_or_ta_required
 def edit_created_exam(request, cur_course_user, exam_answer_id):
   """
@@ -56,12 +53,9 @@ def edit_created_exam(request, cur_course_user, exam_answer_id):
         (cur_course_user.course.pk, exam.pk))
 
 
-# TODO: As Squishy pointed out, 'save' is counterintuitive since we saved it
-# anyway, change the name.
-@decorators.login_required
-@decorators.valid_course_user_required
+@decorators.access_controlled
 @decorators.instructor_or_ta_required
-def save_created_exam(request, cur_course_user, exam_answer_id):
+def leave_created_exam(request, cur_course_user, exam_answer_id):
   """
   Called when the instructor is done viewing exam preview. Redirects the user. 
   The exam was already saved so we don't need to save it again.

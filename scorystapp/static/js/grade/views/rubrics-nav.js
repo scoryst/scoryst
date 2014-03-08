@@ -3,7 +3,7 @@ var RubricsNavView = IdempotentView.extend({
   /* Key code for keyboard shortcuts. */
   A_KEY_CODE: 65,
 
-  template: Handlebars.compile($('.rubrics-nav-template').html()),
+  template: _.template($('.rubrics-nav-template').html()),
   events: {
     'click .toggle-edit': 'toggleEditing',
     'click .disable-edit': 'disableEditing',

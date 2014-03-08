@@ -11,7 +11,7 @@ $(function() {
   var curPartNum = 0;
 
   var templates = {
-    renderStatisticsTemplate: Handlebars.compile($statisticsTemplate.html())
+    renderStatisticsTemplate: _.template($statisticsTemplate.html())
   };
   
   // Makes an AJAX call to fetch the statistics to be rendered into the table

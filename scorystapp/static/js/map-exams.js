@@ -1,10 +1,15 @@
 $(function() { 
+  var LEFT_ARROW_KEY = 37;
+  var RIGHT_ARROW_KEY = 39;
 
   var examsArray;
   var currentIndex = -1;
   
   var $previousExam = $('.previous-exam');
   var $nextExam = $('.next-exam');
+
+  var $previousPage = $('.previous-page');
+  var $nextPage = $('.next-page');
 
   var imageLoader = new ImageLoader(1, { preloadPage: false }, 
     { preloadStudent: true, prefetchNumber: 4 });
@@ -13,18 +18,6 @@ $(function() {
 
   // Initializes the functionality for typeahead.js
   function initTypeAhead() {
-    // Enables use of handlebars templating engine along with typeahead
-    var T = {};
-    T.compile = function (template) {
-      var compile = Handlebars.compile(template),
-        render = {
-          render: function (ctx) {
-            return compile(ctx);
-          }
-        };
-      return render;
-    };
-
     // Expected format of each element in array from prefetch:
     // {
     //   'name': 'Karanveer Mohan',
@@ -32,22 +25,18 @@ $(function() {
     //   'student_id': 01234567,
     //   'tokens': ['Karanveer', 'Mohan']
     // }
+    var typeaheadTemplate = $('.typeahead-template').html();
     $('.typeahead').typeahead({
       prefetch: {
         url: 'get-all-course-students/',
       },
-      template: [
-        '<p><strong>{{name}}</strong></p>',
-        '<p>{{email}} {{studentId}}</p>',
-        '{{#if mapped}}<p class="error">ALREADY MAPPED</p>{{/if}}'
-      ].join(''),
+      template: _.template(typeaheadTemplate),
       limit: 6,
-      engine: T,
       valueKey: 'name'
-    }).on('typeahead:selected', function (obj, datum) {
+    }).on('typeahead:selected', function (obj, user) {
       // When the user selects an option, call mapExam and pass the data associated
       // with the option selected, which is the same as the prefetched data
-      mapExam(datum);
+      mapExam(user);
     });
   }
 
@@ -124,16 +113,16 @@ $(function() {
     });
   }
 
-  // Maps the current exam being displayed to the student specified by datum
-  function mapExam(datum) {
+  // Maps the current exam being displayed to the student specified by user
+  function mapExam(user) {
     var examAnswerId = examsArray[currentIndex].examAnswerId;
-    var courseUserId = datum['courseUserId'];
+    var courseUserId = user['courseUserId'];
     $.ajax({
       url: 'to/' + courseUserId + '/',
       dataType: 'text'
     }).done(function(data) {
-      datum['mapped']= true;
-      examsArray[currentIndex]['mappedTo'] = datum['name'];
+      user['mapped']= true;
+      examsArray[currentIndex]['mappedTo'] = user['name'];
       displayExamAtOffset(1);
     }).fail(function(request, error) {
       console.log('Error while mapping exams');
@@ -141,11 +130,11 @@ $(function() {
   }
 
   // Implement left and right click. Just changes one page at a time.
-  imageLoader.$previousPage.click(function() {
+  $previousPage.click(function() {
     imageLoader.showPageFromCurrent(-1);
   });
 
-  imageLoader.$nextPage.click(function() {
+  $nextPage.click(function() {
     imageLoader.showPageFromCurrent(+1);
   });
 
@@ -167,14 +156,14 @@ $(function() {
     }
 
     // Left Arrow Key: Advance the exam
-    if (event.keyCode == 37) {
-       imageLoader.$previousPage.click();
+    if (event.keyCode == LEFT_ARROW_KEY) {
+       $previousPage.click();
        return false;
     }
 
     // Right Arrow Key: Go back a page in the exam
-    if (event.keyCode == 39) { 
-       imageLoader.$nextPage.click();
+    if (event.keyCode == RIGHT_ARROW_KEY) { 
+       $nextPage.click();
        return false;
     }
   });  
