@@ -1,3 +1,4 @@
+from scorystapp import forms
 from scorystapp.views import helpers
 from django.core.urlresolvers import reverse_lazy
 from django.conf import settings
@@ -195,6 +196,7 @@ urlpatterns = patterns('',
     'django.contrib.auth.views.password_reset_confirm',
     {
       'template_name': 'reset/password-reset-confirm.epy',
+      'set_password_form': forms.SetPasswordWithMinLengthForm,
       'extra_context': {'title': 'Password Reset'}
     }),
   url(r'^reset/done/$', 'django.contrib.auth.views.password_reset_complete',

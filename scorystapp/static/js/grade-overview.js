@@ -59,7 +59,15 @@ $(function() {
           ' been previously notified will receive an email and be able to view their scores.',
         confirmText: 'Release',
         confirm: function() {
-          window.location.href = curExamId + '/release/';
+          $.ajax({
+            url: curExamId + '/release/'
+          }).done(function() {
+            $('.error').hide();
+            $('.success').fadeIn();
+          }).fail(function() {
+            $('.success').hide();
+            $('.error').fadeIn();
+          });
         }
       });
 

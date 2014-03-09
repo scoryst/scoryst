@@ -1100,6 +1100,10 @@ footer .amp {
   width:300px;
 }
 
+.grade-overview .success, .grade-overview .error {
+  display: none;
+}
+
 /* Exams page */
 .exams .edit {
   margin-right: 10px;

@@ -59,7 +59,8 @@ def change_password(request):
   extra_context = helpers.get_extra_context(request)
   extra_context['title'] = 'Change Password'
   return views.password_change(request, template_name='reset/password-change-form.epy',
-    extra_context=extra_context, post_change_redirect='done')
+    extra_context=extra_context, post_change_redirect='done',
+    password_change_form=forms.PasswordWithMinLengthChangeForm)
 
 
 @decorators.login_required
