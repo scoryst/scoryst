@@ -644,7 +644,7 @@ footer .amp {
 }
 
 .grade .rubrics-nav .custom-points {
-  line-height: 28px;
+  line-height: 26px;
 }
 
 .grade .rubrics-nav .custom-points input, .grade .rubrics-nav .rubric-points,
@@ -652,7 +652,7 @@ footer .amp {
   float: right;
   width: 40px;
   padding: 4px 6px;
-  height: 30px;
+  height: 26px;
   text-align: right;
 }
 
@@ -670,7 +670,7 @@ footer .amp {
 }
 
 .grade .rubrics-nav li {
-  padding: 3px;
+  padding: 2px;
   border: 2px solid transparent;
   margin-left: -25px;
   list-style-position: inside;
@@ -832,8 +832,8 @@ footer .amp {
 
 .grade .exam-nav a {
   display: block;
-  height: 38px;
-  line-height: 36px;
+  height: 28px;
+  line-height: 28px;
   text-decoration: none;
   color: #2c3e50;
   padding-left: 7px;

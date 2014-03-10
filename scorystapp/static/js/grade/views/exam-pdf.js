@@ -77,9 +77,8 @@ var ExamPDFView = IdempotentView.extend({
     var $target = $(event.target);
 
     // getting the X and Y relative to exam PDF
-    var parentOffset = this.$el.children('.exam-canvas').offset();
-    var examPDFX = event.pageX - parentOffset.left;
-    var examPDFY = event.pageY - parentOffset.top;
+    var examPDFX = event.offsetX;
+    var examPDFY = event.offsetY;
 
     // check to ensure that the circle is within the canvas
     var minX = this.CIRCLE_RADIUS;
@@ -257,10 +256,12 @@ var ExamPDFView = IdempotentView.extend({
 
     switch (event.keyCode) {
       case this.LEFT_ARROW_KEY_CODE:
+        event.preventDefault();
         this.goToPreviousPage(null, false);
         break;
 
       case this.RIGHT_ARROW_KEY_CODE:
+        event.preventDefault();
         this.goToNextPage(null, false);
         break;
 
