@@ -1,0 +1,109 @@
+#!/usr/bin/env python
+from django.core import management
+from scorystproject import settings
+import argparse
+
+def main():
+  """ Allows user to interface with Scoryst safe. """
+  # set up django environment
+  management.setup_environ(settings)
+  from safe.safe import Safe
+
+  key_ids = ['8FDC1305']
+  safe = Safe(key_ids)
+
+  safe_parser = argparse.ArgumentParser(prog='safe', description='Access Scoryst safe.')
+  safe_subparsers = safe_parser.add_subparsers()
+
+  # add store subcommand, which allows a user to store a document
+  store_parser = safe_subparsers.add_parser('store', help='store a document into the safe.')
+  store_parser.add_argument('document_name', help='Document name to store.')
+  store_parser.set_defaults(func=handle_store)
+
+  # add read subcommand, which allows a user to read a document
+  read_parser = safe_subparsers.add_parser('read', help='read a document from the safe.')
+  read_parser.add_argument('document_name', help='Document name to read.')
+  read_parser.set_defaults(func=handle_read)
+
+  # add list subcommand, which allows a user to list all stored documents
+  list_parser = safe_subparsers.add_parser('list', help='List documents in safe.')
+  list_parser.set_defaults(func=handle_list)
+
+  # add delete subcommand, which allows a user to delete a document
+  delete_parser = safe_subparsers.add_parser('delete', help='Delete document from safe.')
+  delete_parser.add_argument('document_name', help='Document name to delete.')
+  delete_parser.set_defaults(func=handle_delete)
+
+  args = safe_parser.parse_args()
+  args.func(safe, args)
+
+
+def handle_store(safe, args):
+  """ Allows the user to store a document. """
+  document_text = safe.read(args.document_name)
+
+  if not document_text == None:
+    print 'Document %s has the following contents:' % args.document_name
+    print document_text
+
+    # ask the user to confirm before overwriting
+    confirm = raw_input("Are you sure you'd like to overwrite it? [y/n] ")
+    if not confirm == 'y':
+      print 'Cancelled.'
+      return
+
+  print "Enter the document text you'd like to store:"
+  document_text = ''
+
+  # read user input to get document text
+  while True:
+    try:
+      document_text += raw_input() + '\n'
+    except EOFError:
+      break
+
+  safe.store(args.document_name, document_text)
+  print 'Document %s successfully stored.' % args.document_name
+
+
+def handle_read(safe, args):
+  """ Allows the user to read a document. """
+  document_text = safe.read(args.document_name)
+  if document_text == None:
+    print 'No such document exists.'
+  else:
+    print document_text
+
+
+def handle_list(safe, args):
+  """ Allows the user to list stored documents. """
+  documents = safe.list()
+  if len(documents) > 0:
+    print '\n'.join(safe.list())
+
+
+def handle_delete(safe, args):
+  document_text = safe.read(args.document_name)
+
+  if document_text == None:
+    print 'No such document exists.'
+  else:
+    print 'Document %s has the following contents:' % args.document_name
+    print document_text
+
+    # ask the user to confirm before deleting document
+    confirm = raw_input("Are you sure you'd like to delete it? [y/n] ")
+
+    if confirm == 'y':
+      # confirm document exists again; it may have been deleted while we were
+      # waiting for user input
+      if safe.delete(args.document_name):
+        print 'Document %s successfully deleted.' % args.document_name
+      else:
+        print 'No such document exists.'
+    else:
+      print 'Cancelled.'
+
+
+if __name__ == '__main__':
+  main()
