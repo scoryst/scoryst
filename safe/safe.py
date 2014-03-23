@@ -4,7 +4,7 @@ from boto.s3 import connection as s3
 from django.conf import settings
 
 class Safe(object):
-  def __init__(self, key):
+  def __init__(self):
     """ Creates a Safe that contains locked documents. """
     # set up GPG and S3 interfaces
     self.gpg = gnupg.GPG(use_agent=True)

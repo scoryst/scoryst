@@ -8,9 +8,7 @@ def main():
   # set up django environment
   management.setup_environ(settings)
   from safe.safe import Safe
-
-  key_ids = ['8FDC1305']
-  safe = Safe(key_ids)
+  safe = Safe()
 
   safe_parser = argparse.ArgumentParser(prog='safe', description='Access Scoryst safe.')
   safe_subparsers = safe_parser.add_subparsers()
