@@ -13,15 +13,20 @@ class Safe(object):
     self.bucket = connection.get_bucket(settings.AWS_SAFE_BUCKET_NAME)
 
 
-  def store(self, document_name, document_text):
-    """ Encrypts the given text and stores it in a document with the provided name. """
+  def store(self, document_name, document_text, recipient=None):
+    """
+    Encrypts the given text and stores it in a document with the provided name.
+    Encrypts it for the given recipient. If recipient is not specified, encrypts
+    it for the email specified by settings.GPG_KEY_EMAIL.
+    """
     # encrypt text
     document_text = document_text.strip()
     encrypted_text = self.gpg.encrypt(document_text, settings.GPG_KEY_EMAIL)
+    recipient = recipient if not recipient == None else settings.GPG_KEY_EMAIL
 
     # store in S3
     key = s3.Key(self.bucket)
-    key.key = '%s/%s' % (settings.GPG_KEY_EMAIL, document_name)
+    key.key = '%s/%s' % (recipient, document_name)
     key.set_contents_from_string(str(encrypted_text))
 
 
@@ -36,7 +41,7 @@ class Safe(object):
     except boto.exception.S3ResponseError:
       return None
     else:
-      return self.gpg.decrypt(encrypted_text)
+      return str(self.gpg.decrypt(encrypted_text))
 
 
   def list(self):
@@ -51,10 +56,11 @@ class Safe(object):
     return document_names
 
 
-  def delete(self, document_name):
+  def delete(self, document_name, recipient=None):
     """ Deletes the given locked document. """
+    recipient = recipient if not recipient == None else settings.GPG_KEY_EMAIL
     key = s3.Key(self.bucket)
-    key.key = '%s/%s' % (settings.GPG_KEY_EMAIL, document_name)
+    key.key = '%s/%s' % (recipient, document_name)
 
     try:
       key.delete()
@@ -62,3 +68,34 @@ class Safe(object):
       return False
     else:
       return True
+
+
+  def release(self, document_name, recipient):
+    """
+    Releases the given document to the provided recipient. The recipient should
+    be specified by an email address, and his/her public key should be available in
+    the gpg keychain.
+    """
+    document_text = self.read(document_name)
+
+    # release if we could read the given document
+    if not document_text == None:
+      self.store(document_name, document_text, recipient)
+      return True
+
+    return False
+
+
+  def revoke(self, document_name, recipient):
+    """
+    Revokes access to the given document from the provided recipient. The
+    recipient should be specified by an email address.
+    """
+    document_text = self.read(document_name)
+
+    # revoke if we could read the given document
+    if not document_text == None:
+      self.delete(document_name, recipient)
+      return True
+
+    return False

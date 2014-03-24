@@ -3,6 +3,7 @@ from django.core import management
 from scorystproject import settings
 import argparse
 
+
 def main():
   """ Allows user to interface with Scoryst safe. """
   # set up django environment
@@ -18,19 +19,33 @@ def main():
   store_parser.add_argument('document_name', help='Document name to store.')
   store_parser.set_defaults(func=handle_store)
 
-  # add read subcommand, which allows a user to read a document
-  read_parser = safe_subparsers.add_parser('read', help='read a document from the safe.')
-  read_parser.add_argument('document_name', help='Document name to read.')
-  read_parser.set_defaults(func=handle_read)
+  # add cat subcommand, which allows a user to read a document
+  cat_parser = safe_subparsers.add_parser('cat', help='read a document from the safe.')
+  cat_parser.add_argument('document_name', help='Document name to read.')
+  cat_parser.set_defaults(func=handle_cat)
 
-  # add list subcommand, which allows a user to list all stored documents
-  list_parser = safe_subparsers.add_parser('list', help='List documents in safe.')
-  list_parser.set_defaults(func=handle_list)
+  # add ls subcommand, which allows a user to list all stored documents
+  ls_parser = safe_subparsers.add_parser('ls', help='List documents in safe.')
+  ls_parser.set_defaults(func=handle_ls)
 
-  # add delete subcommand, which allows a user to delete a document
-  delete_parser = safe_subparsers.add_parser('delete', help='Delete document from safe.')
-  delete_parser.add_argument('document_name', help='Document name to delete.')
-  delete_parser.set_defaults(func=handle_delete)
+  # add rm subcommand, which allows a user to delete a document
+  rm_parser = safe_subparsers.add_parser('rm', help='Delete document from safe.')
+  rm_parser.add_argument('document_name', help='Document name to delete.')
+  rm_parser.set_defaults(func=handle_rm)
+
+  # add release subcommand, which allows one user to release a document to another user
+  release_parser = safe_subparsers.add_parser('release',
+    help='Release document to another user.')
+  release_parser.add_argument('document_name', help='Document name to release.')
+  release_parser.add_argument('recipient_email', help='Recipient email to release to.')
+  release_parser.set_defaults(func=handle_release)
+
+  # add revoke subcommand, which allows one user to revoke a document from another user
+  revoke_parser = safe_subparsers.add_parser('revoke',
+    help='Revoke document from another user.')
+  revoke_parser.add_argument('document_name', help='Document name to revoke.')
+  revoke_parser.add_argument('recipient_email', help='Recipient email to revoke from.')
+  revoke_parser.set_defaults(func=handle_revoke)
 
   args = safe_parser.parse_args()
   args.func(safe, args)
@@ -64,7 +79,7 @@ def handle_store(safe, args):
   print 'Document %s successfully stored.' % args.document_name
 
 
-def handle_read(safe, args):
+def handle_cat(safe, args):
   """ Allows the user to read a document. """
   document_text = safe.read(args.document_name)
   if document_text == None:
@@ -73,14 +88,14 @@ def handle_read(safe, args):
     print document_text
 
 
-def handle_list(safe, args):
+def handle_ls(safe, args):
   """ Allows the user to list stored documents. """
   documents = safe.list()
   if len(documents) > 0:
     print '\n'.join(safe.list())
 
 
-def handle_delete(safe, args):
+def handle_rm(safe, args):
   document_text = safe.read(args.document_name)
 
   if document_text == None:
@@ -101,6 +116,28 @@ def handle_delete(safe, args):
         print 'No such document exists.'
     else:
       print 'Cancelled.'
+
+
+def handle_release(safe, args):
+  """ Allows the user to release a document to a recipient. """
+  success = safe.release(args.document_name, args.recipient_email)
+  if success:
+    print ('Successfully released document %s to %s.' %
+      (args.document_name, args.recipient_email))
+  else:
+    print ('Failed to release document %s; are you sure you can read it?' %
+      args.document_name)
+
+
+def handle_revoke(safe, args):
+  """ Allows the user to revoke a document from a recipient. """
+  success = safe.revoke(args.document_name, args.recipient_email)
+  if success:
+    print ('Successfully revoked document %s from %s.' %
+      (args.document_name, args.recipient_email))
+  else:
+    print ('Failed to revoke document %s; are you sure it exists?' %
+      args.document_name)
 
 
 if __name__ == '__main__':
