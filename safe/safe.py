@@ -3,6 +3,7 @@ import boto
 from boto.s3 import connection as s3
 from django.conf import settings
 
+
 class Safe(object):
   def __init__(self):
     """ Creates a Safe that contains locked documents. """
@@ -21,8 +22,8 @@ class Safe(object):
     """
     # encrypt text
     document_text = document_text.strip()
-    encrypted_text = self.gpg.encrypt(document_text, settings.GPG_KEY_EMAIL)
     recipient = recipient if not recipient == None else settings.GPG_KEY_EMAIL
+    encrypted_text = self.gpg.encrypt(document_text, recipient)
 
     # store in S3
     key = s3.Key(self.bucket)
