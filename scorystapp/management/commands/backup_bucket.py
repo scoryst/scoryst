@@ -25,7 +25,7 @@ class Command(BaseCommand):
       "--create",
       action="store_true",
       help="Create the destination bucket",
-    ),
+    )
   )
 
   def handle(self, *args, **options):
@@ -41,21 +41,13 @@ class Command(BaseCommand):
     self.copy_bucket(source_bucket, destination_bucket, conn)
 
 
-  def copy_bucket(self, source_bucket, destination_bucket, conn, maximum_keys = 100):
+  def copy_bucket(self, source_bucket, destination_bucket, conn, maximum_keys=100):
     """ Copies the bucket. """
-    result_marker = ''
-    while True:
-      keys = source_bucket.get_all_keys(max_keys=maximum_keys, marker=result_marker)
+    for key in source_bucket.list():
+      print 'Copying %s from %s to %s' % (key.key, source_bucket.name, destination_bucket.name)
+      destination_bucket.copy_key(key.key, source_bucket.name, key.key)
 
-      for key in keys:
-        print 'Copying %s from %s to %s' % (key.key, source_bucket.name, destination_bucket.name)
-        destination_bucket.copy_key(key.key, source_bucket.name, key.key)
-
-      if len(keys) < maximum_keys:
-        print 'Done backing up.'
-        break
-
-      result_marker = keys[maximum_keys - 1].key
+    print 'Done backing up.'
 
 
   def get_buckets(self, conn, source, destination, create):
@@ -79,6 +71,7 @@ class Command(BaseCommand):
     else:
       try:
         conn.create_bucket(destination)
+        print 'created bucket', destination
         destination_bucket = conn.get_bucket(destination)
       except:
         print 'Somewhere in the world, this bucket already exists. Better name please?'

@@ -24,16 +24,16 @@ class Command(BaseCommand):
       return
 
     print 'Getting list of keys used by database'
-    keys_list = self.get_all_keys_in_use()
+    local_keys = self.get_all_keys_in_use()
 
     print 'Getting all keys in S3'
-    keys = bucket.list()
+    s3_keys = bucket.list()
 
     print 'Starting deletion'
     useless_key = 0
     total_keys = 0
-    for key in keys:
-      if key.name not in keys_list:
+    for key in s3_keys:
+      if key.name not in local_keys:
         # print 'Useless key ', key
         # key.delete()
         useless_key += 1
@@ -50,29 +50,29 @@ class Command(BaseCommand):
     Get all the keys that are associated with some model in the database as a
     jpeg or pdf
     """
-    keys_list = []
+    keys = []
 
     # Get all keys associated with ExamAnswerPage page_jpeg and page_jpeg_large
     exam_answer_pages = models.ExamAnswerPage.objects.all()
     for exam_answer_page in exam_answer_pages:
-      keys_list.append(exam_answer_page.page_jpeg.name)
-      keys_list.append(exam_answer_page.page_jpeg_large.name)
+      keys.append(exam_answer_page.page_jpeg.name)
+      keys.append(exam_answer_page.page_jpeg_large.name)
 
     # Get all keys associated with ExamPage page_jpeg and page_jpeg_large
     exam_pages = models.ExamPage.objects.all()
     for exam_page in exam_pages:
-      keys_list.append(exam_page.page_jpeg.name)
-      keys_list.append(exam_page.page_jpeg_large.name)
+      keys.append(exam_page.page_jpeg.name)
+      keys.append(exam_page.page_jpeg_large.name)
 
     # Get all keys associated with Exam exam_pdf and solutions_pdf
     exams = models.Exam.objects.all()
     for exam in exams:
-      keys_list.append(exam.exam_pdf.name)
-      keys_list.append(exam.solutions_pdf.name)
+      keys.append(exam.exam_pdf.name)
+      keys.append(exam.solutions_pdf.name)
 
     # Get all keys associated with ExamAnswer pdf
     exam_answers = models.ExamAnswer.objects.all()
     for exam_answer in exam_answers:
-      keys_list.append(exam_answer.pdf.name)
+      keys.append(exam_answer.pdf.name)
 
-    return set(keys_list)
+    return set(keys)
