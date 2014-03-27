@@ -30,19 +30,9 @@
           <span class="current-page-number">1</span>
         </p>
       </div>
-      <div class="col-xs-8 exam">
 
-        <div class="previous-page">
-          <i class="fa fa-angle-double-left"></i>
-        </div>
+      {% include "exam-canvas.epy" %}
 
-        <div class="exam-canvas"></div>
-
-        <div class="next-page">
-          <i class="fa fa-angle-double-right"></i>
-        </div>
-
-      </div>
     </div>
   </div>
 
@@ -61,9 +51,13 @@
 {% endblock %}
 
 {% block js %}
-  <script src="/static/js/lib/underscore.min.js"></script>
   <script src="/static/js/lib/typeahead.min.js"></script>
-  <script src="/static/js/image-loader.js"></script>
+  <script src="/static/js/lib/underscore.min.js"></script>
+  <script src="/static/js/lib/backbone.min.js"></script>
+  <script src="/static/js/idempotent.js"></script>
+  <script src="/static/js/zoom-lens.js"></script>
+  <script src="/static/js/exam-canvas-base.js"></script>
+  <script src="/static/js/exam-canvas.js"></script>
   <script src="/static/js/map-question-parts.js"></script>
 {% endblock %}
 

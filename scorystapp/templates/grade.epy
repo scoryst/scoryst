@@ -143,17 +143,8 @@
       {% endif %}
     </div>
 
-    <div class="col-xs-8 exam">
-      <div class="previous-page">
-        <i class="fa fa-angle-double-left"></i>
-      </div>
+    {% include "exam-canvas.epy" %}
 
-      <div class="exam-canvas"></div>
-
-      <div class="next-page">
-        <i class="fa fa-angle-double-right"></i>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -314,17 +305,8 @@
   </div>
 </script>
 
-<script type="text/template" class="zoom-toggle-template">
-  <span>
-    <button type="button" class="btn btn-sm btn-link enable-zoom">
-      Enable Zoom <i class="fa fa-search-plus"></i>
-    </button>
-    <button type="button" class="btn btn-sm btn-link disable-zoom">
-      Disable Zoom <i class="fa fa-search-minus"></i>
-    </button>
-  </span>
-</script>
 {% endblock %}
+
 
 {% block js %}
 <script src="/static/js/lib/underscore.min.js"></script>
@@ -335,8 +317,9 @@
 <script src="/static/js/lib/jquery-ui.custom.min.js"></script>
 
 <script src="/static/js/popover-confirm.js"></script>
-<script src="/static/js/image-loader.js"></script>
 <script src="/static/js/idempotent.js"></script>
+<script src="/static/js/exam-canvas-base.js"></script>
+<script src="/static/js/zoom-lens.js"></script>
 
 <script src="/static/js/grade/mediator.js"></script>
 <script src="/static/js/grade/models/utils.js"></script>
@@ -352,6 +335,7 @@
 <script src="/static/js/grade/views/rubrics-nav.js"></script>
 <script src="/static/js/grade/views/exam-nav.js"></script>
 <script src="/static/js/grade/views/annotation.js"></script>
+<script src="/static/js/grade/views/exam-canvas.js"></script>
 <script src="/static/js/grade/views/exam-pdf.js"></script>
 <script src="/static/js/grade/views/student-nav.js"></script>
 <script src="/static/js/grade/views/main.js"></script>

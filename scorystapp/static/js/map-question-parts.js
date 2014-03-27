@@ -1,9 +1,6 @@
 $(function() { 
   var LEFT_ARROW_KEY = 37;
   var RIGHT_ARROW_KEY = 39;
-
-  var imageLoader = new ImageLoader(1, { preloadPage: true, prefetchNumber: 4 }, 
-    { preloadStudent: false });
   
   var $optionsTemplate = $('.options-template');
   var optionsTemplate = _.template($optionsTemplate.html());
@@ -16,6 +13,13 @@ $(function() {
   
   var $previousPage = $('.previous-page');
   var $nextPage = $('.next-page');
+
+  var examCanvasView = new ExamCanvasView({
+    el: '.exam',
+    preloadNumber: 2,
+    preloadOtherStudentExams: false,
+    preloadCurExam: true
+  });
 
   initTypeAhead();
   getAllQuestionParts();
@@ -132,7 +136,7 @@ $(function() {
         return false;
       }
 
-      if (parseInt(page) <= 0 || parseInt(page) > imageLoader.numpages) {
+      if (parseInt(page) <= 0 || parseInt(page) > examCanvasView.totalNumPags()) {
         return false;
       }
     }
@@ -141,40 +145,7 @@ $(function() {
 
   // Makes the back button work by handling the popState event.
   $(window).bind('popstate', function() {
-    imageLoader.showPage(imageLoader.curPageNum);
-    $currentPageNum.html(imageLoader.curPageNum);
-  });
-
-  // Implement left and right click. Just changes one page at a time.
-  $previousPage.click(function() {
-    imageLoader.showPageFromCurrent(-1);
-    $currentPageNum.html(imageLoader.curPageNum);
-  });
-
-  $nextPage.click(function() {
-    imageLoader.showPageFromCurrent(+1);
-    $currentPageNum.html(imageLoader.curPageNum);
-  });
-
-
-  $(document).keydown(function(event) {
-    var $target = $(event.target);
-    // If the focus is in an input box or text area, we don't want the page
-    // to be changing
-    if ($target.is('input') || $target.is('textarea')) {
-      return;
-    }
-
-    // Left Arrow Key: Advance the exam
-    if (event.keyCode == LEFT_ARROW_KEY) {
-       $previousPage.click();
-       return false;
-    }
-
-    // Right Arrow Key: Go back a page in the exam
-    if (event.keyCode == RIGHT_ARROW_KEY) { 
-       $nextPage.click();
-       return false;
-    }
+    examCanvasView.showPage();
+    $currentPageNum.html(examCanvasView.getCurPageNum());
   });  
 });

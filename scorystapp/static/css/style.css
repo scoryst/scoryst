@@ -289,12 +289,11 @@ footer .amp {
 }
 
 .exam-canvas .zoom-lens img {
-  /* TODO: fix this hardcoded value. */
-  width: 1700px;
+  width: auto;
   position: absolute;
 }
 
-.exam-canvas img.zoom-enabled {
+.exam-canvas.zoom-enabled {
   cursor: crosshair;
 }
 

@@ -167,30 +167,6 @@ def _create_preview_exam_answer(cur_course_user, exam):
 
 @decorators.access_controlled
 @decorators.instructor_or_ta_required
-def get_empty_exam_jpeg(request, cur_course_user, exam_id, page_number):
-  """ Returns the URL where the jpeg of the empty uploaded exam can be found """
-  exam_page = shortcuts.get_object_or_404(models.ExamPage, exam_id=exam_id, page_number=page_number)
-  return shortcuts.redirect(exam_page.page_jpeg.url)
-
-
-@decorators.access_controlled
-@decorators.instructor_or_ta_required
-def get_empty_exam_jpeg_large(request, cur_course_user, exam_id, page_number):
-  """ Returns the URL where the large jpeg of the empty uploaded exam can be found """
-  exam_page = shortcuts.get_object_or_404(models.ExamPage, exam_id=exam_id, page_number=page_number)
-  return shortcuts.redirect(exam_page.page_jpeg_large.url)
-
-
-@decorators.access_controlled
-@decorators.instructor_or_ta_required
-def get_empty_exam_page_count(request, cur_course_user, exam_id):
-  """ Returns the number of pages in the exam """
-  exam = shortcuts.get_object_or_404(models.Exam, pk=exam_id)
-  return http.HttpResponse(exam.page_count)
-
-
-@decorators.access_controlled
-@decorators.instructor_or_ta_required
 def get_saved_exam(request, cur_course_user, exam_id):
   """
   Needed to edit exam rubrics. Returns a JSON to the create-exam.js ajax call

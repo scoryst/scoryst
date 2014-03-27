@@ -1,0 +1,24 @@
+<div class="col-xs-8 exam">
+  <div class="previous-page">
+    <i class="fa fa-angle-double-left"></i>
+  </div>
+
+  <div class="exam-canvas">
+    <span>
+      <button type="button" class="btn btn-sm btn-link enable-zoom">
+        Enable Zoom <i class="fa fa-search-plus"></i>
+      </button>
+      <button type="button" class="btn btn-sm btn-link disable-zoom">
+        Disable Zoom <i class="fa fa-search-minus"></i>
+      </button>
+    </span>
+    <img class="exam-image" />
+    <div class="zoom-lens">
+      <img />
+    </div>
+  </div>
+
+  <div class="next-page">
+    <i class="fa fa-angle-double-right"></i>
+  </div>
+</div>

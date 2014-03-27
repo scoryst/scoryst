@@ -1,5 +1,4 @@
 $(function() {
-
   // DOM elements
   var $addQuestion = $('.add-question');
   var $questionList = $('.question-list');
@@ -20,7 +19,13 @@ $(function() {
   };
 
   var lastQuestionNum = 0;
-  var imageLoader = new ImageLoader(1, { preloadPage: true }, { preloadStudent: false });
+
+  new ExamCanvasView({
+    el: '.exam',
+    preloadNumber: 2,
+    preloadOtherStudentExams: false,
+    preloadCurExam: true
+  });
 
   // Used to recreate the UI, either after deletion, or during editing
   var savedQuestions;
@@ -310,36 +315,6 @@ $(function() {
       $awardedOrDeducted.html('deducted');      
     } else {
       $awardedOrDeducted.html('awarded');
-    }
-  });
-
-  // Implement left and right click. Just changes one page at a time.
-  imageLoader.$previousPage.click(function(){
-    imageLoader.showPageFromCurrent(-1);
-  });
-
-  imageLoader.$nextPage.click(function(){
-    imageLoader.showPageFromCurrent(+1);
-  });
-
-  $(document).keydown(function(event) {
-    var $target = $(event.target);
-    // If the focus is in an input box or text area, we don't want the page
-    // to be changing
-    if ($target.is('input') || $target.is('textarea')) {
-      return;
-    }
-
-    // Left Arrow Key: Advance the exam
-    if (event.keyCode == 37) {
-       imageLoader.$previousPage.click();
-       return false;
-    }
-
-    // Right Arrow Key: Go back a page in the exam
-    if (event.keyCode == 39) { 
-       imageLoader.$nextPage.click();
-       return false;
     }
   });
 

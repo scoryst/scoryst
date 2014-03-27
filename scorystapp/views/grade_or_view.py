@@ -6,34 +6,6 @@ from rest_framework import decorators as rest_decorators, response
 
 @decorators.access_controlled
 @decorators.student_required
-def get_exam_jpeg(request, cur_course_user, exam_answer_id, page_number):
-  """ Returns the URL where the jpeg of the empty uploaded exam can be found """
-  return _get_exam_jpeg(request, cur_course_user, exam_answer_id, page_number)
-
-
-def _get_exam_jpeg(request, cur_course_user, exam_answer_id, page_number):
-  """ Returns the URL where the jpeg of the empty uploaded exam can be found """
-  exam_page = shortcuts.get_object_or_404(models.ExamAnswerPage, exam_answer_id=exam_answer_id,
-    page_number=page_number)
-  return shortcuts.redirect(exam_page.page_jpeg.url)
-
-
-@decorators.access_controlled
-@decorators.student_required
-def get_exam_jpeg_large(request, cur_course_user, exam_answer_id, page_number):
-  """ Returns the URL where the large jpeg of the empty uploaded exam can be found """
-  return _get_exam_jpeg_large(request, cur_course_user, exam_answer_id, page_number)
-
-
-def _get_exam_jpeg_large(request, cur_course_user, exam_answer_id, page_number):
-  """ Returns the URL where the jpeg of the empty uploaded exam can be found """
-  exam_page = shortcuts.get_object_or_404(models.ExamAnswerPage, exam_answer_id=exam_answer_id,
-    page_number=page_number)
-  return shortcuts.redirect(exam_page.page_jpeg_large.url)
-
-
-@decorators.access_controlled
-@decorators.student_required
 def get_exam_solutions_pdf(request, cur_course_user, exam_answer_id):
   exam_answer = shortcuts.get_object_or_404(models.ExamAnswer, pk=exam_answer_id)
   return shortcuts.redirect(exam_answer.exam.solutions_pdf.url)
@@ -44,14 +16,6 @@ def get_exam_solutions_pdf(request, cur_course_user, exam_answer_id):
 def get_exam_pdf(request, cur_course_user, exam_answer_id):
   exam_answer = shortcuts.get_object_or_404(models.ExamAnswer, pk=exam_answer_id)
   return shortcuts.redirect(exam_answer.pdf.url)
-
-
-@decorators.access_controlled
-@decorators.student_required
-def get_exam_page_count(request, cur_course_user, exam_answer_id):
-  """ Returns the number of pages in the exam_answer """
-  exam_answer = shortcuts.get_object_or_404(models.ExamAnswer, pk=exam_answer_id)
-  return http.HttpResponse(exam_answer.page_count)
 
 
 # TODO: confirm security is OK for the API methods below

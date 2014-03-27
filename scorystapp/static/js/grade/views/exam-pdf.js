@@ -1,11 +1,5 @@
 // TODO: browserify
 var ExamPDFView = IdempotentView.extend({
-  /* Key codes for keyboard shorcuts. */
-  LEFT_ARROW_KEY_CODE: 37,
-  RIGHT_ARROW_KEY_CODE: 39,
-  LEFT_BRACKET_KEY_CODE: 219,
-  RIGHT_BRACKET_KEY_CODE: 221,
-
   CIRCLE_RADIUS: 10,  // specified in style.css as radius of annotation
 
   events: {
@@ -18,40 +12,28 @@ var ExamPDFView = IdempotentView.extend({
   initialize: function(options) {
     this.constructor.__super__.initialize.apply(this, arguments);
 
-    // if there's a next student button on this page, we should preload
-    // the next/previous student
-    var shouldPreloadStudent = false;
-    if ($('.next-student').length > 0) {
-      shouldPreloadStudent = true;
-    }
-
     this.questionPartAnswers = options.questionPartAnswers;
-    this.imageLoader = new ImageLoader(null, { preloadPage: true },
-      { preloadStudent: shouldPreloadStudent, useQuestionPartNum: true });
 
-    this.setActiveQuestionPartAnswer(this.model, 0);
-    this.addRemoteEventListeners();
-  },
+    this.examCanvasView = new ExamCanvasView({
+      questionPartAnswer: this.model,
+      questionPartAnswers: this.questionPartAnswers,
+      el: '.exam'
+    });
+    this.registerSubview(this.examCanvasView);
+    this.listenTo(this.examCanvasView, 'changeExamPage', this.changeExamPage);
 
-  addRemoteEventListeners: function() {
-    // mediator events
-    var self = this;
-    this.listenTo(Mediator, 'changeQuestionPartAnswer',
-      function(questionPartAnswer, pageIndex) {
-        pageIndex = pageIndex || 0;
-        self.setActiveQuestionPartAnswer(questionPartAnswer, pageIndex);
-      });
-
-    // events from other elements
-    this.listenToDOM($(window), 'keydown', this.handleShortcuts);
+    this.annotationViews = [];
+    this.renderAnnotations();
   },
 
   renderAnnotations: function() {
     // before rendering, remove all the old views.
-    this.deregisterSubview();
-
-    var curPageNum = this.curPageNum;
     var self = this;
+    this.annotationViews.forEach(function(annotationView) {
+      self.deregisterSubview(annotationView);
+    });
+
+    var curPageNum = this.examCanvasView.getCurPageNum();
     this.annotationViews = [];
     this.fetchAnnotations(this.model, curPageNum, function(annotations) {
       self.annotations = annotations;
@@ -103,7 +85,7 @@ var ExamPDFView = IdempotentView.extend({
 
     var annotation = new AnnotationModel({
       question_part_answer: this.model.id,
-      exam_page_number: this.curPageNum,
+      exam_page_number: this.examCanvasView.getCurPageNum(),
       offset_left: examPDFX - this.CIRCLE_RADIUS,
       offset_top: examPDFY - this.CIRCLE_RADIUS
     });
@@ -136,142 +118,8 @@ var ExamPDFView = IdempotentView.extend({
     });
   },
 
-  goToPreviousPage: function(event, skipCurrentPart) {
-    // display the previous page in the current part if it exists
-    if (this.activePageIndex > 0 && !skipCurrentPart) {
-      this.setActiveQuestionPartAnswer(this.model, this.activePageIndex - 1);
-      return;
-    }
-
-    // otherwise, look for the previous part:
-    var curQuestionPart = this.model.get('question_part');
-    var previousQuestionPartAnswer;
-
-    if (curQuestionPart.part_number > 1) {
-      // find the previous part in the current question
-      previousQuestionPartAnswer = this.questionPartAnswers.filter(function(questionPartAnswer) {
-        var questionPart = questionPartAnswer.get('question_part');
-        return questionPart.question_number === curQuestionPart.question_number &&
-          questionPart.part_number === curQuestionPart.part_number - 1;
-      });
-
-      previousQuestionPartAnswer = previousQuestionPartAnswer[0];
-    } else {
-      // if there is no previous part, find the last part in the previous question
-      previousQuestionPartAnswer = this.questionPartAnswers.filter(function(questionPartAnswer) {
-        var questionPart = questionPartAnswer.get('question_part');
-        return questionPart.question_number === curQuestionPart.question_number - 1;
-      });
-
-      if (previousQuestionPartAnswer.length > 0) {
-        // narrow down to last part
-        previousQuestionPartAnswer = _.max(previousQuestionPartAnswer, function(questionPartAnswer) {
-          return questionPartAnswer.get('question_part').part_number;
-        });
-      } else {
-        // no previous question
-        previousQuestionPartAnswer = null;
-      }
-    }
-
-    if (previousQuestionPartAnswer) {
-      Mediator.trigger('changeQuestionPartAnswer', previousQuestionPartAnswer, -1);
-    } else {
-      // if that didn't work, there is no previous part, so do nothing
-    }
-  },
-
-  goToNextPage: function(event, skipCurrentPart) {
-    // display the next page in the current part if it exists
-    if (this.activePageIndex < this.activeQuestionPartAnswerPages.length - 1 &&
-        !skipCurrentPart) {
-      this.setActiveQuestionPartAnswer(this.model, this.activePageIndex + 1);
-      return;
-    }
-
-    // otherwise, look for the next part:
-    var curQuestionPart = this.model.get('question_part');
-
-    // find the next part in the current question
-    var nextQuestionPartAnswer = this.questionPartAnswers.filter(function(questionPartAnswer) {
-      var questionPart = questionPartAnswer.get('question_part');
-      return questionPart.question_number === curQuestionPart.question_number &&
-        questionPart.part_number === curQuestionPart.part_number + 1;
-    });
-
-    nextQuestionPartAnswer = nextQuestionPartAnswer[0];
-
-    // if that didn't work, find the next question
-    if (!nextQuestionPartAnswer) {
-      nextQuestionPartAnswer = this.questionPartAnswers.filter(function(questionPartAnswer) {
-        var questionPart = questionPartAnswer.get('question_part');
-        return questionPart.question_number === curQuestionPart.question_number + 1 &&
-          questionPart.part_number === 1;
-      });
-
-      nextQuestionPartAnswer = nextQuestionPartAnswer[0];
-    }
-
-    if (nextQuestionPartAnswer) {
-      Mediator.trigger('changeQuestionPartAnswer', nextQuestionPartAnswer, 0);
-    } else {
-      // if that didn't work, there is no next part, so do nothing
-    }
-  },
-
-  setActiveQuestionPartAnswer: function(questionPartAnswer, pageIndex) {
-    var questionPart = questionPartAnswer.get('question_part');
-
-    // set instance variables associated with the active question part
+  changeExamPage: function(curPageNum, questionPartAnswer) {
     this.model = questionPartAnswer;
-
-    // TODO: make pages a derived property
-    this.activeQuestionPartAnswerPages = questionPartAnswer.get('pages').split(',');
-    this.activeQuestionPartAnswerPages = this.activeQuestionPartAnswerPages.map(function(page) {
-      return parseInt(page, 10);
-    });
-
-    // allow pythonic negative indexes for ease of use
-    if (pageIndex < 0) {
-      this.activePageIndex = this.activeQuestionPartAnswerPages.length + pageIndex;
-    } else {
-      this.activePageIndex = pageIndex;
-    }
-
-    // update displayed page
-    var page = this.activeQuestionPartAnswerPages[this.activePageIndex];
-    this.curPageNum = page;  // keep track of curPageNum for annotations.
-    this.imageLoader.showPage(page, questionPart.question_number,
-      questionPart.part_number);
-
     this.renderAnnotations();
-  },
-
-  handleShortcuts: function(event) {
-    // ignore keys entered in an input/textarea
-    var $target = $(event.target);
-    if ($target.is('input') || $target.is('textarea')) {
-      return;
-    }
-
-    switch (event.keyCode) {
-      case this.LEFT_ARROW_KEY_CODE:
-        event.preventDefault();
-        this.goToPreviousPage(null, false);
-        break;
-
-      case this.RIGHT_ARROW_KEY_CODE:
-        event.preventDefault();
-        this.goToNextPage(null, false);
-        break;
-
-      case this.LEFT_BRACKET_KEY_CODE:
-        this.goToPreviousPage(null, true);
-        break;
-
-      case this.RIGHT_BRACKET_KEY_CODE:
-        this.goToNextPage(null, true);
-        break;
-    }
   }
 });

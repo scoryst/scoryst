@@ -55,17 +55,8 @@
         <a href="#" class="btn btn-success done-rubric">Save Exam</a>
       </div>
 
-      <div class="col-xs-8 exam">
-        <div class="previous-page">
-          <i class="fa fa-angle-double-left"></i>
-        </div>
+      {% include "exam-canvas.epy" %}
 
-        <div class="exam-canvas"></div>
-
-        <div class="next-page">
-          <i class="fa fa-angle-double-right"></i>
-        </div>
-      </div>
     </div>
     <form method="post">
       {% csrf_token %}
@@ -175,10 +166,15 @@
 {% endblock %}
 
 {% block js %}
-  <script src="/static/js/lib/underscore.min.js"></script>
-  <script src="/static/js/image-loader.js"></script>
   <script src="/static/js/lib/tooltip.js"></script>
   <script src="/static/js/lib/popover.js"></script>
+  <script src="/static/js/lib/underscore.min.js"></script>
+  <script src="/static/js/lib/backbone.min.js"></script>
+  <script src="/static/js/idempotent.js"></script>
+  <script src="/static/js/zoom-lens.js"></script>
+  <script src="/static/js/exam-canvas-base.js"></script>
+  <script src="/static/js/exam-canvas.js"></script>
+
   <script src="/static/js/create-exam.js"></script>
   <script src="/static/js/create-exam-validator.js"></script>
 {% endblock %}

@@ -5,16 +5,23 @@ $(function() {
   var examsArray;
   var currentIndex = -1;
   
-  var $previousExam = $('.previous-exam');
-  var $nextExam = $('.next-exam');
+  var examCanvasView = new ExamCanvasView({
+    el: '.exam',
+    preloadNumber: 2,
+    preloadOtherStudentExams: true,
+    preloadCurExam: false
+  });
 
-  var $previousPage = $('.previous-page');
-  var $nextPage = $('.next-page');
-
-  var imageLoader = new ImageLoader(1, { preloadPage: false }, 
-    { preloadStudent: true, prefetchNumber: 4 });
   initTypeAhead();
   getAllExams();
+
+  $('.previous-exam').click(function() {
+    displayExamAtOffset(-1);
+  });
+
+  $('.next-exam').click(function() {
+    displayExamAtOffset(1);
+  });
 
   // Initializes the functionality for typeahead.js
   function initTypeAhead() {
@@ -88,7 +95,7 @@ $(function() {
   // Display the exam corresponding to the URL being shown
   function displayExam() {
     // The URL has changed, so image loader will show the new exam
-    imageLoader.showPage(imageLoader.curPageNum);
+    examCanvasView.showPage();
 
     // This image is already mapped to a student, so show the student name
     if (examsArray[currentIndex]['mappedTo']) {
@@ -129,42 +136,4 @@ $(function() {
     });
   }
 
-  // Implement left and right click. Just changes one page at a time.
-  $previousPage.click(function() {
-    imageLoader.showPageFromCurrent(-1);
-  });
-
-  $nextPage.click(function() {
-    imageLoader.showPageFromCurrent(+1);
-  });
-
-  // Previous and next student exam
-  $previousExam.click(function() {
-    displayExamAtOffset(-1);
-  });
-
-  $nextExam.click(function() {
-    displayExamAtOffset(1);
-  });
-
-  $(document).keydown(function(event) {
-    var $target = $(event.target);
-    // If the focus is in an input box or text area, we don't want the page
-    // to be changing
-    if ($target.is('input') || $target.is('textarea')) {
-      return;
-    }
-
-    // Left Arrow Key: Advance the exam
-    if (event.keyCode == LEFT_ARROW_KEY) {
-       $previousPage.click();
-       return false;
-    }
-
-    // Right Arrow Key: Go back a page in the exam
-    if (event.keyCode == RIGHT_ARROW_KEY) { 
-       $nextPage.click();
-       return false;
-    }
-  });  
 });

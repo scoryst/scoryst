@@ -22,19 +22,9 @@
         <input class="typeahead" type="text" placeholder="Student name" autocomplete="off" />
 
       </div>
-      <div class="col-xs-8 exam">
-        
-        <div class="previous-page">
-          <i class="fa fa-angle-double-left"></i>
-        </div>
 
-        <div class="exam-canvas"></div>
+      {% include "exam-canvas.epy" %}
 
-        <div class="next-page">
-          <i class="fa fa-angle-double-right"></i>
-        </div>
-
-      </div>
     </div>
   </div>
 
@@ -57,9 +47,14 @@
 {% endblock %}
 
 {% block js %}
-  <script src="/static/js/lib/underscore.min.js"></script>
   <script src="/static/js/lib/typeahead.min.js"></script>
-  <script src="/static/js/image-loader.js"></script>
+  <script src="/static/js/lib/underscore.min.js"></script>
+  <script src="/static/js/lib/backbone.min.js"></script>
+  <script src="/static/js/lib/underscore.min.js"></script>
+  <script src="/static/js/idempotent.js"></script>
+  <script src="/static/js/zoom-lens.js"></script>
+  <script src="/static/js/exam-canvas-base.js"></script>
+  <script src="/static/js/exam-canvas.js"></script>
   <script src="/static/js/map-exams.js"></script>
 {% endblock %}
 

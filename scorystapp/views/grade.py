@@ -1,6 +1,6 @@
 from django import shortcuts, http
 from scorystapp import models, forms, decorators, serializers
-from scorystapp.views import helpers, grade_or_view
+from scorystapp.views import helpers
 from rest_framework import decorators as rest_decorators, response
 
 
@@ -29,7 +29,7 @@ def get_previous_student(request, cur_course_user, exam_answer_id):
   If there is no previous student, the same student is returned.
   """
   cur_exam_answer = shortcuts.get_object_or_404(models.ExamAnswer, pk=exam_answer_id)
-  previous_exam_answer = _get_offset_student_exam(exam_answer_id, -1)
+  previous_exam_answer = get_offset_student_exam(exam_answer_id, -1)
 
   return response.Response({
     'student_path': '/course/%d/grade/%d/' % (cur_course_user.course.pk,
@@ -48,7 +48,7 @@ def get_next_student(request, cur_course_user, exam_answer_id):
   If there is no next student, the same student is returned.
   """
   cur_exam_answer = shortcuts.get_object_or_404(models.ExamAnswer, pk=exam_answer_id)
-  next_exam_answer = _get_offset_student_exam(exam_answer_id, 1)
+  next_exam_answer = get_offset_student_exam(exam_answer_id, 1)
 
   return response.Response({
     'student_path': '/course/%d/grade/%d/' % (cur_course_user.course.pk,
@@ -57,7 +57,7 @@ def get_next_student(request, cur_course_user, exam_answer_id):
   })
 
 
-def _get_offset_student_exam(exam_answer_id, offset):
+def get_offset_student_exam(exam_answer_id, offset):
   """
   Gets the exam for the student present at 'offset' from the current student.
   If there is no student at that offset, the student at one of the bounds (0 or last index)
@@ -91,26 +91,3 @@ def _get_offset_student_exam(exam_answer_id, offset):
   # Get the exam answer correspodning to the index
   next_exam_answer = exam_answers[next_index]
   return next_exam_answer
-
-
-@decorators.access_controlled
-@decorators.instructor_or_ta_required
-def get_offset_student_jpeg(request, cur_course_user, exam_answer_id, offset, question_number, part_number):
-  """
-  Gets the jpeg corresponding to question_number and part_number for the student
-  present at 'offset' from the current student.
-  If there is no student at that offset, the student at one of the bounds (0 or last index)
-  is returned.
-  """
-  # Ensure the exam_answer_id exists
-  cur_exam_answer = shortcuts.get_object_or_404(models.ExamAnswer, pk=exam_answer_id)
-
-  next_exam_answer = _get_offset_student_exam(exam_answer_id, offset)
-  # Get the question_part_answer to find which page question_number and part_number lie on
-  question_part = shortcuts.get_object_or_404(models.QuestionPart, exam=next_exam_answer.exam,
-    question_number=question_number,part_number=part_number)
-  question_part_answer = shortcuts.get_object_or_404(models.QuestionPartAnswer,
-    exam_answer=next_exam_answer, question_part=question_part)
-
-  return grade_or_view._get_exam_jpeg(request, cur_course_user, next_exam_answer.pk, 
-    int(question_part_answer.pages.split(',')[0]))
