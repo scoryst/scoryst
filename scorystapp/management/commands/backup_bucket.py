@@ -3,6 +3,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 from optparse import make_option
 from scorystapp import models
+import boto
 
 
 class Command(BaseCommand):
@@ -56,7 +57,7 @@ class Command(BaseCommand):
         conn.create_bucket(destination)
         print 'Created bucket %s.' % destination
         destination_bucket = conn.get_bucket(destination)
-      except S3CreateError:
+      except boto.exception.S3CreateError:
         print 'Somewhere in the world, this bucket already exists. Better name please?'
     elif not destination_bucket:
       print 'Destination bucket does not exist.'
