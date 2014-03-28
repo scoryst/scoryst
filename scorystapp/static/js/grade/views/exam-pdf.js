@@ -3,8 +3,6 @@ var ExamPDFView = IdempotentView.extend({
   CIRCLE_RADIUS: 10,  // specified in style.css as radius of annotation
 
   events: {
-    'click .previous-page': 'goToPreviousPage',
-    'click .next-page': 'goToNextPage',
     'click img': 'createAnnotation'
   },
 
@@ -14,13 +12,15 @@ var ExamPDFView = IdempotentView.extend({
 
     this.questionPartAnswers = options.questionPartAnswers;
 
-    this.examCanvasView = new ExamCanvasView({
+    this.examCanvasGradeView = new ExamCanvasGradeView({
       questionPartAnswer: this.model,
       questionPartAnswers: this.questionPartAnswers,
+      preloadOtherStudentExams: 2,
+      preloadCurExam: 2,
       el: '.exam'
     });
-    this.registerSubview(this.examCanvasView);
-    this.listenTo(this.examCanvasView, 'changeExamPage', this.changeExamPage);
+    this.registerSubview(this.examCanvasGradeView);
+    this.listenTo(this.examCanvasGradeView, 'changeExamPage', this.changeExamPage);
 
     this.annotationViews = [];
     this.renderAnnotations();
@@ -33,7 +33,7 @@ var ExamPDFView = IdempotentView.extend({
       self.deregisterSubview(annotationView);
     });
 
-    var curPageNum = this.examCanvasView.getCurPageNum();
+    var curPageNum = this.examCanvasGradeView.getCurPageNum();
     this.annotationViews = [];
     this.fetchAnnotations(this.model, curPageNum, function(annotations) {
       self.annotations = annotations;
@@ -85,7 +85,7 @@ var ExamPDFView = IdempotentView.extend({
 
     var annotation = new AnnotationModel({
       question_part_answer: this.model.id,
-      exam_page_number: this.examCanvasView.getCurPageNum(),
+      exam_page_number: this.examCanvasGradeView.getCurPageNum(),
       offset_left: examPDFX - this.CIRCLE_RADIUS,
       offset_top: examPDFY - this.CIRCLE_RADIUS
     });

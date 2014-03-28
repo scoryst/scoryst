@@ -7,9 +7,8 @@ $(function() {
   
   var examCanvasView = new ExamCanvasView({
     el: '.exam',
-    preloadNumber: 2,
-    preloadOtherStudentExams: true,
-    preloadCurExam: false
+    preloadOtherStudentExams: 2,
+    preloadCurExam: 1
   });
 
   initTypeAhead();

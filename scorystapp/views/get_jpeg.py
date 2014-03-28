@@ -6,7 +6,12 @@ from scorystapp.views import grade
 @decorators.access_controlled
 @decorators.student_required
 def get_exam_jpeg(request, cur_course_user, exam_answer_id, page_number, exam_id=None):
-  """ Redirects to the jpeg corresponding to exam_answer_id and page_number """
+  """
+  Redirects to the jpeg corresponding to exam_answer_id and page_number.
+  exam_id is optional, since some URLs may capture it and others may not. It is
+  captured if in the URL so that the decorator can verify its consistency with
+  the exam_answer_id.
+  """
   exam_page = shortcuts.get_object_or_404(models.ExamAnswerPage, exam_answer_id=exam_answer_id,
     page_number=page_number)
   return shortcuts.redirect(exam_page.page_jpeg.url)
@@ -15,7 +20,12 @@ def get_exam_jpeg(request, cur_course_user, exam_answer_id, page_number, exam_id
 @decorators.access_controlled
 @decorators.student_required
 def get_exam_jpeg_large(request, cur_course_user, exam_answer_id, page_number, exam_id=None):
-  """ Redirects to the large jpeg corresponding to exam_answer_id and page_number """
+  """
+  Redirects to the large jpeg corresponding to exam_answer_id and page_number.
+  exam_id is optional, since some URLs may capture it and others may not. It is
+  captured if in the URL so that the decorator can verify its consistency with
+  the exam_answer_id.
+  """
   exam_page = shortcuts.get_object_or_404(models.ExamAnswerPage, exam_answer_id=exam_answer_id,
     page_number=page_number)
   return shortcuts.redirect(exam_page.page_jpeg_large.url)
@@ -35,12 +45,11 @@ def get_offset_student_jpeg(request, cur_course_user, exam_answer_id, offset, pa
   next_exam_answer = grade.get_offset_student_exam(exam_answer_id, offset)
   return get_exam_jpeg(request, cur_course_user, next_exam_answer.pk, page_number)
 
+
 @decorators.access_controlled
 @decorators.student_required
 def get_exam_page_count(request, cur_course_user, exam_answer_id, exam_id=None):
-  """
-  Returns the number of pages in the exam
-  """
+  """ Returns the number of pages in the exam """
   exam_answer = shortcuts.get_object_or_404(models.ExamAnswer, pk=exam_answer_id)
   return http.HttpResponse(exam_answer.page_count)
 
@@ -48,7 +57,7 @@ def get_exam_page_count(request, cur_course_user, exam_answer_id, exam_id=None):
 @decorators.access_controlled
 @decorators.instructor_or_ta_required
 def get_blank_exam_jpeg(request, cur_course_user, exam_id, page_number):
-  """ Redirects to the URL where the jpeg of the empty uploaded exam can be found """
+  """ Redirects to the empty exam jpeg for the provided page number """
   exam_page = shortcuts.get_object_or_404(models.ExamPage, exam_id=exam_id, page_number=page_number)
   return shortcuts.redirect(exam_page.page_jpeg.url)
 
@@ -56,7 +65,7 @@ def get_blank_exam_jpeg(request, cur_course_user, exam_id, page_number):
 @decorators.access_controlled
 @decorators.instructor_or_ta_required
 def get_blank_exam_jpeg_large(request, cur_course_user, exam_id, page_number):
-  """ Redirects to the URL where the large jpeg of the empty uploaded exam can be found """
+  """ Redirects to the empty large exam jpeg for the provided page number """
   exam_page = shortcuts.get_object_or_404(models.ExamPage, exam_id=exam_id, page_number=page_number)
   return shortcuts.redirect(exam_page.page_jpeg_large.url)
 
@@ -74,9 +83,8 @@ def get_blank_exam_page_count(request, cur_course_user, exam_id):
 def get_offset_student_jpeg_with_question_number(request, cur_course_user, exam_answer_id, offset, question_number, part_number):
   """
   Gets the jpeg corresponding to question_number and part_number for the student
-  present at 'offset' from the current student.
-  If there is no student at that offset, the student at one of the bounds (0 or last index)
-  is returned.
+  present at 'offset' from the current student. If there is no student at that
+  offset, the student at one of the bounds (0 or last index) is returned.
   """
   # Ensure the exam_answer_id exists
   cur_exam_answer = shortcuts.get_object_or_404(models.ExamAnswer, pk=exam_answer_id)

@@ -1,14 +1,14 @@
 // TODO: browserify
 var ZoomLensView = IdempotentView.extend({
-  ZOOM_LENS_OFFSET: 200,  // radius of the zoom lens
+  ZOOM_LENS_RADIUS: 200,
+  ZOOM_LENS_OFFSET_FROM_MOUSE: 20,
 
   events: {
     'click .enable-zoom': 'enableZoom',
     'click .disable-zoom': 'disableZoom',
     'mouseenter .exam-image': 'showZoomLens',
     'mouseleave .exam-image': 'hideZoomLens',
-    'mousemove .exam-image': 'moveZoomLens',
-    'changeExamPage': 'setCurPageNum'
+    'mousemove .exam-image': 'moveZoomLens'
   },
 
   initialize: function(options) {
@@ -16,13 +16,21 @@ var ZoomLensView = IdempotentView.extend({
 
     this.curPageNum = options.curPageNum;
     this.zoomLensEnabled = false;
+    this.createdImage = false;
     this.image = new Image();
   },
 
   loadImage: function() {
     if (this.zoomLensEnabled) {
       var imageSource = 'get-exam-jpeg-large/' + this.curPageNum + '/';
-      this.$el.find('.zoom-lens img').attr('src', imageSource);
+
+      // dynamically create the image tag
+      if (!this.createdImage) {
+        this.createdImage = true;
+        this.$zoomImg = $('<img alt="Enlarged Exam" />').appendTo(this.$el.find('.zoom-lens'));
+      }
+
+      this.$zoomImg.attr('src', imageSource);
       this.image.src = imageSource;
     }
   },
@@ -59,18 +67,13 @@ var ZoomLensView = IdempotentView.extend({
     var x = event.offsetX;
 
     // Get the offset top and left of the large image
-    var offsetTop = -(y * this.image.naturalHeight / this.$el.height()) + this.ZOOM_LENS_OFFSET;
-    var offsetLeft = -(x * this.image.naturalWidth / this.$el.width()) + this.ZOOM_LENS_OFFSET;
+    var offsetTop = -(y * this.image.naturalHeight / this.$el.height()) + this.ZOOM_LENS_RADIUS;
+    var offsetLeft = -(x * this.image.naturalWidth / this.$el.width()) + this.ZOOM_LENS_RADIUS;
 
-    this.$el.find('.zoom-lens').css('top', y + 20);
-    this.$el.find('.zoom-lens').css('left', x + 20);
+    this.$el.find('.zoom-lens').css('top', y + this.ZOOM_LENS_OFFSET_FROM_MOUSE);
+    this.$el.find('.zoom-lens').css('left', x + this.ZOOM_LENS_OFFSET_FROM_MOUSE);
     this.$el.find('.zoom-lens img').css('top', offsetTop);
     this.$el.find('.zoom-lens img').css('left', offsetLeft);
-  },
-
-  setCurPageNum: function(curPageNum) {
-    this.curPageNum = curPageNum;
-    this.loadImage();
   },
 
   changeExamPage: function(curPageNum) {

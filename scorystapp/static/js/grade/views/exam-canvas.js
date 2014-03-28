@@ -1,5 +1,6 @@
-var ExamCanvasView = ExamCanvasBaseView.extend({
-  PREFETCH_NUMBER: 1,  // number of pages ahead to prefetch
+var ExamCanvasGradeView = ExamCanvasBaseView.extend({
+  LEFT_BRACKET_KEY_CODE: 219,
+  RIGHT_BRACKET_KEY_CODE: 221,
 
   initialize: function(options) {
     this.constructor.__super__.initialize.apply(this, arguments);
@@ -9,17 +10,14 @@ var ExamCanvasView = ExamCanvasBaseView.extend({
     this.render();
 
     // mediator events
-    var self = this;
     this.listenTo(Mediator, 'changeQuestionPartAnswer',
       function(questionPartAnswer, pageIndex) {
-        self.setQuestionPartAnswer(questionPartAnswer, pageIndex);
+        pageIndex = pageIndex || 0;
+        this.setQuestionPartAnswer(questionPartAnswer, pageIndex);
         this.showPage();
         this.trigger('changeExamPage', this.curPageNum, questionPartAnswer);
-        this.preloadImages();
       }
     );
-
-    this.listenTo(this, 'changeExamPage', function() { this.preloadImages(); });
   },
 
   setQuestionPartAnswer: function(questionPartAnswer, pageIndex) {
@@ -30,28 +28,35 @@ var ExamCanvasView = ExamCanvasBaseView.extend({
     });
 
     // if not set before (when view is being initialized)
-    if (this.curPageNum === undefined) {
+    if (!this.curPageNum) {
       this.curPageNum = this.pages[0];
       this.activePageIndex = 0;
     }
 
-    // allow pythonic negative indexes for ease of use
+    // allow pythonic negative indexes, so -1 corresponds to the last element
     if (pageIndex < 0) {
       this.activePageIndex = this.pages.length + pageIndex;
     } else {
-      this.activePageIndex = 0;
+      this.activePageIndex = pageIndex;
     }
     this.curPageNum = this.pages[this.activePageIndex];
+  },
 
-    if (this.activePageIndex < 0) {
-      this.activePageIndex = 0;
-    } else if (this.activePageIndex >= this.pages.length) {
-      this.activePageIndex = this.pages.length - 1;
+  handleShortcuts: function(event) {
+    this.constructor.__super__.handleShortcuts.apply(this, arguments);
+
+    switch (event.keyCode) {
+      case this.LEFT_BRACKET_KEY_CODE:
+        this.goToLogicalPreviousPage(true);
+        break;
+
+      case this.RIGHT_BRACKET_KEY_CODE:
+        this.goToLogicalNextPage(true);
+        break;
     }
   },
 
-  goToPreviousPage: function(skipCurrentPart) {
-    this.constructor.__super__.goToPreviousPage.apply(this, arguments);
+  goToLogicalPreviousPage: function(skipCurrentPart) {
     // display the previous page in the current part if it exists
     if (this.activePageIndex > 0 && !skipCurrentPart) {
       this.activePageIndex -= 1;
@@ -99,8 +104,7 @@ var ExamCanvasView = ExamCanvasBaseView.extend({
     }
   },
 
-  goToNextPage: function(event, skipCurrentPart) {
-    this.constructor.__super__.goToNextPage.apply(this, arguments);
+  goToLogicalNextPage: function(skipCurrentPart) {
     // display the next page in the current part if it exists
     if (this.activePageIndex < this.pages.length - 1 && !skipCurrentPart) {
       this.activePageIndex += 1;
@@ -141,20 +145,26 @@ var ExamCanvasView = ExamCanvasBaseView.extend({
   },
 
   preloadImages: function() {
-    for (var i = -this.PREFETCH_NUMBER; i <= this.PREFETCH_NUMBER; i++) {
-      // preload pages before and after, corresponding to the current student
-      var pageIndexToPreload = this.activePageIndex + i;
-      if (pageIndexToPreload >= 0 && pageIndexToPreload < this.pages.length) {
-        var image = new Image();
-        image.src = 'get-exam-jpeg/' + this.pages[pageIndexToPreload];
+    if (this.preloadCurExam) {
+      for (var i = -this.preloadCurExam; i <= this.preloadCurExam; i++) {
+        // preload pages before and after, corresponding to the current student
+        var pageIndexToPreload = this.activePageIndex + i;
+        // the page index must be a correct array index
+        if (pageIndexToPreload >= 0 && pageIndexToPreload < this.pages.length) {
+          var image = new Image();
+          image.src = 'get-exam-jpeg/' + this.pages[pageIndexToPreload];
+        }
       }
+    }
 
-      // preload page of previous and next students
-      var image = new Image();
-      var questionPart = this.questionPartAnswer.get('question_part');
-      image.src = 'get-student-jpeg/' + i + '/' + questionPart.question_number +
-        '/' + questionPart.part_number + '/';
+    if (this.preloadOtherStudentExams) {
+      for (var i = -this.preloadOtherStudentExams; i <= this.preloadOtherStudentExams; i++) {
+        // preload page of previous and next students
+        var image = new Image();
+        var questionPart = this.questionPartAnswer.get('question_part');
+        image.src = 'get-student-jpeg/' + i + '/' + questionPart.question_number +
+          '/' + questionPart.part_number + '/';
+      }
     }
   }
-
 });

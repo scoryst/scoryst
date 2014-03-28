@@ -50,7 +50,6 @@
   <script src="/static/js/lib/typeahead.min.js"></script>
   <script src="/static/js/lib/underscore.min.js"></script>
   <script src="/static/js/lib/backbone.min.js"></script>
-  <script src="/static/js/lib/underscore.min.js"></script>
   <script src="/static/js/idempotent.js"></script>
   <script src="/static/js/zoom-lens.js"></script>
   <script src="/static/js/exam-canvas-base.js"></script>

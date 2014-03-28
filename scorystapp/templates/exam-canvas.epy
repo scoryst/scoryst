@@ -12,10 +12,10 @@
         Disable Zoom <i class="fa fa-search-minus"></i>
       </button>
     </span>
-    <img class="exam-image" />
     <div class="zoom-lens">
-      <img />
+      <!-- Enlarged exam image is dynamically inserted -->
     </div>
+    <!-- Exam image is dynamically inserted -->
   </div>
 
   <div class="next-page">

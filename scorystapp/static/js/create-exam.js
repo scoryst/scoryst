@@ -22,9 +22,7 @@ $(function() {
 
   new ExamCanvasView({
     el: '.exam',
-    preloadNumber: 2,
-    preloadOtherStudentExams: false,
-    preloadCurExam: true
+    preloadCurExam: 2
   });
 
   // Used to recreate the UI, either after deletion, or during editing

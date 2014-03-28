@@ -16,9 +16,7 @@ $(function() {
 
   var examCanvasView = new ExamCanvasView({
     el: '.exam',
-    preloadNumber: 2,
-    preloadOtherStudentExams: false,
-    preloadCurExam: true
+    preloadCurExam: 2
   });
 
   initTypeAhead();
@@ -136,7 +134,7 @@ $(function() {
         return false;
       }
 
-      if (parseInt(page) <= 0 || parseInt(page) > examCanvasView.totalNumPags()) {
+      if (parseInt(page) <= 0 || parseInt(page) > examCanvasView.getTotalNumPages()) {
         return false;
       }
     }

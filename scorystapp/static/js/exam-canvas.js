@@ -1,16 +1,15 @@
 // TODO: browserify
-// This is a general exam canvas view where goToPreviousPage and goToNextPage
+// This is a general exam canvas; goToLogicalPreviousPage and goToLogicalNextPage
 // behave as expected, going to the page of the exam one before and one after
 // the current page, respectively. Nothing happens if the user attempts to go
 // before the first page or after the last page.
 //
-// To use this view, 3 options must be passed in:
-// preloadNumber: For each of the options below, the number of jpegs to attempt
-//     to preload in one direction. 
-// preloadOtherStudentExams: true if the next/previous student exams should be
-//     preloaded and false otherwise
-// preloadCurExam: true if the next and previous pages of the current exam
-//     should be preloaded and false otherwise
+// To use this view, 2 options can be passed in:
+// preloadOtherStudentExams: # of student exam jpegs to preload in each
+//     direction for the next/previous student exams
+// preloadCurExam: # of current exam jpegs to preload in each direction
+//
+// If any option is undefined, the preloading will not occur for that option.
 var ExamCanvasView = ExamCanvasBaseView.extend({
   initialize: function(options) {
     this.constructor.__super__.initialize.apply(this, arguments);
@@ -18,14 +17,10 @@ var ExamCanvasView = ExamCanvasBaseView.extend({
     this.setTotalNumPages();
     this.curPageNum = 1;
 
-    this.preloadNumber = options.preloadNumber;
-    this.preloadOtherStudentExams = options.preloadOtherStudentExams;
-    this.preloadCurExam = options.preloadCurExam;
-
     this.render();
   },
 
-  goToPreviousPage: function() {
+  goToLogicalPreviousPage: function() {
     if (this.curPageNum > 1) {
       this.curPageNum -= 1;
       this.trigger('changeExamPage', this.curPageNum);
@@ -33,7 +28,7 @@ var ExamCanvasView = ExamCanvasBaseView.extend({
     }
   },
 
-  goToNextPage: function() {
+  goToLogicalNextPage: function() {
     if (this.curPageNum < this.totalNumPages) {
       this.curPageNum += 1;
       this.trigger('changeExamPage', this.curPageNum);
@@ -43,7 +38,7 @@ var ExamCanvasView = ExamCanvasBaseView.extend({
 
   preloadImages: function() {
     if (this.preloadCurExam) {
-      for (var i = -this.preloadNumber; i <= this.preloadNumber; i++) {
+      for (var i = -this.preloadCurExam; i <= this.preloadCurExam; i++) {
         // preload pages before and after, corresponding to the current student
         var pageToPreload = this.curPageNum + i;
         if (pageToPreload >= 1 && pageToPreload <= this.totalNumPages) {
@@ -54,7 +49,7 @@ var ExamCanvasView = ExamCanvasBaseView.extend({
     }
 
     if (this.preloadOtherStudentExams) {
-      for (var i = -this.preloadNumber; i <= this.preloadNumber; i++) {
+      for (var i = -this.preloadOtherStudentExams; i <= this.preloadOtherStudentExams; i++) {
         var image = new Image();
         image.src = 'get-student-jpeg/' + i + '/' + this.curPageNum + '/';
       }
@@ -72,7 +67,7 @@ var ExamCanvasView = ExamCanvasBaseView.extend({
     });
   },
 
-  totalNumPages: function() {
+  getTotalNumPages: function() {
     return self.totalNumPages;
   }
 
