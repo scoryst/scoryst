@@ -8,19 +8,15 @@ from scorystapp import models
 class Command(BaseCommand):
   help = 'Deletes everything in the bucket that is not a jpeg/pdf associated with a model'
   option_list = BaseCommand.option_list + (
-    make_option(
-      "-b",
-      "--bucketname",
-      help="Specify bucket name",
-    ),
+    make_option('-b', '--bucketname', help='Specify bucket name'),
+    make_option('-r', '--real', action='store_true', help='Actually deletes instead of a dry run')
   )
 
   def handle(self, *args, **options):
     conn = S3Connection(settings.AWS_S3_ACCESS_KEY_ID, settings.AWS_S3_SECRET_ACCESS_KEY)
-    try:
-      bucket = conn.get_bucket(options['bucketname'])
-    except:
-      self.stdout.write('Bucket does not exist')
+    bucket = conn.lookup(options['bucketname'])
+    if not bucket:
+      print 'Bucket "%s" does not exist' % options['bucketname']
       return
 
     print 'Getting list of keys used by database'
@@ -34,15 +30,16 @@ class Command(BaseCommand):
     total_keys = 0
     for key in s3_keys:
       if key.name not in local_keys:
-        # print 'Useless key ', key
-        # key.delete()
+        if options['real']:
+          print 'Useless key ', key
+          key.delete()
         useless_key += 1
       total_keys += 1
 
     print 'Num useless keys: ', useless_key
     print 'Total keys: ', total_keys
 
-    self.stdout.write('Done deleting.')
+    print 'Done deleting.'
 
 
   def get_all_keys_in_use(self):
