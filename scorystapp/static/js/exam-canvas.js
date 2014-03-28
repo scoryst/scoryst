@@ -14,10 +14,12 @@ var ExamCanvasView = ExamCanvasBaseView.extend({
   initialize: function(options) {
     this.constructor.__super__.initialize.apply(this, arguments);
 
-    this.setTotalNumPages();
     this.curPageNum = 1;
 
-    this.render();
+    this.setTotalNumPages(function(self, totalNumPages) {
+      self.totalNumPages = totalNumPages;
+      self.render();
+    });
   },
 
   goToLogicalPreviousPage: function() {
@@ -56,14 +58,13 @@ var ExamCanvasView = ExamCanvasBaseView.extend({
     }
   },
 
-  setTotalNumPages: function() {
+  setTotalNumPages: function(callback) {
     var self = this;
     $.ajax({
       url: 'get-exam-page-count/',
-      dataType: 'text',
-      async: false
+      dataType: 'text'
     }).done(function(data) {
-      self.totalNumPages = parseInt(data, 10);
+      callback(self, parseInt(data, 10));
     });
   },
 

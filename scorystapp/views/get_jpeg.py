@@ -40,7 +40,7 @@ def get_offset_student_jpeg(request, cur_course_user, exam_answer_id, offset, pa
   we return the bound
   """
   # Ensure the exam_answer_id exists
-  cur_exam_answer = shortcuts.get_object_or_404(models.ExamAnswer, pk=exam_answer_id)
+  shortcuts.get_object_or_404(models.ExamAnswer, pk=exam_answer_id)
 
   next_exam_answer = grade.get_offset_student_exam(exam_answer_id, offset)
   return get_exam_jpeg(request, cur_course_user, next_exam_answer.pk, page_number)
@@ -87,7 +87,7 @@ def get_offset_student_jpeg_with_question_number(request, cur_course_user, exam_
   offset, the student at one of the bounds (0 or last index) is returned.
   """
   # Ensure the exam_answer_id exists
-  cur_exam_answer = shortcuts.get_object_or_404(models.ExamAnswer, pk=exam_answer_id)
+  shortcuts.get_object_or_404(models.ExamAnswer, pk=exam_answer_id)
 
   next_exam_answer = grade.get_offset_student_exam(exam_answer_id, offset)
   # Get the question_part_answer to find which page question_number and part_number lie on
