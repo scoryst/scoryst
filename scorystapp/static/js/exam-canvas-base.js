@@ -9,7 +9,7 @@ var ExamCanvasBaseView = IdempotentView.extend({
   // key codes for keyboard shorcuts
   LEFT_ARROW_KEY_CODE: 37,
   RIGHT_ARROW_KEY_CODE: 39,
-  LOADING_ICON: '/static/img/loading.gif',
+  LOADING_ICON: '/static/img/loading_big.gif',
 
   events: {
     'click .previous-page': 'goToLogicalPreviousPage',
