@@ -15,6 +15,7 @@ var ExamCanvasView = ExamCanvasBaseView.extend({
     this.constructor.__super__.initialize.apply(this, arguments);
 
     this.curPageNum = 1;
+    this.$el.find('.previous-page').addClass('disabled');
 
     this.setTotalNumPages(function(self, totalNumPages) {
       self.totalNumPages = totalNumPages;
@@ -25,6 +26,10 @@ var ExamCanvasView = ExamCanvasBaseView.extend({
   goToLogicalPreviousPage: function() {
     if (this.curPageNum > 1) {
       this.curPageNum -= 1;
+      this.$el.find('.next-page').removeClass('disabled');
+      if (this.curPageNum === 1) {
+        this.$el.find('.previous-page').addClass('disabled');
+      }
       this.trigger('changeExamPage', this.curPageNum);
       this.showPage();
     }
@@ -33,6 +38,10 @@ var ExamCanvasView = ExamCanvasBaseView.extend({
   goToLogicalNextPage: function() {
     if (this.curPageNum < this.totalNumPages) {
       this.curPageNum += 1;
+      this.$el.find('.previous-page').removeClass('disabled');
+      if (this.curPageNum === this.totalNumPages) {
+        this.$el.find('.next-page').addClass('disabled');
+      }
       this.trigger('changeExamPage', this.curPageNum);
       this.showPage();
     }

@@ -31,6 +31,7 @@ var ExamCanvasGradeView = ExamCanvasBaseView.extend({
     if (!this.curPageNum) {
       this.curPageNum = this.pages[0];
       this.activePageIndex = 0;
+      this.$el.find('.previous-page').addClass('disabled');
     }
 
     // allow pythonic negative indexes, so -1 corresponds to the last element
@@ -40,6 +41,12 @@ var ExamCanvasGradeView = ExamCanvasBaseView.extend({
       this.activePageIndex = pageIndex;
     }
     this.curPageNum = this.pages[this.activePageIndex];
+
+    // Check to see if either left or right arrows should be disabled
+    this.$el.find('.previous-page').removeClass('disabled');
+    this.$el.find('.next-page').removeClass('disabled');
+    this.checkDisablingPreviousPage();
+    this.checkDisablingNextPage();
   },
 
   handleShortcuts: function(event) {
@@ -60,9 +67,11 @@ var ExamCanvasGradeView = ExamCanvasBaseView.extend({
     // display the previous page in the current part if it exists
     if (this.activePageIndex > 0 && !skipCurrentPart) {
       this.activePageIndex -= 1;
+      this.$el.find('.next-page').removeClass('disabled');
+      this.checkDisablingPreviousPage();
       this.curPageNum = this.pages[this.activePageIndex];
       this.showPage();
-      this.trigger('changeExamPage', this.curPageNum, this.questionPartAnswer);  // TODO: Move to image handler base
+      this.trigger('changeExamPage', this.curPageNum, this.questionPartAnswer);
       return;
     }
 
@@ -108,13 +117,25 @@ var ExamCanvasGradeView = ExamCanvasBaseView.extend({
     // display the next page in the current part if it exists
     if (this.activePageIndex < this.pages.length - 1 && !skipCurrentPart) {
       this.activePageIndex += 1;
+      this.$el.find('.previous-page').removeClass('disabled');
+      this.checkDisablingNextPage();
       this.curPageNum = this.pages[this.activePageIndex];
       this.showPage();
-      this.trigger('changeExamPage', this.curPageNum, this.questionPartAnswer);  // TODO: Move to image handler base
+      this.trigger('changeExamPage', this.curPageNum, this.questionPartAnswer);
       return;
     }
 
     // otherwise, look for the next part:
+    var nextQuestionPartAnswer = this.getNextQuestionPartAnswer();
+
+    if (nextQuestionPartAnswer) {
+      Mediator.trigger('changeQuestionPartAnswer', nextQuestionPartAnswer, 0);
+    } else {
+      // if that didn't work, there is no next part, so do nothing
+    }
+  },
+
+  getNextQuestionPartAnswer: function() {
     var curQuestionPart = this.questionPartAnswer.get('question_part');
 
     // find the next part in the current question
@@ -124,7 +145,7 @@ var ExamCanvasGradeView = ExamCanvasBaseView.extend({
         questionPart.part_number === curQuestionPart.part_number + 1;
     });
 
-    nextQuestionPartAnswer = nextQuestionPartAnswer[0];
+    var nextQuestionPartAnswer = nextQuestionPartAnswer[0];
 
     // if that didn't work, find the next question
     if (!nextQuestionPartAnswer) {
@@ -134,13 +155,24 @@ var ExamCanvasGradeView = ExamCanvasBaseView.extend({
           questionPart.part_number === 1;
       });
 
-      nextQuestionPartAnswer = nextQuestionPartAnswer[0];
+      return nextQuestionPartAnswer[0];
     }
 
-    if (nextQuestionPartAnswer) {
-      Mediator.trigger('changeQuestionPartAnswer', nextQuestionPartAnswer, 0);
-    } else {
-      // if that didn't work, there is no next part, so do nothing
+    return nextQuestionPartAnswer;
+  },
+
+  checkDisablingPreviousPage: function() {
+    var questionPart = this.questionPartAnswer.get('question_part');
+    if (this.activePageIndex === 0 && questionPart.question_number === 1 &&
+        questionPart.part_number === 1) {
+      this.$el.find('.previous-page').addClass('disabled');
+    }
+  },
+
+  checkDisablingNextPage: function() {
+    var nextQuestionPartAnswer = this.getNextQuestionPartAnswer();
+    if (!nextQuestionPartAnswer && this.activePageIndex === this.pages.length - 1) {
+      this.$el.find('.next-page').addClass('disabled');
     }
   },
 

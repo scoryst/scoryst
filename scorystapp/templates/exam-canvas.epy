@@ -4,14 +4,14 @@
   </div>
 
   <div class="exam-canvas">
-    <span>
+    <div>
       <button type="button" class="btn btn-sm btn-link enable-zoom">
         Enable Zoom <i class="fa fa-search-plus"></i>
       </button>
       <button type="button" class="btn btn-sm btn-link disable-zoom">
         Disable Zoom <i class="fa fa-search-minus"></i>
       </button>
-    </span>
+    </div>
     <div class="zoom-lens">
       <!-- Enlarged exam image is dynamically inserted -->
     </div>

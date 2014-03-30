@@ -259,6 +259,66 @@ footer .amp {
   margin: 5px 0;
 }
 
+/* CSS for exam canvas. */
+.exam {
+  position: relative;
+}
+
+.exam-canvas {
+  float: left;
+  width: 90%;
+  border: 1px solid #ccc;
+}
+
+.exam-canvas img {
+  width: 100%;
+}
+
+.previous-page, .next-page {
+  cursor: pointer;
+  position: relative;
+  margin-top: 1px;
+}
+
+.previous-page i, .next-page i {
+  position: absolute;
+  top: 50%;
+
+  transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  -o-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+}
+
+.previous-page i, .next-page i {
+  left: 50%;
+  font-size: 40px;
+}
+
+.previous-page:hover, .next-page:hover {
+  background: #f6f6f6;
+}
+
+.previous-page.disabled:hover, .next-page.disabled:hover {
+  cursor: not-allowed;
+}
+
+.previous-page.disabled, .next-page.disabled {
+  background-color: #ecf0f1;
+  color: #adadad;
+}
+
+.previous-page {
+  float: left;
+  width: 5%;
+}
+
+.next-page {
+  float: left;
+  width: 5%;
+}
+
 /* CSS for zoom lens. */
 .exam-canvas .zoom-lens {
   display: none;
@@ -306,56 +366,6 @@ footer .amp {
 }
 
 /* CSS for create exam page */
-.exam {
-  position: relative;
-}
-
-.exam-canvas {
-  float: left;
-  width: 90%;
-  border: 1px solid #ccc;
-}
-
-.exam-canvas img {
-  width: 100%;
-}
-
-.previous-page, .next-page {
-  cursor: pointer;
-  position: relative;
-  margin-top: 1px;
-}
-
-.previous-page i, .next-page i {
-  position: absolute;
-  top: 50%;
-
-  transform: translate(-50%, -50%);
-  -webkit-transform: translate(-50%, -50%);
-  -moz-transform: translate(-50%, -50%);
-  -o-transform: translate(-50%, -50%);
-  -ms-transform: translate(-50%, -50%);
-}
-
-.previous-page i, .next-page i {
-  left: 50%;
-  font-size: 40px;
-}
-
-.previous-page:hover, .next-page:hover {
-  background: #f6f6f6;
-}
-
-.previous-page {
-  float: left;
-  width: 5%;
-}
-
-.next-page {
-  float: left;
-  width: 5%;
-}
-
 .create-exam .fa-trash-o {
   float: right;
   cursor: pointer;
