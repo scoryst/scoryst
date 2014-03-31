@@ -14,6 +14,10 @@ var ZoomLensView = IdempotentView.extend({
   initialize: function(options) {
     this.constructor.__super__.initialize.apply(this, arguments);
 
+    this.$enableZoomButton = this.$el.find('.enable-zoom');
+    this.$disableZoomButton = this.$el.find('.disable-zoom');
+    this.$zoomLens = this.$el.find('.zoom-lens');
+
     this.curPageNum = options.curPageNum;
     this.zoomLensEnabled = false;
     this.createdImage = false;
@@ -40,25 +44,25 @@ var ZoomLensView = IdempotentView.extend({
     this.loadImage();
 
     this.$el.addClass('zoom-enabled');
-    this.$el.find('.enable-zoom').toggle();
-    this.$el.find('.disable-zoom').toggle();
+    this.$enableZoomButton.toggle();
+    this.$disableZoomButton.toggle();
   },
 
   disableZoom: function() {
     this.zoomLensEnabled = false;
     this.$el.removeClass('zoom-enabled');
-    this.$el.find('.enable-zoom').toggle();
-    this.$el.find('.disable-zoom').toggle();
+    this.$enableZoomButton.toggle();
+    this.$disableZoomButton.toggle();
   },
 
   showZoomLens: function() {
     if (this.zoomLensEnabled) {
-      this.$el.find('.zoom-lens').show();
+      this.$zoomLens.show();
     }
   },
 
   hideZoomLens: function() {
-    this.$el.find('.zoom-lens').hide();
+    this.$zoomLens.hide();
   },
 
   moveZoomLens: function(event) {
@@ -70,10 +74,10 @@ var ZoomLensView = IdempotentView.extend({
     var offsetTop = -(y * this.image.naturalHeight / this.$el.height()) + this.ZOOM_LENS_RADIUS;
     var offsetLeft = -(x * this.image.naturalWidth / this.$el.width()) + this.ZOOM_LENS_RADIUS;
 
-    this.$el.find('.zoom-lens').css('top', y + this.ZOOM_LENS_OFFSET_FROM_MOUSE);
-    this.$el.find('.zoom-lens').css('left', x + this.ZOOM_LENS_OFFSET_FROM_MOUSE);
-    this.$el.find('.zoom-lens img').css('top', offsetTop);
-    this.$el.find('.zoom-lens img').css('left', offsetLeft);
+    this.$zoomLens.css('top', y + this.ZOOM_LENS_OFFSET_FROM_MOUSE);
+    this.$zoomLens.css('left', x + this.ZOOM_LENS_OFFSET_FROM_MOUSE);
+    this.$zoomImg.css('top', offsetTop);
+    this.$zoomImg.css('left', offsetLeft);
   },
 
   changeExamPage: function(curPageNum) {

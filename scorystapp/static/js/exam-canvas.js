@@ -15,10 +15,17 @@ var ExamCanvasView = ExamCanvasBaseView.extend({
     this.constructor.__super__.initialize.apply(this, arguments);
 
     this.curPageNum = 1;
-    this.$el.find('.previous-page').addClass('disabled');
 
-    this.setTotalNumPages(function(self, totalNumPages) {
+    this.$previousPage = this.$el.find('.previous-page');
+    this.$nextPage = this.$el.find('.next-page');
+
+    this.$previousPage.addClass('disabled');
+    this.undelegateEvents();
+
+    var self = this;
+    this.setTotalNumPages(function(totalNumPages) {
       self.totalNumPages = totalNumPages;
+      self.delegateEvents();
       self.render();
     });
   },
@@ -26,9 +33,9 @@ var ExamCanvasView = ExamCanvasBaseView.extend({
   goToLogicalPreviousPage: function() {
     if (this.curPageNum > 1) {
       this.curPageNum -= 1;
-      this.$el.find('.next-page').removeClass('disabled');
+      this.$nextPage.removeClass('disabled');
       if (this.curPageNum === 1) {
-        this.$el.find('.previous-page').addClass('disabled');
+        this.$previousPage.addClass('disabled');
       }
       this.trigger('changeExamPage', this.curPageNum);
       this.showPage();
@@ -38,9 +45,9 @@ var ExamCanvasView = ExamCanvasBaseView.extend({
   goToLogicalNextPage: function() {
     if (this.curPageNum < this.totalNumPages) {
       this.curPageNum += 1;
-      this.$el.find('.previous-page').removeClass('disabled');
+      this.$previousPage.removeClass('disabled');
       if (this.curPageNum === this.totalNumPages) {
-        this.$el.find('.next-page').addClass('disabled');
+        this.$nextPage.addClass('disabled');
       }
       this.trigger('changeExamPage', this.curPageNum);
       this.showPage();
@@ -67,13 +74,14 @@ var ExamCanvasView = ExamCanvasBaseView.extend({
     }
   },
 
+  // callback takes the number of total pages in the exam
   setTotalNumPages: function(callback) {
     var self = this;
     $.ajax({
       url: 'get-exam-page-count/',
       dataType: 'text'
     }).done(function(data) {
-      callback(self, parseInt(data, 10));
+      callback(parseInt(data, 10));
     });
   },
 

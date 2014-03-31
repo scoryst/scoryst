@@ -19,26 +19,34 @@ var ExamCanvasBaseView = IdempotentView.extend({
   initialize: function(options) {
     IdempotentView.prototype.initialize.apply(this, arguments);
 
+    this.$examCanvas = this.$el.find('.exam-canvas');
+    this.$previousPage = this.$el.find('.previous-page');
+    this.$nextPage = this.$el.find('.next-page');
+    this.$examImg = this.$examCanvas.find('img');
+    if (this.$examImg.length === 0) {
+      this.$examImg = $('<img class="exam-image" alt="Exam" />').appendTo(this.$examCanvas);
+    }
+
     this.preloadOtherStudentExams = options.preloadOtherStudentExams;
     this.preloadCurExam = options.preloadCurExam;
     this.millisecondsBeforeRetrying = 2000;
-    this.$examImg = $('<img class="exam-image" alt="Exam" />').appendTo(this.$el.find('.exam-canvas'));
 
     var self = this;
+    this.$examImage = this.$el.find('.exam-image');
     // resize canvas after the image loads or canvas has not yet been resized
-    this.$el.find('.exam-image').load(function() {
+    this.$examImage.load(function() {
       if (this.src.indexOf(self.LOADING_ICON) === -1 ||
-        self.$el.find('.exam-canvas').height() !== self.$el.find('.previous-page').height()) {
+          self.$examCanvas.height() !== self.$previousPage.height()) {
         $(window).resize();
-        var canvasHeight = self.$el.find('.exam-canvas').height();
-        self.$el.find('.previous-page').height(canvasHeight);
-        self.$el.find('.next-page').height(canvasHeight);
+        var canvasHeight = self.$examCanvas.height();
+        self.$previousPage.height(canvasHeight);
+        self.$nextPage.height(canvasHeight);
       }
     });
 
     // if loading the image failed, try to load it again after some time (wait 2
     // seconds, then 4, 8, 16, 32 which is max) while showing loading icon
-    this.$el.find('.exam-image').error(function() {
+    this.$examImage.error(function() {
       this.src = self.LOADING_ICON;
       window.setTimeout(function() {
         self.showPage();
@@ -83,7 +91,7 @@ var ExamCanvasBaseView = IdempotentView.extend({
   showPage: function() {
     // updates the exam canvas to show the image corresponding to the current
     // page number
-    this.$el.find('.exam-image').attr('src', 'get-exam-jpeg/' + this.curPageNum + '/');
+    this.$examImage.attr('src', 'get-exam-jpeg/' + this.curPageNum + '/');
     this.preloadImages();
   },
 
