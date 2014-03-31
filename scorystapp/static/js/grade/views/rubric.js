@@ -32,17 +32,17 @@ var RubricView = IdempotentView.extend({
   /* Renders this rubric in a new li element. */
   render: function() {
     var rubric = this.model.toJSON();
-    var gradeDown = this.questionPartAnswer.get('question_part').grade_down;
+    var gradeDown = this.questionPartAnswer.get('questionPart').gradeDown;
 
     // associate a color (red or green) with each rubric
     if (gradeDown) {
       rubric.color = rubric.points > 0 ? 'red' : 'green';
       // If we are grading down, we want the points to be displayed as negative
       // so if a rubric has 10 points associated, it shows up as -10
-      rubric.display_points = -rubric.points;
+      rubric.displayPoints = -rubric.points;
     } else {
       rubric.color = rubric.points < 0 ? 'red' : 'green';
-      rubric.display_points = rubric.points;
+      rubric.displayPoints = rubric.points;
     }
 
     // track whether this rubric is selected
@@ -125,7 +125,7 @@ var RubricView = IdempotentView.extend({
     var points = parseFloat(this.$('.rubric-points').val(), 10);
 
     // use the correct sign if the exam is graded down
-    var gradeDown = this.questionPartAnswer.get('question_part').grade_down;
+    var gradeDown = this.questionPartAnswer.get('questionPart').gradeDown;
     if (gradeDown) {
       points = -points;
     }

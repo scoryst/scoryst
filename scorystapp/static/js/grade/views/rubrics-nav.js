@@ -109,7 +109,7 @@ var RubricsNavView = IdempotentView.extend({
   /* Adds a rubric with example text to the navigation. */
   addRubric: function(event) {
     var rubric = new RubricModel({
-      question_part: this.model.get('question_part').id,
+      questionPart: this.model.get('questionPart').id,
       description: 'Rubric description',
       points: 1
     });

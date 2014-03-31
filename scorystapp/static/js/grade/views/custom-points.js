@@ -13,7 +13,7 @@ var CustomPointsView = IdempotentView.extend({
   initialize: function(options) {
     this.constructor.__super__.initialize.apply(this, arguments);
     this.enableUpdate = true;
-    this.listenTo(this.model, 'change:custom_points', this.render);
+    this.listenTo(this.model, 'change:customPoints', this.render);
 
     this.listenTo(Mediator, 'enableEditing', this.enableEditing);
     this.listenTo(Mediator, 'disableEditing', this.disableEditing);
@@ -22,7 +22,7 @@ var CustomPointsView = IdempotentView.extend({
   /* Renders the custom points field in a new li element. */
   render: function() {
     var questionPartAnswer = this.model.toJSON();
-    if (_.isNumber(questionPartAnswer.custom_points)) {
+    if (_.isNumber(questionPartAnswer.customPoints)) {
       this.$el.addClass('selected');
     } else {
       this.$el.removeClass('selected');
@@ -61,7 +61,7 @@ var CustomPointsView = IdempotentView.extend({
     if (this.$el.hasClass('selected')) {
       // don't deselect custom points if the input was clicked
       if (!$target.is('input')) {
-        this.model.save({ custom_points: null }, { wait: true });
+        this.model.save({ customPoints: null }, { wait: true });
       }
     } else {
       // custom points is not selected and was just clicked; focus input
@@ -81,7 +81,7 @@ var CustomPointsView = IdempotentView.extend({
 
     this.model.save({
       // only set a valid number of custom points
-      custom_points: isNaN(customPoints) ? null : customPoints
+      customPoints: isNaN(customPoints) ? null : customPoints
     }, { wait: true });
   }, 1000)
 });

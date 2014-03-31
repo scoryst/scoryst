@@ -2,7 +2,7 @@ $(function() {
   // The validation process is a bit complicated. Firstly, if any question
   // is completely empty (nothing filled in at all), we ignore it and delete it.
   // We do the same if any part is completely empty or any rubric is completely empty
-  // 
+  //
   // Now, once that is done, we report errors if
   // - Nothing entered at all
   // - Partially entered question/part/rubric
@@ -71,7 +71,7 @@ $(function() {
         }
       }
     }
-    
+
     // Time to delete everything that was made null
     removeEmptyList(questions);
     for (var i = questions.length - 1; i >= 0; i--) {
@@ -83,7 +83,7 @@ $(function() {
     return errors;
   }
 
-  // Nullifies each element of the list for which emptyFn(list_element)
+  // Nullifies each element of the list for which emptyFn(listElement)
   // returns true
   function nullifyEmptyList(list, emptyFn) {
     for (var i = 0; i < list.length; i++) {
@@ -120,7 +120,7 @@ $(function() {
   }
 
   function isPartEmpty(part) {
-    return (isNaN(part.points) && isIntegerArrayInvalid(part.pages) && 
+    return (isNaN(part.points) && isIntegerArrayInvalid(part.pages) &&
             allRubricsEmpty(part.rubrics));
   }
 

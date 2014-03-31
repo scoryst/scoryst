@@ -95,7 +95,7 @@ def create_exam(request, cur_course_user, exam_id):
   if request.method == 'POST':
     exam_object = json.loads(request.POST['exam-json'])
     questions = exam_object['questions']
-    grade_down = bool(exam_object['gradeDown'])
+    grade_down = bool(exam_object['grade_down'])
     # Validate the new rubrics and store the new forms in form_list
     success, form_list = _validate_exam_creation(questions)
 
@@ -229,7 +229,7 @@ def get_saved_exam(request, cur_course_user, exam_id):
 
   return_object = {
     'questions': questions_list,
-    'gradeDown': exam.grade_down
+    'grade_down': exam.grade_down
   }
   return http.HttpResponse(json.dumps(return_object), mimetype='application/json')
 

@@ -58,14 +58,14 @@
 </div>
 
 <script class="roster-template" type="text/template">
-  <td class="first-name"><%= user.first_name %></td>
-  <td class="last-name"><%= user.last_name %></td>
-  <td class="student-id"><%= user.student_id %></td>
+  <td class="first-name"><%= user.firstName %></td>
+  <td class="last-name"><%= user.lastName %></td>
+  <td class="student-id"><%= user.studentId %></td>
   <td class="privilege"><%= privilege %></td>
   {% if is_instructor %}
 
   <td class="actions">
-    <% if (!is_current_user) { %>
+    <% if (!isCurrentUser) { %>
     <a href="#" class="edit">
       <i class="fa fa-pencil"></i>
     </a>
@@ -95,7 +95,7 @@
   {% if is_instructor %}
 
   <td class="actions">
-    <% if (typeof(is_current_user) == "undefined" || !is_current_user) { %>
+    <% if (typeof(isCurrentUser) == "undefined" || !isCurrentUser) { %>
     <a href="#" class="save">
       <i class="fa fa-save"></i>
     </a>

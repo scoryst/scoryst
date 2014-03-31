@@ -105,6 +105,7 @@ TEMPLATE_LOADERS = (
 # production, as it overrides MIDDLEWARE_CLASSES
 MIDDLEWARE_CLASSES = (
   'debug_toolbar.middleware.DebugToolbarMiddleware',
+  'scorystapp.middleware.middleware.ChangeToCamelCaseMiddleware',
   'django.middleware.common.CommonMiddleware',
   'django.contrib.sessions.middleware.SessionMiddleware',
   'django.middleware.csrf.CsrfViewMiddleware',

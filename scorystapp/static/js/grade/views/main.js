@@ -11,11 +11,11 @@ var MainView = IdempotentView.extend({
       success: function() {
         var questionPartAnswer = self.questionPartAnswers.filter(
           function(questionPartAnswer) {
-            var questionPart = questionPartAnswer.get('question_part');
+            var questionPart = questionPartAnswer.get('questionPart');
 
             // find the question part that matches the given active question/part numbers
-            return questionPart.question_number === options.activeQuestionNumber &&
-              questionPart.part_number === options.activePartNumber;
+            return questionPart.questionNumber === options.activeQuestionNumber &&
+              questionPart.partNumber === options.activePartNumber;
           })[0];
 
         // default to first question part answer
@@ -89,7 +89,7 @@ var MainView = IdempotentView.extend({
 
   fetchQuestionPartAnswer: function(questionPart, callback) {
     var questionPartAnswer = new QuestionPartAnswerModel({
-      'question_part': { id: questionPart.get('id') }
+      'questionPart': { id: questionPart.get('id') }
     });
 
     var self = this;
@@ -132,9 +132,9 @@ $(function() {
 
   /* Keep track of the active question/part number. */
   Mediator.on('changeQuestionPartAnswer', function(questionPartAnswer) {
-    var questionPart = questionPartAnswer.get('question_part');
-    activeQuestionNumber = questionPart.question_number;
-    activePartNumber = questionPart.part_number;
+    var questionPart = questionPartAnswer.get('questionPart');
+    activeQuestionNumber = questionPart.questionNumber;
+    activePartNumber = questionPart.partNumber;
 
     $.cookie('activeQuestionNumber', activeQuestionNumber, { path: '/' });
     $.cookie('activePartNumber', activePartNumber, { path: '/' });

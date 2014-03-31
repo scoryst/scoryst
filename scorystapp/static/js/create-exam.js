@@ -4,7 +4,7 @@ $(function() {
   var $addQuestion = $('.add-question');
   var $questionList = $('.question-list');
   var $doneRubric = $('.done-rubric');
-  
+
   var $gradeDownRadio = $('input[name=grade-down]');
   var $gradeDownRadioYes = $('input[name=grade-down]').eq(0);
   var $gradeDownRadioNo = $('input[name=grade-down]').eq(1);
@@ -64,7 +64,7 @@ $(function() {
     // Init the UI by adding one question to be shown to begin with
     $addQuestion.click();
   });
-  
+
 
   // handle adding parts
   $questionList.click(function(event) {
@@ -83,10 +83,10 @@ $(function() {
       // Get the questionNum and partNum
       var questionNum = parseInt($addPart.children('div').data().question, 10);
       var partNum = $ul.children('li').length + 1;
-      
+
       var points = '';
       var pages = '';
-      
+
       // If we are recreating, fetch the previous points and pages corresponding to this part
       if (savedQuestions[questionNum - 1] && savedQuestions[questionNum - 1][partNum - 1]) {
         points = savedQuestions[questionNum - 1][partNum - 1].points;
@@ -112,9 +112,9 @@ $(function() {
       resizeNav();
 
       // If we are recreating the UI, click on add part and add question as needed
-      if (savedQuestions[questionNum - 1] && 
+      if (savedQuestions[questionNum - 1] &&
         partNum < savedQuestions[questionNum - 1].length) {
-        
+
         // More parts exist for this question, so click on add part
         $questionList.children().eq(questionNum - 1).find('.add-part').click()
 
@@ -145,7 +145,7 @@ $(function() {
 
       var description = '';
       var points = '';
-      
+
       var rubrics;
       try {
         // This will fail if savedQuestions is undefined etc.
@@ -161,7 +161,7 @@ $(function() {
       } else if (rubricNum == 1) {
         description = 'Correct answer';
         points = 0;
-      } 
+      }
       // else if (rubricNum == 2) {
       //   description = 'Wrong answer';
       //   points = -10;
@@ -202,7 +202,7 @@ $(function() {
     // If the user clicked on either of them
     if (isArrowDown || isArrowUp) {
       event.preventDefault();
-      var $body = $target.parent().siblings('.question-body, .part-body'); 
+      var $body = $target.parent().siblings('.question-body, .part-body');
 
       // change icon and show/hide body
       if (isArrowDown) {
@@ -229,8 +229,8 @@ $(function() {
       var questionNum = parseInt($li.data('question'), 10);
       var partNum = parseInt($li.data('part'), 10);
       savedQuestions = createQuestionsList();
-      
-      
+
+
       if($li.hasClass('rubric-li')) {
         // Easy case where we just delete the rubric and return
         var rubricNum = $li.index() + 1;
@@ -274,8 +274,8 @@ $(function() {
     resizeNav();
   });
 
-  // Called when user is done creating the rubrics. We create the questions, 
-  // validate it and send it to the server
+  // Called when user is done creating the rubrics. We create the questions,
+  // validate them and send them to the server
   $doneRubric.click(function(event) {
     event.preventDefault();
     var questions = createQuestionsList();
@@ -295,6 +295,7 @@ $(function() {
       'gradeDown': gradeDown
     };
 
+    exam = convertKeysToUnderscore(exam);
     $('.exam-json-input').val(JSON.stringify(exam, null, 2));
     $('form').submit();
   });
@@ -307,7 +308,7 @@ $(function() {
     var $awardedOrDeducted = $('.awarded-or-deducted');
 
     if (gradeDown) {
-      $awardedOrDeducted.html('deducted');      
+      $awardedOrDeducted.html('deducted');
     } else {
       $awardedOrDeducted.html('awarded');
     }
@@ -337,7 +338,7 @@ $(function() {
     }
 
     // Right Arrow Key: Go back a page in the exam
-    if (event.keyCode == 39) { 
+    if (event.keyCode == 39) {
        imageLoader.$nextPage.click();
        return false;
     }
@@ -361,13 +362,13 @@ $(function() {
       // Get all the parts that belong to the current question
       var $parts = $questionList.children('li').eq(i)
                     .children('div').children('ul').children('li');
-      
+
       for (var j = 0; j < $parts.length; j++) {
         // By implementation, the first li corresponds to total points and pages
         // for the part we are currently on
         var points = $parts.eq(j).find('.points input').val();
         var pages = $parts.eq(j).find('.pages input').val();
-        
+
         // Convert CSV of pages to array of integers. First we get rid of the
         // whitespeaces. Then we split them from the commas, so that '1,2,3'
         // will now be ['1', '2', '3']
@@ -389,7 +390,7 @@ $(function() {
         for (var k = 0; k < $rubricsLi.length; k++) {
           var description = $rubricsLi.eq(k).find('.rubric-description').val();
           var rubricPoints = $rubricsLi.eq(k).find('.rubric-points').val();
-          
+
           rubrics.push({
             description: description,
             points: parseFloat(rubricPoints)

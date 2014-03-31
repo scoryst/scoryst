@@ -13,7 +13,7 @@ var CommentView = IdempotentView.extend({
   /* Initializes this comment. Requires a QuestionPartAnswer model. */
   initialize: function(options) {
     this.constructor.__super__.initialize.apply(this, arguments);
-    this.listenTo(this.model, 'change:grader_comments', this.render);   
+    this.listenTo(this.model, 'change:graderComments', this.render);
   },
 
   render: function() {
@@ -34,7 +34,7 @@ var CommentView = IdempotentView.extend({
     if (!comment) return;
     var self = this;
 
-    this.model.save({ grader_comments: comment }, {
+    this.model.save({ graderComments: comment }, {
       success: function() {
         self.showCommentSuccess();
         self.$('.save-comment').addClass('hidden');
@@ -55,7 +55,7 @@ var CommentView = IdempotentView.extend({
   /* Deletes the comment the user entered for the custom points field. */
   deleteComment: function(event) {
     event.preventDefault();
-    this.model.save({ grader_comments: null }, { wait: true });
+    this.model.save({ graderComments: null }, { wait: true });
 
     this.$('.save-comment').removeClass('hidden');
     this.$('.edit-comment').addClass('hidden');

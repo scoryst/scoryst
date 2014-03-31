@@ -102,10 +102,10 @@ var ExamPDFView = IdempotentView.extend({
     }
 
     var annotation = new AnnotationModel({
-      question_part_answer: this.model.id,
-      exam_page_number: this.curPageNum,
-      offset_left: examPDFX - this.CIRCLE_RADIUS,
-      offset_top: examPDFY - this.CIRCLE_RADIUS
+      questionPartAnswer: this.model.id,
+      examPageNumber: this.curPageNum,
+      offsetLeft: examPDFX - this.CIRCLE_RADIUS,
+      offsetTop: examPDFY - this.CIRCLE_RADIUS
     });
 
     this.annotations.add(annotation);
@@ -144,29 +144,29 @@ var ExamPDFView = IdempotentView.extend({
     }
 
     // otherwise, look for the previous part:
-    var curQuestionPart = this.model.get('question_part');
+    var curQuestionPart = this.model.get('questionPart');
     var previousQuestionPartAnswer;
 
-    if (curQuestionPart.part_number > 1) {
+    if (curQuestionPart.partNumber > 1) {
       // find the previous part in the current question
       previousQuestionPartAnswer = this.questionPartAnswers.filter(function(questionPartAnswer) {
-        var questionPart = questionPartAnswer.get('question_part');
-        return questionPart.question_number === curQuestionPart.question_number &&
-          questionPart.part_number === curQuestionPart.part_number - 1;
+        var questionPart = questionPartAnswer.get('questionPart');
+        return questionPart.questionNumber === curQuestionPart.questionNumber &&
+          questionPart.partNumber === curQuestionPart.partNumber - 1;
       });
 
       previousQuestionPartAnswer = previousQuestionPartAnswer[0];
     } else {
       // if there is no previous part, find the last part in the previous question
       previousQuestionPartAnswer = this.questionPartAnswers.filter(function(questionPartAnswer) {
-        var questionPart = questionPartAnswer.get('question_part');
-        return questionPart.question_number === curQuestionPart.question_number - 1;
+        var questionPart = questionPartAnswer.get('questionPart');
+        return questionPart.questionNumber === curQuestionPart.questionNumber - 1;
       });
 
       if (previousQuestionPartAnswer.length > 0) {
         // narrow down to last part
         previousQuestionPartAnswer = _.max(previousQuestionPartAnswer, function(questionPartAnswer) {
-          return questionPartAnswer.get('question_part').part_number;
+          return questionPartAnswer.get('questionPart').partNumber;
         });
       } else {
         // no previous question
@@ -190,13 +190,13 @@ var ExamPDFView = IdempotentView.extend({
     }
 
     // otherwise, look for the next part:
-    var curQuestionPart = this.model.get('question_part');
+    var curQuestionPart = this.model.get('questionPart');
 
     // find the next part in the current question
     var nextQuestionPartAnswer = this.questionPartAnswers.filter(function(questionPartAnswer) {
-      var questionPart = questionPartAnswer.get('question_part');
-      return questionPart.question_number === curQuestionPart.question_number &&
-        questionPart.part_number === curQuestionPart.part_number + 1;
+      var questionPart = questionPartAnswer.get('questionPart');
+      return questionPart.questionNumber === curQuestionPart.questionNumber &&
+        questionPart.partNumber === curQuestionPart.partNumber + 1;
     });
 
     nextQuestionPartAnswer = nextQuestionPartAnswer[0];
@@ -204,9 +204,9 @@ var ExamPDFView = IdempotentView.extend({
     // if that didn't work, find the next question
     if (!nextQuestionPartAnswer) {
       nextQuestionPartAnswer = this.questionPartAnswers.filter(function(questionPartAnswer) {
-        var questionPart = questionPartAnswer.get('question_part');
-        return questionPart.question_number === curQuestionPart.question_number + 1 &&
-          questionPart.part_number === 1;
+        var questionPart = questionPartAnswer.get('questionPart');
+        return questionPart.questionNumber === curQuestionPart.questionNumber + 1 &&
+          questionPart.partNumber === 1;
       });
 
       nextQuestionPartAnswer = nextQuestionPartAnswer[0];
@@ -220,7 +220,7 @@ var ExamPDFView = IdempotentView.extend({
   },
 
   setActiveQuestionPartAnswer: function(questionPartAnswer, pageIndex) {
-    var questionPart = questionPartAnswer.get('question_part');
+    var questionPart = questionPartAnswer.get('questionPart');
 
     // set instance variables associated with the active question part
     this.model = questionPartAnswer;
@@ -241,8 +241,8 @@ var ExamPDFView = IdempotentView.extend({
     // update displayed page
     var page = this.activeQuestionPartAnswerPages[this.activePageIndex];
     this.curPageNum = page;  // keep track of curPageNum for annotations.
-    this.imageLoader.showPage(page, questionPart.question_number,
-      questionPart.part_number);
+    this.imageLoader.showPage(page, questionPart.questionNumber,
+      questionPart.partNumber);
 
     this.renderAnnotations();
   },

@@ -13,7 +13,7 @@ var StudentSummaryView = IdempotentView.extend({
   },
 
   render: function(examID, courseUserGraded) {
-    // We store this to retrieve the exam_answer_id needed to go to the grade page
+    // We store this to retrieve the examAnswerId needed to go to the grade page
     this.courseUserGraded = courseUserGraded;
 
     this.questionPartAnswers = new QuestionPartAnswerCollection();
@@ -24,7 +24,7 @@ var StudentSummaryView = IdempotentView.extend({
 
     var $studentSummaryHeader = $('.student-summary-header');
     $studentSummaryHeader.html(
-      this.templates.studentHeadingTemplate({ name: courseUserGraded.full_name })
+      this.templates.studentHeadingTemplate({ name: courseUserGraded.fullName })
     );
 
     var $studentSummaryTable = $('.student-summary-table');
@@ -33,10 +33,10 @@ var StudentSummaryView = IdempotentView.extend({
       success: function() {
         var questionPartAnswers = self.questionPartAnswers.toJSON();
 
-        if (questionPartAnswers[0].no_mapped_exam) {
+        if (questionPartAnswers[0].noMappedExam) {
           $studentSummaryTable.html(self.templates.noExamTemplate());
-        } else if (questionPartAnswers[0].not_released) {
-          // Not released. Note that not_released will always return undefined
+        } else if (questionPartAnswers[0].notReleased) {
+          // Not released. Note that notReleased will always return undefined
           // if a TA/instructor is seeing this
           $studentSummaryTable.html(self.templates.notReleasedTemplate());
         } else {
@@ -70,6 +70,6 @@ var StudentSummaryView = IdempotentView.extend({
     $.cookie('activeQuestionNumber', questionNumber, { expires: 1, path: '/' });
     $.cookie('activePartNumber', partNumber, { expires: 1, path: '/' });
 
-    window.location = this.courseUserGraded.exam_answer_id;
+    window.location = this.courseUserGraded.examAnswerId;
   }
 });

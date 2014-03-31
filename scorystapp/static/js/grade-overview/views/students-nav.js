@@ -71,10 +71,10 @@ var StudentsNavView = IdempotentView.extend({
 
     var self = this;
     self.courseUsersGraded.forEach(function(courseUserGraded) {
-      var curQuestion = courseUserGraded.questions_info[self.selectedOptionValue];
-      if (!courseUserGraded.is_mapped) {
+      var curQuestion = courseUserGraded.questionsInfo[self.selectedOptionValue];
+      if (!courseUserGraded.isMapped) {
         numUnmapped++;
-      } else if (curQuestion.is_graded) {
+      } else if (curQuestion.isGraded) {
         numGraded++;
       } else {
         numUngraded++;
@@ -92,7 +92,7 @@ var StudentsNavView = IdempotentView.extend({
       numUnmapped: numUnmapped,
 
       selectedOptionValue: self.selectedOptionValue,
-      numQuestions: self.courseUsersGraded[0].questions_info.length
+      numQuestions: self.courseUsersGraded[0].questionsInfo.length
     }));
   },
 
@@ -123,11 +123,11 @@ var StudentsNavView = IdempotentView.extend({
 
     var self = this;
     this.courseUsersGraded.forEach(function(courseUserGraded) {
-      var curQuestion = courseUserGraded.questions_info[self.selectedOptionValue];
+      var curQuestion = courseUserGraded.questionsInfo[self.selectedOptionValue];
 
-      if ((curQuestion.is_graded && self.isGradedChecked) ||
-          (!curQuestion.is_graded && courseUserGraded.is_mapped && self.isUngradedChecked) ||
-          (!courseUserGraded.is_mapped && self.isUnmappedChecked)) {
+      if ((curQuestion.isGraded && self.isGradedChecked) ||
+          (!curQuestion.isGraded && courseUserGraded.isMapped && self.isUngradedChecked) ||
+          (!courseUserGraded.isMapped && self.isUnmappedChecked)) {
 
         courseUsersToDisplay.push({
           courseUser: courseUserGraded,

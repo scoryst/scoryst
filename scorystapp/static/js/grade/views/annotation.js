@@ -26,8 +26,8 @@ var AnnotationView = IdempotentView.extend({
     this.$el.html(this.template(annotation));
     this.$el.addClass('annotation');
     // Subtract 10 because of padding.
-    this.$el.css('top', annotation.offset_top - 10 + 'px');
-    this.$el.css('left', annotation.offset_left - 10 + 'px');
+    this.$el.css('top', annotation.offsetTop - 10 + 'px');
+    this.$el.css('left', annotation.offsetLeft - 10 + 'px');
     var self = this;
 
     // Add unsaved comment from previous annotation, if any.
@@ -50,8 +50,8 @@ var AnnotationView = IdempotentView.extend({
           // TODO: Success / error functions for saving offset?
           self.model.save({
             // Add 10 because of padding.
-            offset_top: parseFloat(self.$el.css('top')) + 10,
-            offset_left: parseFloat(self.$el.css('left')) + 10
+            offsetTop: parseFloat(self.$el.css('top')) + 10,
+            offsetLeft: parseFloat(self.$el.css('left')) + 10
           }, {});
 
           // Reopen the annotation.

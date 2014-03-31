@@ -68,8 +68,8 @@ var StudentNavView = IdempotentView.extend({
 
       dataType: 'json',
       success: function(data) {
-        var studentPath = data.student_path;
-        var studentName = data.student_name;
+        var studentPath = data.studentPath;
+        var studentName = data.studentName;
 
         if (studentPath !== window.location.pathname) {
           // update URL with history API; fall back to standard redirect
@@ -124,7 +124,7 @@ var StudentNavView = IdempotentView.extend({
       case this.DOWN_ARROW_KEY_CODE:
         if (event.shiftKey) {
           event.preventDefault();
-          this.goToNextStudent();          
+          this.goToNextStudent();
         }
         break;
     }

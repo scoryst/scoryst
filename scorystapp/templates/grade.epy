@@ -161,8 +161,8 @@
   <div class="toggle-exam-nav">
     <h3 class="nav-title">
       Exam
-      <% if (is_exam_graded) { %>
-        <span class="green">(<%= exam_points %> / <%= exam_max_points %>)</span>
+      <% if (isExamGraded) { %>
+        <span class="green">(<%= examPoints %> / <%= examMaxPoints %>)</span>
       <% } else { %>
         <span class="red">(ungraded)</span>
       <% } %>
@@ -173,22 +173,22 @@
   </div>
 
   <p class="active-question-part">
-    Grading question <%= active_question_part_answer.question_part.question_number %>,
-    part <%= active_question_part_answer.question_part.part_number %>
+    Grading question <%= activeQuestionPartAnswer.questionPart.questionNumber %>,
+    part <%= activeQuestionPartAnswer.questionPart.partNumber %>
   </p>
 
   <ul>
-    <% for (var i = 0; i < question_part_answers.length; i++) { %>
-      <% var question_part = question_part_answers[i].question_part; %>
-      <% if (question_part.starts_new_question) { %>
-        <li>Question <%= question_part.question_number %></li>
+    <% for (var i = 0; i < questionPartAnswers.length; i++) { %>
+      <% var questionPart = questionPartAnswers[i].questionPart; %>
+      <% if (questionPart.startsNewQuestion) { %>
+        <li>Question <%= questionPart.questionNumber %></li>
       <% } %>
 
-      <li <% if (question_part_answers[i].active) { %> class="active" <% } %> >
-        <a href="#" data-question-part-answer="<%= question_part_answers[i].id %>">
-          Part <%= question_part.part_number %>:
-          <% if (question_part_answers[i].is_graded) { %>
-            <%= question_part_answers[i].points %> / <%= question_part.max_points %>
+      <li <% if (questionPartAnswers[i].active) { %> class="active" <% } %> >
+        <a href="#" data-question-part-answer="<%= questionPartAnswers[i].id %>">
+          Part <%= questionPart.partNumber %>:
+          <% if (questionPartAnswers[i].isGraded) { %>
+            <%= questionPartAnswers[i].points %> / <%= questionPart.maxPoints %>
           <% } else { %>
             ungraded
           <% } %>
@@ -214,9 +214,9 @@
 
   <strong class="<%= color %>">
     <% if (editing) { %>
-      <input type="text" name="points" class="form-control rubric-points" value="<%= display_points %>" />
+      <input type="text" name="points" class="form-control rubric-points" value="<%= displayPoints %>" />
     <% } else { %>
-      <%= display_points %>
+      <%= displayPoints %>
     <% } %>
   </strong>
 </script>
@@ -224,26 +224,26 @@
 <script type="text/template" class="custom-points-template">
   Custom points
   {% if not is_student_view %}
-      <input class="form-control custom-points" type="text" value="<%= custom_points %>" />
+      <input class="form-control custom-points" type="text" value="<%= customPoints %>" />
   {% else %}
-      <input class="form-control custom-points" type="text" value="<%= custom_points %>" disabled="true" />
+      <input class="form-control custom-points" type="text" value="<%= customPoints %>" disabled="true" />
   {% endif %}
 </script>
 
 <script type="text/template" class="comment-template">
 
   {% if not is_student_view %}
-      <textarea class="form-control comment-textarea" placeholder="Add comment" <% if (grader_comments) { %> disabled="true" <% } %> ><%= grader_comments %></textarea>
+      <textarea class="form-control comment-textarea" placeholder="Add comment" <% if (graderComments) { %> disabled="true" <% } %> ><%= graderComments %></textarea>
   {% else %}
-      <textarea class="form-control comment-textarea" disabled="true"><%= grader_comments %></textarea>
+      <textarea class="form-control comment-textarea" disabled="true"><%= graderComments %></textarea>
   {% endif %}
 
   {% if not is_student_view %}
-      <button class="btn btn-sm btn-primary save-comment <% if (grader_comments) { %> hidden <% } %>">Save comment</button>
-      <button class="btn btn-sm btn-primary edit-comment <% if (!grader_comments) { %> hidden <% } %>">Edit comment</button>
+      <button class="btn btn-sm btn-primary save-comment <% if (graderComments) { %> hidden <% } %>">Save comment</button>
+      <button class="btn btn-sm btn-primary edit-comment <% if (!graderComments) { %> hidden <% } %>">Edit comment</button>
       <i class="fa fa-check comment-success"></i>
 
-      <a href="#" class="delete-comment <% if (!grader_comments) { %> hidden <% } %>">
+      <a href="#" class="delete-comment <% if (!graderComments) { %> hidden <% } %>">
         <i class="fa fa-trash-o fa-lg"></i>
       </a>
   {% endif %}
@@ -258,16 +258,16 @@
   </h3>
 
   <span class="points">
-    <% if (is_graded) { %>
+    <% if (isGraded) { %>
       <%= points %>
     <% } else { %>
       -
     <% } %>
-    / <%= question_part.max_points %>
+    / <%= questionPart.maxPoints %>
   </span>
 
-  <% if (is_graded) { %>
-    <span class="grader">(Grader: <%= grader_name %>)</span>
+  <% if (isGraded) { %>
+    <span class="grader">(Grader: <%= graderName %>)</span>
   <% } %>
 </script>
 

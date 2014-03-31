@@ -203,11 +203,11 @@
   <li <% if (index == 0) { %>class="active"<% } %> >
     <a href="" data-course-user-id="<%= courseUserInfo.courseUser.id %>" class="name">
       <% with (courseUserInfo) { %>
-        <%= courseUser.full_name %>
+        <%= courseUser.fullName %>
         <span class="graded">
-          <% if (!courseUser.is_mapped) { %>
+          <% if (!courseUser.isMapped) { %>
             no exam
-          <% } else if (courseUser.questions_info[selectedOptionValue].is_graded) { %>
+          <% } else if (courseUser.questionsInfo[selectedOptionValue].isGraded) { %>
             graded
           <% } else { %>
             ungraded
@@ -218,10 +218,10 @@
           <%= courseUser.email %>
         </span>
         <span class="id">
-          ID: <%= courseUser.student_id %>
+          ID: <%= courseUser.studentId %>
         </span>
         <span class="graders">
-          <%= courseUser.questions_info[selectedOptionValue].graders %>
+          <%= courseUser.questionsInfo[selectedOptionValue].graders %>
         </span>
       <% } %>
     </a>

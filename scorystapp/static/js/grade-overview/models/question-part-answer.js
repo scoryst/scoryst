@@ -73,14 +73,14 @@ var QuestionPartAnswerCollection = Backbone.Collection.extend({
 
     for (var i = 0; i < questionPartAnswers.length; i++) {
       var curQuestionPart = questionPartAnswers[i];
-      var questionNumber = curQuestionPart.question_part.question_number;
+      var questionNumber = curQuestionPart.questionPart.questionNumber;
 
       var part = {
-        isGraded: curQuestionPart.is_graded,
-        partNumber: curQuestionPart.question_part.part_number,
+        isGraded: curQuestionPart.isGraded,
+        partNumber: curQuestionPart.questionPart.partNumber,
         points: curQuestionPart.points,
-        maxPoints: curQuestionPart.question_part.max_points,
-        grader: curQuestionPart.grader_name
+        maxPoints: curQuestionPart.questionPart.maxPoints,
+        grader: curQuestionPart.graderName
       };
 
       question.parts.push(part);
@@ -96,7 +96,7 @@ var QuestionPartAnswerCollection = Backbone.Collection.extend({
       // If we're at a new question or are done, push the previous question
       // and perform necessary computations
       if (i === questionPartAnswers.length - 1 ||
-        questionPartAnswers[i + 1].question_part.question_number !== questionNumber) {
+        questionPartAnswers[i + 1].questionPart.questionNumber !== questionNumber) {
         points += question.points;
         maxPoints += question.maxPoints;
         isGraded = isGraded && question.isGraded;

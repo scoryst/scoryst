@@ -33,12 +33,12 @@ var ExamNavView = IdempotentView.extend({
     var examPoints = 0;
 
     questionPartAnswers.forEach(function(questionPartAnswer) {
-      var questionPart = questionPartAnswer.question_part;
+      var questionPart = questionPartAnswer.questionPart;
 
       // mark question separators
-      if (questionPart.question_number !== lastQuestionNum) {
-        lastQuestionNum = questionPart.question_number;
-        questionPart.starts_new_question = true;
+      if (questionPart.questionNumber !== lastQuestionNum) {
+        lastQuestionNum = questionPart.questionNumber;
+        questionPart.startsNewQuestion = true;
       }
 
       // mark active question part answer
@@ -47,21 +47,21 @@ var ExamNavView = IdempotentView.extend({
       }
 
       // compute overall exam statistics
-      // TODO: change this to is_graded once Catherine is done
-      isExamGraded = isExamGraded && questionPartAnswer.is_graded;
-      examMaxPoints += questionPart.max_points;
+      // TODO: change this to isGraded once Catherine is done
+      isExamGraded = isExamGraded && questionPartAnswer.isGraded;
+      examMaxPoints += questionPart.maxPoints;
 
-      if (questionPartAnswer.is_graded) {
+      if (questionPartAnswer.isGraded) {
         examPoints += questionPartAnswer.points;
       }
     });
 
     var templateData = {
-      is_exam_graded: isExamGraded,
-      exam_max_points: examMaxPoints,
-      exam_points: examPoints,
-      active_question_part_answer: activeQuestionPartAnswer,
-      question_part_answers: questionPartAnswers
+      isExamGraded: isExamGraded,
+      examMaxPoints: examMaxPoints,
+      examPoints: examPoints,
+      activeQuestionPartAnswer: activeQuestionPartAnswer,
+      questionPartAnswers: questionPartAnswers
     };
     this.$el.html(this.template(templateData));
 
