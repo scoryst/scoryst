@@ -300,13 +300,8 @@ footer .amp {
   background: #f6f6f6;
 }
 
-.previous-page.disabled:hover, .next-page.disabled:hover {
-  cursor: not-allowed;
-}
-
 .previous-page.disabled, .next-page.disabled {
-  background-color: #ecf0f1;
-  color: #adadad;
+  visibility: hidden;
 }
 
 .previous-page {
