@@ -15,7 +15,8 @@ def grade(request, cur_course_user, exam_answer_id):
     'course_user': cur_course_user,
     'course': cur_course_user.course.name,
     'student_name': exam_answer.course_user.user.get_full_name(),
-    'solutions_exist': bool(exam_answer.exam.solutions_pdf.name)
+    'solutions_exist': bool(exam_answer.exam.solutions_pdf.name),
+    'is_grade_page': True
   })
   
 

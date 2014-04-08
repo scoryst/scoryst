@@ -4,13 +4,15 @@ $(function() {
   var curExamId = $exams.find('li.active a').attr('data-exam-id');
   
   var $statisticsTemplate = $('.statistics-template');
-  var $statisticsTable = $('.table-container');
+  var $noStatisticsTemplate = $('.no-statistics-template');
+  var $examStatistics = $('.exam-statistics');
   var $histogramHeader = $('.histogram-header');
 
   var curQuestionNum = 0;
   var curPartNum = 0;
 
   var templates = {
+    renderNoStatisticsTemplate: _.template($noStatisticsTemplate.html()),
     renderStatisticsTemplate: _.template($statisticsTemplate.html())
   };
   
@@ -20,7 +22,11 @@ $(function() {
       url: curExamId + '/get-statistics/',
       dataType: 'json'
     }).done(function(data) {
-      $statisticsTable.html(templates.renderStatisticsTemplate(data));
+      if (data.questionStatistics.length === 0) {
+        $examStatistics.html(templates.renderNoStatisticsTemplate());
+      } else {
+        $examStatistics.html(templates.renderStatisticsTemplate(data));        
+      }
       window.resizeNav();
     }).fail(function(request, error) {
       console.log('Error while getting exams overview data: ' + error);
@@ -118,7 +124,7 @@ $(function() {
   renderStatistics();
   renderHistogram();
   
-  $statisticsTable.on('click', 'tr', function(event) {
+  $examStatistics.on('click', 'tr', function(event) {
     event.preventDefault();
     var $tr = $(event.currentTarget);
     var questionNumber = $tr.find('.question-number').html();

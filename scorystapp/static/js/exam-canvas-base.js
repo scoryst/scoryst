@@ -22,7 +22,7 @@ var ExamCanvasBaseView = IdempotentView.extend({
     this.$examCanvas = this.$el.find('.exam-canvas');
     this.$previousPage = this.$el.find('.previous-page');
     this.$nextPage = this.$el.find('.next-page');
-    this.$examImage = this.$examCanvas.find('img');
+    this.$examImage = this.$examCanvas.find('.exam-image');
     if (this.$examImage.length === 0) {
       this.$examImage = $('<img class="exam-image" alt="Exam" />').appendTo(this.$examCanvas);
     }

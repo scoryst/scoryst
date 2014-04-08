@@ -7,10 +7,25 @@ var ExamCanvasGradeView = ExamCanvasBaseView.extend({
 
     this.$previousPage = this.$el.find('.previous-page');
     this.$nextPage = this.$el.find('.next-page');
+    this.$previousAnnotationInfoButton = this.$el.find('button.previous');
+    this.$nextAnnotationInfoButton = this.$el.find('button.next');
     this.questionPartAnswers = options.questionPartAnswers;
     this.setQuestionPartAnswer(options.questionPartAnswer, 0);
 
     this.render();
+
+    // custom events for going through info about annotations
+    var self = this;
+    this.listenToDOM(this.$el.find('.annotation-info-modal'), 'show.bs.modal', function() {
+      var $allAnnotationInfo = self.$el.find('.annotation-info li');
+      $allAnnotationInfo.hide();
+      self.$currAnnotationInfo = $allAnnotationInfo.eq(0);
+      self.$currAnnotationInfo.show();
+      self.$nextAnnotationInfoButton.show();
+      self.$previousAnnotationInfoButton.hide();
+    });
+    this.listenToDOM(this.$previousAnnotationInfoButton, 'click', this.goToPreviousAnnotationInfo);
+    this.listenToDOM(this.$nextAnnotationInfoButton, 'click', this.goToNextAnnotationInfo);
 
     // mediator events
     this.listenTo(Mediator, 'changeQuestionPartAnswer',
@@ -201,5 +216,25 @@ var ExamCanvasGradeView = ExamCanvasBaseView.extend({
           '/' + questionPart.partNumber + '/';
       }
     }
+  },
+
+  goToNextAnnotationInfo: function() {
+    this.$currAnnotationInfo.hide();
+    this.$currAnnotationInfo = this.$currAnnotationInfo.next();
+    this.$currAnnotationInfo.show();
+    if (this.$currAnnotationInfo.next().length === 0) {
+      this.$nextAnnotationInfoButton.hide();
+    }
+    this.$previousAnnotationInfoButton.show();
+  },
+
+  goToPreviousAnnotationInfo: function() {
+    this.$currAnnotationInfo.hide();
+    this.$currAnnotationInfo = this.$currAnnotationInfo.prev();
+    this.$currAnnotationInfo.show();
+    if (this.$currAnnotationInfo.prev().length === 0) {
+      this.$previousAnnotationInfoButton.hide();
+    }
+    this.$nextAnnotationInfoButton.show();
   }
 });

@@ -20,9 +20,6 @@
       <h2>
         Statistics
       </h2>
-      <p>
-      Click on any of the rows to see the histogram corresponding to it.
-      </p>
     </div>
     <div class="col-xs-6">
       <h2 class="histogram-header">
@@ -31,11 +28,8 @@
     </div>
   </div>
   <div class="row">
-    <div class="col-xs-6 exam-summary">
-      
-      <div class="table-container">
-        <!-- Statistics info to be added in with template. -->
-      </div>
+    <div class="col-xs-6 exam-statistics">
+      <!-- Statistics info to be added in with template. -->
     </div>
     <div class="col-xs-6 histogram-div">
       <canvas id="histogram"></canvas>
@@ -43,62 +37,69 @@
   </div>
 </div>
 
+<script type="text/template" class="no-statistics-template">
+  <p>There are no graded exams.</p>
+</script>
+
 <script type="text/template" class="statistics-template">
-  <table class="table table-condensed">
-    <thead>
-      <tr>
-        <th></th>
-        <th>Question</th>
-        <th>Part</th>
-        <th>Mean</th>
-        <th>Median</th>
-        <th>Std Dev</th>
-        <th>Min</th>
-        <th>Max</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% for (var i = 0; i < questionStatistics.length; i++) { %>
-      <tr class="row-body question">
-        <td>
-          <a class="toggle" href="#"><i class="fa fa-chevron-down"></i></a>
-          <a class="toggle collapse" href="#"><i class="fa fa-chevron-up"></i></a>
-        </td>
-        <td class="question-number"><%= questionStatistics[i].questionNumber %></td>
-        <td>-</td>
-        <td><%= questionStatistics[i].mean %></td>
-        <td><%= questionStatistics[i].median %></td>
-        <td><%= questionStatistics[i].stdDev %></td>
-        <td><%= questionStatistics[i].min %></td>
-        <td><%= questionStatistics[i].max %></td>
-        
-      </tr>
-        <% var questionPartStatistics = questionStatistics[i].questionPartStatistics; %>
-        <% for (var j = 0; j < questionPartStatistics.length; j++) { %>
-        <tr class="row-body question-part" data-question=<%= questionPartStatistics[j].questionNumber %>>
-          <td></td>
-          <td class="question-number"><%= questionPartStatistics[j].questionNumber %></td>
-          <td class="part-number"><%= questionPartStatistics[j].partNumber %></td>
-          <td><%= questionPartStatistics[j].mean %></td>
-          <td><%= questionPartStatistics[j].median %></td>
-          <td><%= questionPartStatistics[j].stdDev %></td>
-          <td><%= questionPartStatistics[j].min %></td>
-          <td><%= questionPartStatistics[j].max %></td>
+  <p>Click on any of the rows to see the histogram corresponding to it.</p>
+  <div class="table-container">
+    <table class="table table-condensed">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Question</th>
+          <th>Part</th>
+          <th>Mean</th>
+          <th>Median</th>
+          <th>Std Dev</th>
+          <th>Min</th>
+          <th>Max</th>
         </tr>
-        <% } %>
-      <% } %>
-      <tr class="row-body question selected">
-        <td></td>
-        <td class="question-number total">Total</td>
-        <td>-</td>
-        <td><%= examStatistics.mean %></td>
-        <td><%= examStatistics.median %></td>
-        <td><%= examStatistics.stdDev %></td>
-        <td><%= examStatistics.min %></td>
-        <td><%= examStatistics.max %></td>
-      </tr>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% questionStatistics.forEach(function(statistics) { %>
+        <tr class="row-body question">
+          <td>
+            <a class="toggle" href="#"><i class="fa fa-chevron-down"></i></a>
+            <a class="toggle collapse" href="#"><i class="fa fa-chevron-up"></i></a>
+          </td>
+          <td class="question-number"><%= statistics.questionNumber %></td>
+          <td>-</td>
+          <td><%= statistics.mean %></td>
+          <td><%= statistics.median %></td>
+          <td><%= statistics.stdDev %></td>
+          <td><%= statistics.min %></td>
+          <td><%= statistics.max %></td>
+          
+        </tr>
+          <% var questionPartStatistics = statistics.questionPartStatistics; %>
+          <% questionPartStatistics.forEach(function(partStatistics) { %>
+          <tr class="row-body question-part" data-question=<%= partStatistics.questionNumber %>>
+            <td></td>
+            <td class="question-number"><%= partStatistics.questionNumber %></td>
+            <td class="part-number"><%= partStatistics.partNumber %></td>
+            <td><%= partStatistics.mean %></td>
+            <td><%= partStatistics.median %></td>
+            <td><%= partStatistics.stdDev %></td>
+            <td><%= partStatistics.min %></td>
+            <td><%= partStatistics.max %></td>
+          </tr>
+          <% }); %>
+        <% }); %>
+        <tr class="row-body question selected">
+          <td></td>
+          <td class="question-number total">Total</td>
+          <td>-</td>
+          <td><%= examStatistics.mean %></td>
+          <td><%= examStatistics.median %></td>
+          <td><%= examStatistics.stdDev %></td>
+          <td><%= examStatistics.min %></td>
+          <td><%= examStatistics.max %></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </script>
 
 {% endblock %}

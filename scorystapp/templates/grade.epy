@@ -56,12 +56,12 @@
         {% endif %}
       </div>
 
-      <a href="#" class="keyboard-shortcuts" data-toggle="modal" data-target="#keyboard-shortcuts">
+      <a href="#" data-toggle="modal" data-target=".keyboard-shortcuts">
         <i class="fa fa-keyboard-o left-icon"></i>
         View keyboard shortcuts
       </a>
 
-      <div class="modal fade" id="keyboard-shortcuts" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal fade keyboard-shortcuts" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-body">
@@ -191,7 +191,7 @@
 
 <script type="text/template" class="rubric-template">
   <% if (editing) { %>
-    <input type="text" name="description" class="form-control rubric-description" value="<%= description %>" />
+    <input type="text" name="description" class="form-control rubric-description" value="<%= description  %>" />
   <% } else { %>
     <%= description %>
   <% } %>
