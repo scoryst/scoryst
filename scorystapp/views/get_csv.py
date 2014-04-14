@@ -21,11 +21,8 @@ def get_csv(request, cur_course_user, exam_id):
 
   response['Content-Disposition'] = 'attachment; filename="%s"' % filename
 
-  question_parts = models.QuestionPart.objects.filter(exam=exam).order_by('-question_number')
-  if question_parts.count() > 0:
-    num_questions  = question_parts[0].question_number
-  else:
-    num_questions = 0
+  question_parts = exam.get_prefetched_question_parts().order_by('-question_number')
+  num_questions = exam.get_num_questions()
 
   fieldnames=['Last Name', 'First Name', 'ID', 'Email', 'Total Score']
   for i in range(num_questions):
@@ -33,18 +30,15 @@ def get_csv(request, cur_course_user, exam_id):
 
   writer = csv.DictWriter(response, fieldnames=fieldnames)
 
-  exam_answers = models.ExamAnswer.objects.filter(exam=exam, preview=False
-    ).order_by('course_user__user__last_name', 'course_user__user__first_name')
+  exam_answers = exam.get_prefetched_exam_answers().prefetch_related(
+    'course_user__user').order_by('course_user__user__last_name',
+    'course_user__user__first_name')
 
   writer.writeheader()
 
   for exam_answer in exam_answers:
     user = exam_answer.course_user.user if exam_answer.course_user else None
-    is_entire_exam_graded = exam_answer.is_graded()
-    score = exam_answer.get_points()
-
-    if not is_entire_exam_graded:
-      score = 'ungraded'
+    score = exam_answer.get_points() if exam_answer.is_graded() else 'ungraded'
 
     row = {
       'Last Name': user.last_name if user else 'unmapped',

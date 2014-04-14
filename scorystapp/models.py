@@ -224,6 +224,7 @@ class Exam(models.Model):
       'questionpartanswer_set__exam_answer__exam'
     )
 
+
   def __unicode__(self):
     return '%s (%s)' % (self.name, self.course.name)
 
