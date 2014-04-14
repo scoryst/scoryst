@@ -420,9 +420,8 @@ class QuestionPartAnswer(models.Model):
 
 
 class Annotation(models.Model):
-  """ Represents an annotation for a student's exam answer page and question/part. """
+  """ Represents an annotation for a student's exam answer page. """
   exam_answer_page = models.ForeignKey(ExamAnswerPage, db_index=True)
-  question_part_answer = models.ForeignKey(QuestionPartAnswer, db_index=True)
 
   # One of the rubric and comment fields should not be null
   rubric = models.ForeignKey(Rubric, null=True, blank=True, db_index=True)

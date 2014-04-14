@@ -171,7 +171,6 @@
   {% include 'backbone.epy' %}
   <script src="/static/js/backbone-commons/idempotent.js"></script>
   <script src="/static/js/zoom-lens.js"></script>
-  <script src="/static/js/exam-canvas-base.js"></script>
   <script src="/static/js/exam-canvas.js"></script>
 
   <script src="/static/js/create-exam.js"></script>

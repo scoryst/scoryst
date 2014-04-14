@@ -319,7 +319,7 @@
 <script src="/static/js/backbone-commons/mediator.js"></script>
 <script src="/static/js/backbone-commons/utils.js"></script>
 
-<script src="/static/js/exam-canvas-base.js"></script>
+<script src="/static/js/exam-canvas.js"></script>
 <script src="/static/js/zoom-lens.js"></script>
 <script src="/static/js/grade/models/question-part-answer.js"></script>
 <script src="/static/js/grade/models/rubric.js"></script>

@@ -126,28 +126,24 @@ def manage_rubric(request, cur_course_user, exam_answer_id, question_part_answer
 @rest_decorators.api_view(['GET', 'POST'])
 @decorators.access_controlled
 @decorators.student_required
-def list_annotations(request, cur_course_user, exam_answer_id, question_part_answer_id, exam_page_number):
-  """ Returns a list of Annotations for the provided Exam and QuestionPartAnswer """
-  question_part_answer = shortcuts.get_object_or_404(models.QuestionPartAnswer, pk=question_part_answer_id)
+def list_annotations(request, cur_course_user, exam_answer_id, exam_page_number):
+  """ Returns a list of Annotations for the provided exam answer and page number """
   exam_answer_page = shortcuts.get_object_or_404(models.ExamAnswerPage,
     exam_answer=exam_answer_id, page_number=int(exam_page_number))
 
   if request.method == 'GET':
-    annotations = models.Annotation.objects.filter(exam_answer_page=exam_answer_page,
-      question_part_answer=question_part_answer)
+    annotations = models.Annotation.objects.filter(exam_answer_page=exam_answer_page)
     serializer = serializers.AnnotationSerializer(annotations, many=True)
 
     return response.Response(serializer.data)
   elif request.method == 'POST':
     request.DATA['exam_answer_page'] = exam_answer_page.pk
 
-    # Get these objects to be validated in the serializer methods against those
-    # in the PUT/POST body i.e. in request.DATA. The context
-    # question_part_answer is already validated against the exam_answer and
-    # cur_course_user from the decorator. The request.DATA exam_answer_page is
-    # already validated, since otherwise getting the object would 404.
-    serializer = serializers.AnnotationSerializer(data=request.DATA, context={
-      'question_part_answer': question_part_answer, 'exam_answer_page': exam_answer_page })
+    # The exam answer page is used by the serializer to validate user input.
+    # Note that exam_answer_page is already validated, since otherwise getting
+    # the object would 404.
+    serializer = serializers.AnnotationSerializer(data=request.DATA,
+      context={ 'exam_answer_page': exam_answer_page })
     if serializer.is_valid():
       serializer.save()
       return response.Response(serializer.data)
@@ -157,7 +153,7 @@ def list_annotations(request, cur_course_user, exam_answer_id, question_part_ans
 @rest_decorators.api_view(['GET', 'PUT', 'DELETE'])
 @decorators.access_controlled
 @decorators.student_required
-def manage_annotation(request, cur_course_user, exam_answer_id, question_part_answer_id, exam_page_number, annotation_id):
+def manage_annotation(request, cur_course_user, exam_answer_id, exam_page_number, annotation_id):
   """ Manages a single Annotation by allowing reads/updates. """
   annotation = shortcuts.get_object_or_404(models.Annotation, pk=annotation_id)
   if request.method == 'GET':
@@ -168,16 +164,12 @@ def manage_annotation(request, cur_course_user, exam_answer_id, question_part_an
     if cur_course_user.privilege == models.CourseUser.STUDENT:
       return response.Response(status=403)
 
-    # Get these objects to be validated in the serializer methods against those
-    # in the PUT/POST body i.e. in request.DATA. The context
-    # question_part_answer is already validated against the exam_answer and
-    # cur_course_user from the decorator.
-    question_part_answer = shortcuts.get_object_or_404(models.QuestionPartAnswer, pk=question_part_answer_id)
+    # The exam answer page is used by the serializer to validate user input.
     exam_answer_page = shortcuts.get_object_or_404(models.ExamAnswerPage,
       exam_answer=exam_answer_id, page_number=int(exam_page_number))
 
-    serializer = serializers.AnnotationSerializer(annotation, data=request.DATA, context={
-      'question_part_answer': question_part_answer, 'exam_answer_page': exam_answer_page })
+    serializer = serializers.AnnotationSerializer(annotation, data=request.DATA,
+      context={ 'exam_answer_page': exam_answer_page })
     if serializer.is_valid():
       serializer.save()
       return response.Response(serializer.data)

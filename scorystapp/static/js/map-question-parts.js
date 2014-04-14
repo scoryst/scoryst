@@ -18,6 +18,7 @@ $(function() {
     el: '.exam',
     preloadCurExam: 2
   });
+  examCanvasView.render();
 
   initTypeAhead();
   getAllQuestionParts();

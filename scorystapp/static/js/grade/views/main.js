@@ -48,8 +48,7 @@ var MainView = IdempotentView.extend({
   renderExamPDF: function(questionPartAnswer) {
     var examPDFView = new ExamPDFView({
       el: this.$('.exam'),
-      model: questionPartAnswer,
-      questionPartAnswers: this.questionPartAnswers
+      model: questionPartAnswer
     });
 
     this.registerSubview(examPDFView);

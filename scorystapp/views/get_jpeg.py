@@ -43,7 +43,9 @@ def get_offset_student_jpeg(request, cur_course_user, exam_answer_id, offset, pa
   shortcuts.get_object_or_404(models.ExamAnswer, pk=exam_answer_id)
 
   next_exam_answer = grade.get_offset_student_exam(exam_answer_id, offset)
-  return get_exam_jpeg(request, cur_course_user, next_exam_answer.pk, page_number)
+  exam_page = shortcuts.get_object_or_404(models.ExamAnswerPage, exam_answer=next_exam_answer,
+    page_number=page_number)
+  return shortcuts.redirect(exam_page.page_jpeg.url)
 
 
 @decorators.access_controlled
@@ -96,5 +98,6 @@ def get_offset_student_jpeg_with_question_number(request, cur_course_user, exam_
   question_part_answer = shortcuts.get_object_or_404(models.QuestionPartAnswer,
     exam_answer=next_exam_answer, question_part=question_part)
 
-  return get_exam_jpeg(request, cur_course_user, next_exam_answer.pk, 
-    int(question_part_answer.pages.split(',')[0]))
+  exam_page = shortcuts.get_object_or_404(models.ExamAnswerPage, exam_answer=next_exam_answer,
+    page_number=int(question_part_answer.pages.split(',')[0]))
+  return shortcuts.redirect(exam_page.page_jpeg.url)

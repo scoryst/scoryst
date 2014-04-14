@@ -22,13 +22,11 @@ var AnnotationCollection = Backbone.Collection.extend({
   model: AnnotationModel,
 
   initialize: function(models, options) {
-    this.questionPartAnswer = options.questionPartAnswer.id;
     this.examPageNumber = options.examPageNumber;
   },
 
   url: function() {
-    return window.location.href + 'question-part-answer/' + this.questionPartAnswer +
-      '/exam-page/' + this.examPageNumber + '/annotation/';
+    return window.location.href + 'exam-page/' + this.examPageNumber + '/annotation/';
   },
 
   sync: function(method, model, options) {

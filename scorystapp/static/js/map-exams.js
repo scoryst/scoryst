@@ -10,6 +10,7 @@ $(function() {
     preloadOtherStudentExams: 2,
     preloadCurExam: 1
   });
+  examCanvasView.render();
 
   initTypeAhead();
   getAllExams();

@@ -10,11 +10,8 @@ var ExamPDFView = IdempotentView.extend({
   initialize: function(options) {
     this.constructor.__super__.initialize.apply(this, arguments);
 
-    this.questionPartAnswers = options.questionPartAnswers;
-
     this.examCanvasGradeView = new ExamCanvasGradeView({
       questionPartAnswer: this.model,
-      questionPartAnswers: this.questionPartAnswers,
       preloadOtherStudentExams: 2,
       preloadCurExam: 2,
       el: '.exam'
@@ -35,14 +32,10 @@ var ExamPDFView = IdempotentView.extend({
 
     var curPageNum = this.examCanvasGradeView.getCurPageNum();
     this.annotationViews = [];
-    this.fetchAnnotations(this.model, curPageNum, function(annotations) {
+    this.fetchAnnotations(curPageNum, function(annotations) {
       self.annotations = annotations;
       annotations.forEach(function(annotation) {
-        var annotationView = new AnnotationView({
-          questionPartAnswer: self.model,
-          model: annotation,
-          curPageNumber: curPageNum
-        });
+        var annotationView = new AnnotationView({ model: annotation });
 
         self.$el.children('.exam-canvas').prepend(annotationView.render().$el);
         self.registerSubview(annotationView);
@@ -84,7 +77,6 @@ var ExamPDFView = IdempotentView.extend({
     }
 
     var annotation = new AnnotationModel({
-      questionPartAnswer: this.model.id,
       examPageNumber: this.examCanvasGradeView.getCurPageNum(),
       offsetLeft: examPDFX - this.CIRCLE_RADIUS,
       offsetTop: examPDFY - this.CIRCLE_RADIUS
@@ -105,9 +97,8 @@ var ExamPDFView = IdempotentView.extend({
     this.registerSubview(annotationView);
   },
 
-  fetchAnnotations: function(questionPartAnswer, curPageNum, callback) {
+  fetchAnnotations: function(curPageNum, callback) {
     var annotations = new AnnotationCollection({}, {
-      questionPartAnswer: questionPartAnswer,
       examPageNumber: curPageNum
     });
 
@@ -118,8 +109,7 @@ var ExamPDFView = IdempotentView.extend({
     });
   },
 
-  changeExamPage: function(curPageNum, questionPartAnswer) {
-    this.model = questionPartAnswer;
+  changeExamPage: function() {
     this.renderAnnotations();
   }
 });

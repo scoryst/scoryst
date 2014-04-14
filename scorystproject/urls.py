@@ -130,9 +130,9 @@ urlpatterns = patterns('',
   url(r'^course/(?P<course_id>\d+)/grade/(?P<exam_answer_id>\d+)/get-next-student/$',
     'scorystapp.views.grade.get_next_student'),
 
-  url(r'^course/(?P<course_id>\d+)/(grade|exams/view|exams/preview)/(?P<exam_answer_id>\d+)/question-part-answer/(?P<question_part_answer_id>\d+)/exam-page/(?P<exam_page_number>\d+)/annotation/$',
+  url(r'^course/(?P<course_id>\d+)/(grade|exams/view|exams/preview)/(?P<exam_answer_id>\d+)/exam-page/(?P<exam_page_number>\d+)/annotation/$',
     'scorystapp.views.grade_or_view.list_annotations'),
-  url(r'^course/(?P<course_id>\d+)/(grade|exams/view|exams/preview)/(?P<exam_answer_id>\d+)/question-part-answer/(?P<question_part_answer_id>\d+)/exam-page/(?P<exam_page_number>\d+)/annotation/(?P<annotation_id>\d+)/$',
+  url(r'^course/(?P<course_id>\d+)/(grade|exams/view|exams/preview)/(?P<exam_answer_id>\d+)/exam-page/(?P<exam_page_number>\d+)/annotation/(?P<annotation_id>\d+)/$',
     'scorystapp.views.grade_or_view.manage_annotation'),
 
 

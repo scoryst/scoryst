@@ -115,25 +115,15 @@ class CourseUserSerializer(serializers.ModelSerializer):
 class ExamAnswerPageSerializer(serializers.ModelSerializer):
   class Meta:
     model = models.ExamAnswerPage
-    fields = ('id', 'page_number')
-    read_only_fields = ('id', 'page_number')
+    fields = ('id', 'page_number', 'exam_answer')
+    read_only_fields = ('id', 'page_number', 'exam_answer')
 
 
 class AnnotationSerializer(serializers.ModelSerializer):
   class Meta:
     model = models.Annotation
-    fields = ('id', 'exam_answer_page', 'question_part_answer', 'rubric', 'comment',
-      'offset_top', 'offset_left')
+    fields = ('id', 'exam_answer_page', 'rubric', 'comment', 'offset_top', 'offset_left')
     read_only_fields = ('id',)
-
-  def validate_question_part(self, attrs, source):
-    """ Validates that the QuestionPartAnswer matches the one currently being viewed. """
-    question_part_answer = attrs.get(source)
-
-    if question_part_answer != self.context['question_part_answer']:
-      raise serializers.ValidationError(
-        'Annotation for invalid question part answer: %d' % question_part_answer.pk)
-    return attrs
 
   def validate_exam_answer_page(self, attrs, source):
     """ Validates that the ExamAnswerPage matches the one currently being viewed. """
