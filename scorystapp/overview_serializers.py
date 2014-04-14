@@ -102,4 +102,4 @@ class CourseUserGradedSerializer(serializers.ModelSerializer):
     model = models.CourseUser
     fields = ('id', 'full_name', 'student_id', 'email', 'is_mapped',
       'questions_info', 'exam_answer_id')
-    read_only_fields = ('id', )
+    read_only_fields = ('id',)

@@ -1,0 +1,85 @@
+{% extends 'layout.epy' %}
+
+{% block content %}
+  <div class="container assign-exams">
+    <div class="row">
+      <div class="col-xs-4">
+        <h2>Assign Students to Exams</h2>
+        The exam on the right belongs to:
+        <input class="form-control typeahead" type="text" placeholder="Student Name" autocomplete="off" />
+        <div class="exam-answers-nav">
+          <h2>Navigation</h2>
+          <div class="filtering">
+            <!-- Rendered using template -->
+          </div>
+
+          <div class="students-scroll default-skin">
+            <ul class="nav nav-pills nav-stacked exam-answers">
+              <!-- Rendered using template -->
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {% include "exam-canvas.epy" %}
+    </div>
+  </div>
+
+  <script type="text/template" class="exam-answers-filtering-template">
+    <label class="checkbox-inline">
+      <input type="checkbox" class="filter show-assigned" <% if (isShowAssignedChecked) { %> checked <% } %> />
+      Assigned (<%= numAssigned %>)
+    </label>
+    <label class="checkbox-inline">
+      <input type="checkbox" class="filter show-unassigned" <% if(isShowUnassignedChecked) { %> checked <% } %> />
+      Unassigned (<%= numUnassigned %>)
+    </label>
+  </script>
+
+  <script type="text/template" class="exam-answers-template">
+    <% examAnswers.forEach(function(examAnswer, i) {  %>
+      <li <% if (examAnswer.id == curExamAnswerId) { %> class="active" <% } %> >
+        <a href="#" data-exam-answer-id="<%= examAnswers[i].id %>" class="exam-answer">
+        <%= i + 1 %>.
+        <% if (examAnswer.courseUser) { %>
+          <%= examAnswer.name %>
+        <% } else { %>
+          unassigned
+        <% } %>
+        </a>
+      </li>
+    <% }); %>
+  </script>
+
+  <script type="text/template" class="typeahead-template">
+    <div>
+      <strong><%= name %></strong>
+      <% if (isAssigned) { %><span class="error">(assigned)</span><% } %>
+    </div>
+    <div><%= email %> <%= studentId %></div>
+  </script>
+{% endblock %}
+
+{% block js %}
+  <script src="/static/js/lib/typeahead.min.js"></script>
+  {% include 'backbone.epy' %}
+  <script src="/static/js/backbone-commons/idempotent.js"></script>
+  <script src="/static/js/backbone-commons/mediator.js"></script>
+  <script src="/static/js/backbone-commons/utils.js"></script>
+
+  <script src="/static/js/lib/jquery.custom-scrollbar.min.js"></script>
+
+  <script src="/static/js/zoom-lens.js"></script>
+  <script src="/static/js/exam-canvas-base.js"></script>
+  <script src="/static/js/exam-canvas.js"></script>
+
+  <script src="/static/js/assign/models/exam-answer.js"></script>
+  <script src="/static/js/assign/models/student.js"></script>
+
+  <script src="/static/js/assign/views/main.js"></script>
+  <script src="/static/js/assign/views/exam-answers-nav.js"></script>
+{% endblock %}
+
+{% block css %}
+  <link rel="stylesheet" href="/static/css/lib/jquery.custom-scrollbar.css" />
+{% endblock %}

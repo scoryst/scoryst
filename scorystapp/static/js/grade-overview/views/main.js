@@ -14,7 +14,7 @@ var MainView = IdempotentView.extend({
     this.exams.fetch({
       success: function() {
         var $examNav = $('.exam-nav');
-        exams = self.exams.toJSON();
+        var exams = self.exams.toJSON();
         exams.forEach(function(exam, index) {
           var templateData = {
             exam: exam,

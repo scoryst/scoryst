@@ -34,16 +34,16 @@ urlpatterns = patterns('',
 
 
   # exam mapping
-  url(r'^course/(?P<course_id>\d+)/exams/(?P<exam_id>\d+)/map/$',
-    'scorystapp.views.map.map'),
-  url(r'^course/(?P<course_id>\d+)/exams/(?P<exam_id>\d+)/map/(?P<exam_answer_id>\d+)/$',
-    'scorystapp.views.map.map'),
-  url(r'^course/(?P<course_id>\d+)/exams/(?P<exam_id>\d+)/map/\d+/get-all-course-students/$',
-    'scorystapp.views.map.get_all_course_students'),
-  url(r'^course/(?P<course_id>\d+)/exams/(?P<exam_id>\d+)/map/(?P<exam_answer_id>\d+)/get-all-exams/$',
-    'scorystapp.views.map.get_all_exams'),
-  url(r'^course/(?P<course_id>\d+)/exams/(?P<exam_id>\d+)/map/(?P<exam_answer_id>\d+)/to/(?P<course_user_id>\d+)/$',
-    'scorystapp.views.map.map_exam_to_student'),
+  url(r'^course/(?P<course_id>\d+)/exams/(?P<exam_id>\d+)/assign/$',
+    'scorystapp.views.assign.assign'),
+  url(r'^course/(?P<course_id>\d+)/exams/(?P<exam_id>\d+)/assign/(?P<exam_answer_id>\d+)/$',
+    'scorystapp.views.assign.assign'),
+  url(r'^course/(?P<course_id>\d+)/exams/(?P<exam_id>\d+)/assign/\d+/students/$',
+    'scorystapp.views.assign.get_students'),
+  url(r'^course/(?P<course_id>\d+)/exams/(?P<exam_id>\d+)/assign/\d+/exam-answers/$',
+    'scorystapp.views.assign.list_exam_answers'),
+  url(r'^course/(?P<course_id>\d+)/exams/(?P<exam_id>\d+)/assign/\d+/exam-answers/(?P<exam_answer_id>\d+)/$',
+    'scorystapp.views.assign.manage_exam_answer'),
 
 
   # Question part mapping
@@ -160,26 +160,26 @@ urlpatterns = patterns('',
   # get exam jpegs
   url(r'^course/(?P<course_id>\d+)/(grade|exams/view|exams/preview)/(?P<exam_answer_id>\d+)/get-exam-jpeg/(?P<page_number>\d+)/$',
     'scorystapp.views.get_jpeg.get_exam_jpeg'),
-  url(r'^course/(?P<course_id>\d+)/exams/(?P<exam_id>\d+)/(map|map-question-parts)/(?P<exam_answer_id>\d+)/get-exam-jpeg/(?P<page_number>\d+)/$',
+  url(r'^course/(?P<course_id>\d+)/exams/(?P<exam_id>\d+)/(assign|map-question-parts)/(?P<exam_answer_id>\d+)/get-exam-jpeg/(?P<page_number>\d+)/$',
     'scorystapp.views.get_jpeg.get_exam_jpeg'),
 
 
   # get large exam jpegs
   url(r'^course/(?P<course_id>\d+)/(grade|exams/view|exams/preview)/(?P<exam_answer_id>\d+)/get-exam-jpeg-large/(?P<page_number>\d+)/$',
     'scorystapp.views.get_jpeg.get_exam_jpeg_large'),
-  url(r'^course/(?P<course_id>\d+)/exams/(?P<exam_id>\d+)/(map|map-question-parts)/(?P<exam_answer_id>\d+)/get-exam-jpeg-large/(?P<page_number>\d+)/$',
+  url(r'^course/(?P<course_id>\d+)/exams/(?P<exam_id>\d+)/(assign|map-question-parts)/(?P<exam_answer_id>\d+)/get-exam-jpeg-large/(?P<page_number>\d+)/$',
     'scorystapp.views.get_jpeg.get_exam_jpeg_large'),
 
 
-  # get number of pages for a given exam 
+  # get number of pages for a given exam
   url(r'^course/(?P<course_id>\d+)/(grade|exams/view|exams/preview)/(?P<exam_answer_id>\d+)/get-exam-page-count/$',
     'scorystapp.views.get_jpeg.get_exam_page_count'),
-  url(r'^course/(?P<course_id>\d+)/exams/(?P<exam_id>\d+)/(map|map-question-parts)/(?P<exam_answer_id>\d+)/get-exam-page-count/$',
+  url(r'^course/(?P<course_id>\d+)/exams/(?P<exam_id>\d+)/(assign|map-question-parts)/(?P<exam_answer_id>\d+)/get-exam-page-count/$',
     'scorystapp.views.get_jpeg.get_exam_page_count'),
 
 
   # get jpeg corresponding to student offset
-  url(r'^course/(?P<course_id>\d+)/exams/(?P<exam_id>\d+)/(map|map-question-parts)/(?P<exam_answer_id>\d+)'
+  url(r'^course/(?P<course_id>\d+)/exams/(?P<exam_id>\d+)/(assign|map-question-parts)/(?P<exam_answer_id>\d+)'
     '/get-student-jpeg/(?P<offset>(-?\d+))/(?P<page_number>\d+)/$',
     'scorystapp.views.get_jpeg.get_offset_student_jpeg'),
   url((r'^course/(?P<course_id>\d+)/grade/(?P<exam_answer_id>\d+)/get-student-jpeg/'

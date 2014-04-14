@@ -258,7 +258,7 @@ class ExamAnswer(models.Model):
     )
 
   exam = models.ForeignKey(Exam, db_index=True)
-  course_user = models.ForeignKey(CourseUser, null=True, db_index=True)
+  course_user = models.ForeignKey(CourseUser, null=True, blank=True, db_index=True)
 
   page_count = models.IntegerField()
   preview = models.BooleanField(default=False)

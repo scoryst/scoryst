@@ -1345,6 +1345,102 @@ footer .amp {
   -o-border-radius: 5px;
 }
 
+.assign-exams .overview {
+  width: 100%;
+}
+
+.assign-exams .students-scroll {
+  border-bottom: 1px solid #ccc;
+}
+
+.assign-exams .tt-hint {
+  /* CSS in .tt-hint here have been taken from form-control */
+  height: 34px;
+  padding: 6px 12px;
+  font-size: 14px;
+  line-height: 1.429;
+  color: #555555;
+  vertical-align: middle;
+  background-color: #ffffff;
+  background-image: none;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  -o-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  -ms-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+  -moz-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+  -ms-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+  -o-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+}
+
+.assign-exams .tt-query, .assign-exams .tt-hint {
+  margin: 10px 0 -3px;
+  width: 350px;
+}
+
+.assign-exams .tt-hint {
+  color: #999
+}
+
+.assign-exams .tt-dropdown-menu {
+  width: 350px;
+  margin-top: 2px;
+  padding: 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+
+  -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+  -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+  -o-box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+  -ms-box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+}
+
+.assign-exams .show-dropdown {
+  border-bottom-right-radius: 0px;
+  border-bottom-left-radius: 0px;
+  -moz-border-bottom-right-radius: 0px;
+  -moz-border-bottom-left-radius: 0px;
+  -webkit-border-bottom-right-radius: 0px;
+  -webkit-border-bottom-left-radius: 0px;
+  -o-border-bottom-right-radius: 0px;
+  -o-border-bottom-left-radius: 0px;
+  -ms-border-bottom-right-radius: 0px;
+  -ms-border-bottom-left-radius: 0px;
+}
+
+.assign-exams .error {
+  display: inline;
+  padding-top: 2px;
+  margin-top: 0px;
+}
+
+.assign-exams .tt-suggestion {
+  padding: 8px 20px;
+  line-height: 24px;
+  border-bottom: 1px solid #eee;
+}
+
+.assign-exams .tt-suggestion.tt-is-under-cursor {
+  color: #fff;
+  background-color: #0097cf;
+}
+
+.assign-exams .tt-suggestion p {
+  margin: 0;
+}
+
+.assign-exams .exam-answers-nav {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
 .map-question-parts .pages {
   width: 100px;
   float: none;

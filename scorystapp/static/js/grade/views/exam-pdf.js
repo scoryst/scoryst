@@ -9,7 +9,6 @@ var ExamPDFView = IdempotentView.extend({
   // TODO: comments
   initialize: function(options) {
     this.constructor.__super__.initialize.apply(this, arguments);
-
     this.questionPartAnswers = options.questionPartAnswers;
 
     this.examCanvasGradeView = new ExamCanvasGradeView({
@@ -19,6 +18,7 @@ var ExamPDFView = IdempotentView.extend({
       preloadCurExam: 2,
       el: '.exam'
     });
+
     this.registerSubview(this.examCanvasGradeView);
     this.listenTo(this.examCanvasGradeView, 'changeExamPage', this.changeExamPage);
 
