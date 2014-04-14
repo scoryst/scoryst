@@ -1,6 +1,5 @@
 from django import shortcuts, http
 from scorystapp import models, forms, decorators, serializers, overview_serializers
-from scorystapp.performance import cache_helpers
 from scorystapp.views import helpers, grade_or_view, send_email
 from rest_framework import decorators as rest_decorators, response
 import json
@@ -39,8 +38,21 @@ def get_students(request, cur_course_user, exam_id):
   student_course_users = models.CourseUser.objects.filter(course=cur_course.pk,
     privilege=models.CourseUser.STUDENT).order_by('user__first_name', 'user__last_name')
 
+  # TODO: not a good idea if students have a lot of exams, but it works really well for now
+  student_course_users = student_course_users.prefetch_related(
+    'user',
+    'examanswer_set',
+    'examanswer_set__questionpartanswer_set',
+    'examanswer_set__questionpartanswer_set__rubrics',
+    'examanswer_set__questionpartanswer_set__question_part',
+    'examanswer_set__questionpartanswer_set__exam_answer__exam',
+    'examanswer_set__questionpartanswer_set__grader__user'
+  )
+
+  # cache num_questions here to avoid repeated db queries in the serializer
+  num_questions = exam.get_num_questions()
   serializer = overview_serializers.CourseUserGradedSerializer(student_course_users, many=True,
-    context={ 'exam': exam })
+    context={'exam': exam, 'num_questions': num_questions})
   return response.Response(serializer.data)
 
 

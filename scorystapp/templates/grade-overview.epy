@@ -208,7 +208,8 @@
           <% if (!courseUser.isMapped) { %>
             no exam
           <% } else if (courseUser.questionsInfo[selectedOptionValue].isGraded) { %>
-            graded
+            <%= courseUser.questionsInfo[selectedOptionValue].points %> /
+            <%= courseUser.questionsInfo[selectedOptionValue].maxPoints %>
           <% } else { %>
             ungraded
           <% } %>

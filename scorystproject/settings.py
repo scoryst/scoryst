@@ -128,7 +128,6 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
-  'cacheops',
   'django.contrib.auth',
   'django.contrib.contenttypes',
   'django.contrib.sessions',
@@ -151,20 +150,6 @@ INSTALLED_APPS = (
   'debug_toolbar',
   'south',
 )
-
-CACHEOPS_REDIS = {
-    'host': 'localhost', # redis-server is on same machine
-    'port': 6379,        # default redis port
-    'db': 1,             # SELECT non-default redis database
-                         # using separate redis db or redis instance
-                         # is highly recommended
-    'socket_timeout': 3,
-}
-
-CACHEOPS = {
-    # Automatically cache all requests for all scoryst models for 30 days
-    'scorystapp.*': ('all', 60*60*24*5),
-}
 
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 

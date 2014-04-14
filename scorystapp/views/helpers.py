@@ -2,6 +2,7 @@ from scorystapp import models
 from django import shortcuts
 from django.utils import timezone
 from django.conf import settings
+from django.db.models import Q
 
 def render(request, template, data={}):
   """
@@ -20,13 +21,16 @@ def get_extra_context(request):
 
   # fetch all courses this user is in
   if is_authenticated:
-    course_users_ta = (models.CourseUser.objects.filter(user=request.user.pk).
-      exclude(privilege=models.CourseUser.STUDENT))
-    courses_ta = map(lambda course_user_ta: course_user_ta.course, course_users_ta)
+    courses_ta = (models.Course.objects.filter(
+      Q(courseuser__user=request.user.pk),
+      Q(courseuser__privilege=models.CourseUser.INSTRUCTOR) |
+      Q(courseuser__privilege=models.CourseUser.TA)
+    ).prefetch_related('exam_set'))
 
-    course_users_student = models.CourseUser.objects.filter(user=request.user.pk, 
-      privilege=models.CourseUser.STUDENT)
-    courses_student = map(lambda course_user_student: course_user_student.course, course_users_student)
+    courses_student = (models.Course.objects.filter(
+      Q(courseuser__user=request.user.pk),
+      Q(courseuser__privilege=models.CourseUser.STUDENT)
+    ).prefetch_related('exam_set'))
 
     user = shortcuts.get_object_or_404(models.User, id=request.user.pk)
     name = user.first_name

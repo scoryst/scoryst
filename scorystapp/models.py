@@ -4,7 +4,6 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, \
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
-import cacheops
 
 
 """
@@ -121,7 +120,7 @@ class Course(models.Model):
 
   def has_exams(self):
     """ Returns true if Exams are associated with this course, or false otherwise. """
-    return Exam.objects.filter(course=self.pk).count() > 0
+    return self.exam_set.count() > 0
 
   def __unicode__(self):
     return '%s (%s %d)' % (self.name, self.TERM_CHOICES[self.term][1], self.year)
@@ -149,6 +148,7 @@ class CourseUser(models.Model):
   user = models.ForeignKey(User, db_index=True)
   course = models.ForeignKey(Course, db_index=True)
   privilege = models.IntegerField(choices=USER_PRIVILEGE_CHOICES, default=STUDENT)
+
 
   def __unicode__(self):
     return '%s (%s)' % (self.user.get_full_name(),
@@ -182,19 +182,47 @@ class Exam(models.Model):
   grade_down = models.BooleanField(default=True)
   cap_score = models.BooleanField(default=True)
 
+
   def get_num_questions(self):
     """ Returns the number of questions in this exam. """
-    question_parts = QuestionPart.objects.filter(exam=self).order_by('-question_number')
+    question_parts = self.questionpart_set.order_by('-question_number')
     if question_parts.count() > 0:
       return question_parts[0].question_number
     return 0
 
+
   def get_points(self):
-    question_parts = QuestionPart.objects.filter(exam=self)
+    question_parts = self.questionpart_set.all()
     points = 0
     for question_part in question_parts:
       points += question_part.max_points
     return points
+
+
+  def get_prefetched_exam_answers(self):
+    """
+    Returns the set of exam answers corresponding to this exam. Prefetches all
+    fields necessary to compute is_graded() and get_points().
+    """ 
+    return self.examanswer_set.filter(preview=False).prefetch_related(
+      'questionpartanswer_set',
+      'questionpartanswer_set__rubrics',
+      'questionpartanswer_set__question_part',
+      'questionpartanswer_set__exam_answer__exam'
+    )
+
+
+  def get_prefetched_question_parts(self):
+    """
+    Returns the set of question parts corresponding to this exam. Prefetches
+    all fields necessary to compute is_graded() and get_points().
+    """ 
+    return self.questionpart_set.prefetch_related(
+      'questionpartanswer_set',
+      'questionpartanswer_set__rubrics',
+      'questionpartanswer_set__question_part',
+      'questionpartanswer_set__exam_answer__exam'
+    )
 
   def __unicode__(self):
     return '%s (%s)' % (self.name, self.course.name)
@@ -268,46 +296,54 @@ class ExamAnswer(models.Model):
 
   def get_points(self):
     """ Returns the total number of points the student received on this exam. """
-    question_part_answers = QuestionPartAnswer.objects.filter(exam_answer=self)
+    question_part_answers = self.questionpartanswer_set.all()
     points = 0
     for question_part_answer in question_part_answers:
       points += question_part_answer.get_points()
     return points
 
-  def is_graded(self):
-    @cacheops.cached_as(QuestionPartAnswer.objects.filter(exam_answer=self))
-    def _is_graded():
-      """ Returns true if this exam is graded, or false otherwise. """
-      question_part_answers = QuestionPartAnswer.objects.filter(exam_answer=self)
-      for question_part_answer in question_part_answers:
-        if not question_part_answer.is_graded():
-          return False
-      return True
 
-    return _is_graded()
+  def get_max_points(self):
+    """ Returns the max number of points the student could receive on this exam. """
+    question_part_answers = self.questionpartanswer_set.all()
+    max_points = 0
+    for question_part_answer in question_part_answers:
+      max_points += question_part_answer.question_part.max_points
+    return max_points
+
+
+  def is_graded(self):
+    """ Returns true if this exam is graded, or false otherwise. """
+    question_part_answers = self.questionpartanswer_set.all()
+    for question_part_answer in question_part_answers:
+      if not question_part_answer.is_graded():
+        return False
+    return True
+
 
   def get_question_points(self, question_number):
     """ Returns the total number of points the student received on this question_number. """
-    question_part_answers = QuestionPartAnswer.objects.filter(exam_answer=self,
-      question_part__question_number=question_number)
+    question_part_answers = self.questionpartanswer_set.all()
+    question_part_answers = filter(lambda qp_answer: qp_answer.question_part.question_number
+      == question_number, question_part_answers)
+
     points = 0
     for question_part_answer in question_part_answers:
       points += question_part_answer.get_points()
     return points
 
-  def is_question_graded(self, question_number):
-    @cacheops.cached_as(QuestionPartAnswer.objects.filter(exam_answer=self,
-      question_part__question_number=question_number))
-    def _is_question_graded():
-      """ Returns true if this exam is graded, or false otherwise. """
-      question_part_answers = QuestionPartAnswer.objects.filter(exam_answer=self,
-        question_part__question_number=question_number)
-      for question_part_answer in question_part_answers:
-        if not question_part_answer.is_graded():
-          return False
-      return True
 
-    return _is_question_graded()
+  def is_question_graded(self, question_number):
+    """ Returns true if this exam is graded, or false otherwise. """
+    question_part_answers = self.questionpartanswer_set.all()
+    question_part_answers = filter(lambda qp_answer: qp_answer.question_part.question_number
+      == question_number, question_part_answers)
+
+    for question_part_answer in question_part_answers:
+      if not question_part_answer.is_graded():
+        return False
+    return True
+
 
   def __unicode__(self):
     if self.course_user:
@@ -351,11 +387,8 @@ class QuestionPartAnswer(models.Model):
   custom_points = models.FloatField(null=True, blank=True)
 
   def is_graded(self):
-    @cacheops.cached_as(self)
-    def _is_graded(self):
-      """ Returns true if this question part answer is graded, or false otherwise. """
-      return self.rubrics.count() > 0 or self.custom_points is not None
-    return _is_graded(self)
+    """ Returns true if this question part answer is graded, or false otherwise. """
+    return self.rubrics.count() > 0 or self.custom_points is not None
 
   def get_points(self):
     """ Returns the number of points the student received for this answer. """

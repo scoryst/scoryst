@@ -22,13 +22,15 @@ class CourseUserGradedSerializer(serializers.ModelSerializer):
   is_mapped = serializers.SerializerMethodField('get_is_mapped')
   questions_info = serializers.SerializerMethodField('get_questions_info')
 
+
   def get_exam_answer_id(self, course_user):
     """
     Returns exam_answer_id for the course_user if one exists, None otherwise.
     """
-    exam_answer = models.ExamAnswer.objects.filter(course_user=course_user,
-      exam=self.context['exam'])
-    return None if exam_answer.count() == 0 else exam_answer[0].pk
+    exam_answers = filter(lambda ea: ea.exam == self.context['exam'],
+      course_user.examanswer_set.all())
+    return None if len(exam_answers) == 0 else exam_answers[0].pk
+
 
   def get_is_mapped(self, course_user):
     """
@@ -36,6 +38,7 @@ class CourseUserGradedSerializer(serializers.ModelSerializer):
     the given exam.
     """
     return False if self.get_exam_answer_id(course_user) == None else True
+
 
   # TODO: Im still not happy with the way we treat questions, I'm doing aggregation
   # for questions for a single student for student summary in backbone, but im doing
@@ -54,32 +57,42 @@ class CourseUserGradedSerializer(serializers.ModelSerializer):
     questions_info.append({})
 
     exam = self.context['exam']
-    num_questions = exam.get_num_questions()
+    num_questions = self.context['num_questions']
 
-    try:
-      exam_answer = models.ExamAnswer.objects.get(course_user=course_user, exam=exam)
-    except models.ExamAnswer.DoesNotExist:
+    exam_answers = filter(lambda ea: ea.exam == self.context['exam'],
+      course_user.examanswer_set.all())
+
+    if len(exam_answers) == 0:
       questions_info = [{
         'is_graded': False,
         'graders': ''
       }]
       return questions_info * (num_questions + 1)
+    else:
+      exam_answer = exam_answers[0]
 
+    question_part_answer_set = exam_answer.questionpartanswer_set.all()
     is_exam_graded = True
     exam_graders = set()
 
     # loop over each question
-    for i in range(num_questions):
-      question_part_answers = models.QuestionPartAnswer.objects.filter(
-        exam_answer=exam_answer, question_part__question_number=i+1)
+    for i in range(1, num_questions + 1):
+      question_part_answers = filter(lambda qp_answer: qp_answer.question_part.
+        question_number == i, question_part_answer_set)
 
       graders = set()
       is_question_graded = True
+      points = 0
+      max_points = 0
 
       # Check if question is graded and find the graders
       for answer in question_part_answers:
         is_question_part_graded = answer.is_graded()
         is_question_graded = is_question_graded and is_question_part_graded
+
+        points += answer.get_points()
+        max_points += answer.question_part.max_points
+
         if is_question_part_graded:
           graders.add(answer.grader.user.get_full_name())
 
@@ -88,18 +101,23 @@ class CourseUserGradedSerializer(serializers.ModelSerializer):
 
       questions_info.append({
         'is_graded': is_question_graded,
-        'graders': ', '.join(graders)
+        'graders': ', '.join(graders),
+        'points': points,
+        'max_points': max_points,
       })
 
     # Now add information about the entire exam
     questions_info[0] = {
       'is_graded': is_exam_graded,
-      'graders': ', '.join(exam_graders)
+      'graders': ', '.join(exam_graders),
+      'points': exam_answer.get_points(),
+      'max_points': exam_answer.get_max_points(),
     }
     return questions_info
+
 
   class Meta:
     model = models.CourseUser
     fields = ('id', 'full_name', 'student_id', 'email', 'is_mapped',
       'questions_info', 'exam_answer_id')
-    read_only_fields = ('id', )
+    read_only_fields = ('id',)
