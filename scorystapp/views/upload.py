@@ -5,7 +5,6 @@ from django.db.models.fields import files as file_fields
 from scorystapp import models, forms, decorators, utils
 from scorystapp.views import helpers
 from workers import dispatcher
-from workers.orchard import client as orchard_client
 from celery import task as celery
 import sys
 import numpy
@@ -105,7 +104,6 @@ def _create_and_upload_exam_answers(exam, name_prefix, num_pages_per_exam, num_s
 
   threads = []
   question_parts = models.QuestionPart.objects.filter(exam=exam)
-  orchard = orchard_client.OrchardClient(settings.ORCHARD_API_KEY)
 
   for worker in range(num_workers):
     print 'Spawning worker %d' % worker
@@ -164,13 +162,10 @@ def _create_and_upload_exam_answers(exam, name_prefix, num_pages_per_exam, num_s
           exam_answer=exam_answer, pages=answer_pages)
         question_part_answer.save()
 
-    # TODO: if create_host is called simultaneously by two processes, it fails;
-    # we should talk to Orchard about this
-    host_name = utils.generate_random_string(20).lower()
-    host = orchard.create_host(host_name, 8192)
+    dp = dispatcher.Dispatcher()
 
     # spawn thread to dispatch converter worker
-    args = ('converter', host_name, {
+    payload = {
       's3': {
         'token': settings.AWS_S3_ACCESS_KEY_ID,
         'secret': settings.AWS_S3_SECRET_ACCESS_KEY,
@@ -179,13 +174,15 @@ def _create_and_upload_exam_answers(exam, name_prefix, num_pages_per_exam, num_s
 
       'pdf_paths': pdf_paths,
       'jpeg_prefixes': jpeg_prefixes,
-    })
+    }
 
-    dispatcher.dispatch_worker.delay(*args)
-    # thread = threading.Thread(target=dispatcher.dispatch_worker, args=args)
-    # threads.append(thread)
+    instance_options = {'instance_type': 'm3.medium'}
+    dispatch_worker.delay(dp, 'converter', payload, instance_options)
 
-  # [thread.start() for thread in threads]
 
-  # wait until all threads have complete
-  # [thread.join() for thread in threads]
+@celery.task
+def dispatch_worker(dp, *args):
+  """ Proxy for dispatcher.run(). """
+  response = dp.run(*args)
+  print response.text
+  print 'Done!'

@@ -1,80 +1,160 @@
+import time
+import sys
+import yaml
 import os
+import base64
 import json
 import requests
-import subprocess
-import time
-import base64
-from workers.orchard import client
-from celery import task as celery
-from scorystapp import utils
+from fabric import api
+from fabric import exceptions
+from boto import ec2
 from django.conf import settings
 from Crypto.Cipher import AES
-from Crypto import Random
 
 
-@celery.task
-def dispatch_worker(worker_name, host_name, payload):
-  """
-  Dispatches a worker with the given name to the provided orchard host.
-  Delivers the provided payload as arguments to the worker.
-  """
-  orchard = client.OrchardClient(settings.ORCHARD_API_KEY)
-  host = orchard.get_host(host_name)
+DIRECTORY = os.path.abspath(os.path.dirname(__file__))
 
-  if host == None:
-    print 'Could not get orchard host with name %s' % host_name
-    return
 
-  worker_dir = os.path.abspath(os.path.dirname(__file__))
+class Dispatcher(object):
+  """ Dispatches jobs on AWS instances. """
 
-  try:
-    print 'Running docker build...'
-    docker = host.get_docker_client()
-    for line in docker.build('%s/%s' % (worker_dir, worker_name), stream=True):
-      print 'docker build: %s' % line,
+  DEFAULT_INSTANCE_OPTIONS = {
+    'instance_type': 't1.micro',
+    'image': 'ami-9c91acd9',
+    'key_name': 'scoryst',
+    'security_groups': ['basic'],
+  }
 
-    print 'Creating docker container...'
-    image = docker.images()[0]
-    container = docker.create_container(image['Id'], ports=[5000])
-    docker.start(container['Id'], port_bindings={5000: 5000})
+  DEFAULT_SSH_OPTIONS = {
+    'user': 'ubuntu',
+    'key_path': DIRECTORY + '/scoryst.pem',
+  }
 
-    print "Waiting for container's HTTP server to start..."
-    host_ip = host.ipv4_address
-    host_url = 'http://%s:5000' % host_ip
 
-    # periodically try to connect to container
-    while True:
-      try:
-        requests.get('%s/ping' % host_url, timeout=5)
-      except (requests.Timeout, requests.ConnectionError):
-        print "Couldn't connect, trying again..."
-        time.sleep(1)
-      else:
-        print 'Successfully connected!'
-        break
+  def __init__(self, region='us-west-1'):
+    """ Initializes this dispatcher by connecting to AWS. """
+    # TODO: rename access key (shouldn't have s3 in it)
+    self.connection = ec2.connect_to_region(region,
+      aws_access_key_id=settings.AWS_S3_ACCESS_KEY_ID,
+      aws_secret_access_key=settings.AWS_S3_SECRET_ACCESS_KEY)
 
-    print 'Making POST request to activate worker...'
-    # encrypt payload
+
+  def run(self, worker_name, payload, instance_options={}, ssh_options={}):
+    """
+    Spawns an instance, provisions it for the given worker, and dispatches
+    a job with the provided payload. Returns the response from the worker.
+    """
+    response = None
+    instance = self.spawn(instance_options)
+
+    try:
+      self.provision(instance, worker_name, ssh_options)
+      response = self.dispatch(instance, payload)
+    finally:
+      # always terminate the instance, regardless of whether an error occurred
+      self.terminate(instance)
+
+    return response
+
+
+  def spawn(self, instance_options={}):
+    """
+    Spawns an instance to run the given worker. `instance_options` is
+    a dictionary of options for the instance. See `DEFAULT_INSTANCE_OPTIONS`
+    above. Waits until the instance is running. Returns the instance.
+    """
+    instance_options = dict(self.DEFAULT_INSTANCE_OPTIONS.items() +
+      instance_options.items())
+
+    instance = self._create_instance(instance_options)
+    self._wait_until_instance_is_running(instance)
+
+    return instance
+
+
+  def provision(self, instance, worker_name, ssh_options={}):
+    """
+    Provisions a worker on the given instance. `ssh_options` is a dictionary of
+    options for sshing. See `DEFAULT_SSH_OPTIONS` above.
+    """
+    ssh_options = dict(self.DEFAULT_SSH_OPTIONS.items() +
+      ssh_options.items())
+
+    with self._create_fab_env(instance.ip_address, ssh_options):
+      self._wait_until_instance_is_sshable()
+      self._upload_and_provision_worker(worker_name)
+
+
+  def dispatch(self, instance, payload):
+    """
+    Dispatches the worker running on the provided instance. Passes the given
+    payload to the worker as arguments. Returns the response from the worker.
+    """
     cipher = AES.new(settings.CONVERTER_AES_KEY, AES.MODE_CFB,
       settings.CONVERTER_AES_INIT_VECTOR)
     encrypted_payload = cipher.encrypt(json.dumps(payload))
 
-    # make POST request to worker with payload
+    # make POST request to worker with an encrypted payload
     data = {'encrypted_payload': base64.b64encode(encrypted_payload)}
     headers = {'Content-type': 'application/json'}
 
-    response = requests.post('%s/work' % host_url, data=json.dumps(data),
-      headers=headers)
+    return requests.post('http://%s:5000/work' % instance.ip_address,
+      data=json.dumps(data), headers=headers)
 
-    print response.text
-    print 'Removing container...'
-    try:
-      docker.stop(container['Id'])
 
-    # docker.stop() often times out, but still succeeds, so ignore timeouts and proceed
-    except requests.Timeout:
-      docker.remove_container(container['Id'])
+  def terminate(self, instance):
+    """ Terminates the given instance. """
+    self.connection.terminate_instances(instance_ids=[instance.id])
 
-  finally:
-    print 'Removing orchard host...'
-    orchard.remove_host(host)
+
+  def _create_instance(self, options):
+    """
+    Creates an instances based off the given options. See
+    `DEFAULT_INSTANCE_OPTIONS` for a list of options.
+    """
+    reservation = self.connection.run_instances(options['image'],
+      key_name=options['key_name'], instance_type=options['instance_type'],
+      security_groups=options['security_groups'])
+
+    return reservation.instances[0]
+
+
+  def _wait_until_instance_is_running(self, instance):
+    """ Waits until the given instance is running. """
+    while not instance.state == 'running':
+      instance.update()
+      time.sleep(1)
+
+
+  def _create_fab_env(self, instance_ip, ssh_options):
+    """
+    Creates and returns a fab environment to SSH into the given instance. Pass
+    this to with() to use fabric.api.* commands.
+    """
+    return api.settings(host_string=instance_ip,
+      user=ssh_options['user'],
+      key_filename=ssh_options['key_path'])
+
+
+  def _wait_until_instance_is_sshable(self):
+    """
+    Waits until the given instance is sshable. Must be in the fab environment.
+    """
+    while True:
+      try:
+        api.run('ls')
+      except exceptions.NetworkError:
+        time.sleep(3)
+      else:
+        break
+
+
+  def _upload_and_provision_worker(self, worker_name):
+    """ Uploads and runs the given worker. """
+    api.run('mkdir worker')
+    api.put('%s/%s/*' % (DIRECTORY, worker_name), 'worker/')
+
+    with api.cd('worker'):
+      # this will spawn a background process; run with pty=False to circumvent
+      # fabric issue 395 <https://github.com/fabric/fabric/issues/395>
+      api.run('bash provision.sh', pty=False)
