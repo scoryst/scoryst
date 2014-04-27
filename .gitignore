@@ -11,3 +11,5 @@ dump.rdb
 superuser.json
 fixtures
 scorystapp/migrations
+.vagrant/
+Vagrantfile

@@ -2,11 +2,11 @@ from django import shortcuts
 from django.core import files
 from django.conf import settings
 from django.db.models.fields import files as file_fields
-from scorystapp import models, forms, decorators, utils
+from scorystapp import models, forms, decorators, utils, serializers
 from scorystapp.views import helpers
 from workers import dispatcher
-from workers.orchard import client as orchard_client
 from celery import task as celery
+from rest_framework import decorators as rest_decorators, response
 import sys
 import numpy
 import os
@@ -48,8 +48,22 @@ def upload(request, cur_course_user):
   return helpers.render(request, 'upload.epy', {
     'title': 'Upload',
     'course': cur_course,
-    'form': form
+    'form': form,
   })
+
+
+@rest_decorators.api_view(['GET'])
+@decorators.access_controlled
+@decorators.instructor_or_ta_required
+def get_exam_answer_pages(request, cur_course_user, exam_id):
+  """ Returns the unassigned exam answer pages for the given exam. """
+  exam = shortcuts.get_object_or_404(models.Exam, pk=exam_id)
+  pages = (models.ExamAnswerPage.objects.filter(exam_answer__exam=exam_id,
+    page_number=1, course_user=None, exam_answer__preview=False).
+    prefetch_related('exam_answer__course_user__user'))
+
+  serializer = serializers.UploadExamAnswerPageSerializer(pages, many=True)
+  return response.Response(serializer.data)
 
 
 def _break_and_upload(exam, handle, name_prefix):
@@ -105,7 +119,6 @@ def _create_and_upload_exam_answers(exam, name_prefix, num_pages_per_exam, num_s
 
   threads = []
   question_parts = models.QuestionPart.objects.filter(exam=exam)
-  orchard = orchard_client.OrchardClient(settings.ORCHARD_API_KEY)
 
   for worker in range(num_workers):
     print 'Spawning worker %d' % worker
@@ -164,13 +177,10 @@ def _create_and_upload_exam_answers(exam, name_prefix, num_pages_per_exam, num_s
           exam_answer=exam_answer, pages=answer_pages)
         question_part_answer.save()
 
-    # TODO: if create_host is called simultaneously by two processes, it fails;
-    # we should talk to Orchard about this
-    host_name = utils.generate_random_string(20).lower()
-    host = orchard.create_host(host_name, 8192)
+    dp = dispatcher.Dispatcher()
 
     # spawn thread to dispatch converter worker
-    args = ('converter', host_name, {
+    payload = {
       's3': {
         'token': settings.AWS_S3_ACCESS_KEY_ID,
         'secret': settings.AWS_S3_SECRET_ACCESS_KEY,
@@ -179,13 +189,15 @@ def _create_and_upload_exam_answers(exam, name_prefix, num_pages_per_exam, num_s
 
       'pdf_paths': pdf_paths,
       'jpeg_prefixes': jpeg_prefixes,
-    })
+    }
 
-    dispatcher.dispatch_worker.delay(*args)
-    # thread = threading.Thread(target=dispatcher.dispatch_worker, args=args)
-    # threads.append(thread)
+    instance_options = {'instance_type': 'm3.medium'}
+    dispatch_worker.delay(dp, 'converter', payload, instance_options)
 
-  # [thread.start() for thread in threads]
 
-  # wait until all threads have complete
-  # [thread.join() for thread in threads]
+@celery.task
+def dispatch_worker(dp, *args):
+  """ Proxy for dispatcher.run(). """
+  response = dp.run(*args)
+  print response.text
+  print 'Done!'
