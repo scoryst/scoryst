@@ -10,7 +10,8 @@ from fabric import exceptions
 from boto import ec2
 from django.conf import settings
 from Crypto.Cipher import AES
-
+from Crypto import Random
+from Crypto.Hash import HMAC, SHA256
 
 DIRECTORY = os.path.abspath(os.path.dirname(__file__))
 
@@ -90,16 +91,20 @@ class Dispatcher(object):
     Dispatches the worker running on the provided instance. Passes the given
     payload to the worker as arguments. Returns the response from the worker.
     """
-    cipher = AES.new(settings.CONVERTER_AES_KEY, AES.MODE_CFB,
-      settings.CONVERTER_AES_INIT_VECTOR)
-    encrypted_payload = cipher.encrypt(json.dumps(payload))
+    # generate random initialization vector for each request
+    iv = Random.new().read(AES.block_size)
+    cipher = AES.new(settings.CONVERTER_AES_KEY, AES.MODE_CFB, iv)
 
-    # make POST request to worker with an encrypted payload
-    data = {'encrypted_payload': base64.b64encode(encrypted_payload)}
-    headers = {'Content-type': 'application/json'}
+    # encrypt data with AES for confidentiality
+    encrypted_payload = cipher.encrypt(json.dumps(payload))
+    body = base64.b64encode(encrypted_payload + iv)
+
+    # add HMAC for integrity
+    hmac = HMAC.new(settings.CONVERTER_HMAC_KEY, msg=body, digestmod=SHA256)
+    body_hmac = hmac.hexdigest()
 
     return requests.post('http://%s:5000/work' % instance.ip_address,
-      data=json.dumps(data), headers=headers)
+      data=body + body_hmac)
 
 
   def terminate(self, instance):
@@ -151,6 +156,9 @@ class Dispatcher(object):
 
   def _upload_and_provision_worker(self, worker_name):
     """ Uploads and runs the given worker. """
+    # if there's an existing worker, delete it
+    api.run('rm -rf worker')
+
     api.run('mkdir worker')
     api.put('%s/%s/*' % (DIRECTORY, worker_name), 'worker/')
 
