@@ -2,10 +2,11 @@ from django import shortcuts
 from django.core import files
 from django.conf import settings
 from django.db.models.fields import files as file_fields
-from scorystapp import models, forms, decorators, utils
+from scorystapp import models, forms, decorators, utils, serializers
 from scorystapp.views import helpers
 from workers import dispatcher
 from celery import task as celery
+from rest_framework import decorators as rest_decorators, response
 import sys
 import numpy
 import os
@@ -47,8 +48,22 @@ def upload(request, cur_course_user):
   return helpers.render(request, 'upload.epy', {
     'title': 'Upload',
     'course': cur_course,
-    'form': form
+    'form': form,
   })
+
+
+@rest_decorators.api_view(['GET'])
+@decorators.access_controlled
+@decorators.instructor_or_ta_required
+def get_exam_answer_pages(request, cur_course_user, exam_id):
+  """ Returns the unassigned exam answer pages for the given exam. """
+  exam = shortcuts.get_object_or_404(models.Exam, pk=exam_id)
+  pages = (models.ExamAnswerPage.objects.filter(exam_answer__exam=exam_id,
+    page_number=1, course_user=None, exam_answer__preview=False).
+    prefetch_related('exam_answer__course_user__user'))
+
+  serializer = serializers.UploadExamAnswerPageSerializer(pages, many=True)
+  return response.Response(serializer.data)
 
 
 def _break_and_upload(exam, handle, name_prefix):

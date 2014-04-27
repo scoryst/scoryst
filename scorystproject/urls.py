@@ -90,6 +90,7 @@ urlpatterns = patterns('',
 
   # uploading student exams
   url(r'^course/(?P<course_id>\d+)/upload/$', 'scorystapp.views.upload.upload'),
+  url(r'^course/(?P<course_id>\d+)/upload/exam-answer-pages/(?P<exam_id>\d+)/$', 'scorystapp.views.upload.get_exam_answer_pages'),
 
 
   # Backbone's grade overview
