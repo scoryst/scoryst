@@ -22,6 +22,8 @@ var StudentNavView = IdempotentView.extend({
     if (this.$('.next-student').length > 0) {
       // attach events from elements outside this view
       this.listenToDOM($(window), 'keydown', this.handleShortcuts);
+      this.listenToDOM($(window), 'click .next-student', this.goToNextStudent);
+      this.listenToDOM($(window), 'click .previous-student', this.goToPreviousStudent);
       this.enableBackButton();
     } else {
       this.undelegateEvents();
@@ -30,7 +32,7 @@ var StudentNavView = IdempotentView.extend({
 
   showNavSuccess: function() {
     // show success icon and then hide it
-    var $navSuccessIcon = this.$('.nav-success');
+    var $navSuccessIcon = $('.student-nav-success');
     $navSuccessIcon.show();
 
     clearTimeout(this.successTimeout);

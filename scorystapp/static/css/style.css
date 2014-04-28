@@ -779,13 +779,13 @@ footer .amp {
   width: 100%;
 }
 
-.grade .comment-success, .grade .nav-success {
+.grade .comment-success, .grade .student-nav-success {
   display: none;
   margin-left: 10px;
   color: #27ae60;
 }
 
-.grade .nav-success {
+.grade .student-nav-success {
   margin-left: 3px;
 }
 
@@ -982,6 +982,10 @@ footer .amp {
 
 .grade button.next {
   float: right;
+}
+
+.grade .bottom-student-nav {
+  margin-bottom: 15px;
 }
 
 .annotation-info-modal .modal-body {

@@ -52,7 +52,7 @@
             <span class="shortcut">SHIFT<i class="fa fa-arrow-down"></i></span> Next Student
           </button>
 
-          <i class="fa fa-check nav-success"></i>
+          <i class="fa fa-check student-nav-success"></i>
         {% endif %}
       </div>
 
@@ -128,6 +128,20 @@
       <div class="well rubrics-nav">
         <!-- Rubric nav will be inserted here using the template. -->
       </div>
+
+      {% if not is_student_view and not is_preview %}
+        <div class="bottom-student-nav">
+          <button class="btn btn-default btn-sm previous-student" type="button">
+            <span class="shortcut">SHIFT<i class="fa fa-arrow-up"></i></span> Previous Student
+          </button>
+
+          <button class="btn btn-default btn-sm next-student" type="button">
+            <span class="shortcut">SHIFT<i class="fa fa-arrow-down"></i></span> Next Student
+          </button>
+
+          <i class="fa fa-check student-nav-success"></i>
+        </div>
+      {% endif %}
 
       <a href="exam-pdf" target="_blank">
         <i class="fa fa-external-link left-icon"></i>
@@ -215,28 +229,9 @@
 <script type="text/template" class="custom-points-template">
   Custom points
   {% if not is_student_view %}
-      <input class="form-control custom-points" type="text" value="<%= customPoints %>" />
+    <input class="form-control custom-points" type="text" value="<%= customPoints %>" />
   {% else %}
-      <input class="form-control custom-points" type="text" value="<%= customPoints %>" disabled="true" />
-  {% endif %}
-</script>
-
-<script type="text/template" class="comment-template">
-
-  {% if not is_student_view %}
-      <textarea class="form-control comment-textarea" placeholder="Add comment" <% if (graderComments) { %> disabled="true" <% } %> ><%= graderComments %></textarea>
-  {% else %}
-      <textarea class="form-control comment-textarea" disabled="true"><%= graderComments %></textarea>
-  {% endif %}
-
-  {% if not is_student_view %}
-      <button class="btn btn-sm btn-primary save-comment <% if (graderComments) { %> hidden <% } %>">Save comment</button>
-      <button class="btn btn-sm btn-primary edit-comment <% if (!graderComments) { %> hidden <% } %>">Edit comment</button>
-      <i class="fa fa-check comment-success"></i>
-
-      <a href="#" class="delete-comment <% if (!graderComments) { %> hidden <% } %>">
-        <i class="fa fa-trash-o fa-lg"></i>
-      </a>
+    <input class="form-control custom-points" type="text" value="<%= customPoints %>" disabled="true" />
   {% endif %}
 </script>
 
@@ -276,7 +271,13 @@
   <ol type="A"></ol>
 
   <button class="btn btn-primary btn-sm add-rubric">Add rubric</button>
-  <div class="comment-container"></div>
+  {% if is_student_view %}
+    <% if (graderComments) { %>
+      <div class="comment-container">
+        <textarea class="form-control comment-textarea" disabled="true"><%= graderComments %></textarea>
+      </div>
+    <% } %>
+  {% endif %}
 </script>
 
 <script type="text/template" class="annotation-template">

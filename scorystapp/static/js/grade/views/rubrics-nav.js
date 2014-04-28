@@ -55,13 +55,6 @@ var RubricsNavView = IdempotentView.extend({
     $ol.append(customPointsView.render().$el);
     this.registerSubview(customPointsView);
 
-    // add commenting
-    var commentView = new CommentView({
-      model: this.model,
-      el: this.$('.comment-container')
-    }).render();
-    this.registerSubview(commentView);
-
     window.resizeNav();
     return this;
   },

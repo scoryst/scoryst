@@ -10,7 +10,8 @@ var SplitView = Backbone.View.extend({
   events: {
     'click .next-images': 'viewNextImages',
     'click .previous-images': 'viewPreviousImages',
-    'click img': 'markImage'
+    'click img': 'markImage',
+    'click .zoom': 'showModal'
   },
 
   initialize: function(options) {
@@ -27,7 +28,7 @@ var SplitView = Backbone.View.extend({
 
     $(window).keydown(_.bind(this.handleShortcuts, this));
 
-    // TODO: Use bootstrap modal
+    this.$modal = $('.modal');  // used to show large jpegs
   },
 
   render: function() {
@@ -89,6 +90,11 @@ var SplitView = Backbone.View.extend({
         this.viewPreviousImages();
         break;
     }
+  },
+
+  showModal: function(event) {
+    this.$modal.find('.modal-content').html('<img src="http://placekitten.com/g/700/900" alt="zoom" />');
+    this.$modal.modal();
   }
 });
 

@@ -74,7 +74,7 @@ var ExamCanvasGradeView = ExamCanvasView.extend({
       }
     }
 
-    if (this.preloadOtherStudentExams) {
+    if (this.preloadOtherStudentExams && !Utils.IS_STUDENT_VIEW) {
       for (var i = -this.preloadOtherStudentExams; i <= this.preloadOtherStudentExams; i++) {
         // preload page of previous and next students
         var image = new Image();
