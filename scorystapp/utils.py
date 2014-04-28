@@ -1,5 +1,6 @@
 import random
 import string
+from django.utils import timezone
 
 
 def generate_random_string(length):

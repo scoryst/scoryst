@@ -35,10 +35,9 @@ def upload(request, cur_course_user):
     if form.is_valid():
       exam = shortcuts.get_object_or_404(models.Exam, pk=form.cleaned_data['exam_name'], course=cur_course)
 
-      # Break the pdf into corresponding student exams using a celery worker
-      # Break those pdfs into jpegs and upload them to S3.
+      # Breaks the pdf into jpegs and uploads them to S3 after creating `SplitPage` objects
       name_prefix = exam.name.replace(' ', '') + utils.generate_random_string(5)
-      _break_and_upload(exam, request.FILES['exam_file'], name_prefix)
+      _upload_and_split(exam, request.FILES['exam_file'], name_prefix)
 
       # We return to the roster page because the files are still being processed and map exams
       # won't be ready
@@ -67,10 +66,10 @@ def get_exam_answer_pages(request, cur_course_user, exam_id):
   return response.Response(serializer.data)
 
 
-def _break_and_upload(exam, handle, name_prefix):
+def _upload_and_split(exam, handle, name_prefix):
   """
-  Breaks and uploads the PDF file specified by handle. Creates a temporary
-  file with the given name prefix, and starts an asynchronous break and
+  Uploads the PDF file specified by handle. Creates a temporary
+  file with the given name prefix, and starts an asynchronous split and
   upload job that runs in the background.
   """
   temp_pdf_name = '/tmp/%s.pdf' % name_prefix
@@ -79,106 +78,69 @@ def _break_and_upload(exam, handle, name_prefix):
   temp_pdf.write(handle.read())
   temp_pdf.flush()
 
-  _break_and_upload_task.delay(exam, temp_pdf_name, name_prefix)
+  _upload_and_split_task.delay(exam, temp_pdf_name)
 
 
 @celery.task
-def _break_and_upload_task(exam, temp_pdf_name, name_prefix):
+def _upload_and_split_task(exam, temp_pdf_name):
   """
-  Splits the given PDF into multiple smaller PDFs. Converts these PDFs into
-  JPEGs and uploads them to S3 (courtesy of the converter worker).
+  Creates a 'Split' object and uploads the giant PDF file. Converts the PDF
+  into JPEGs and uploads them to S3 (courtesy of the converter worker).
   """
-  entire_pdf = PyPDF2.PdfFileReader(file(temp_pdf_name, 'rb'))
+  entire_pdf_file = file(temp_pdf_name, 'rb')
+  entire_pdf = PyPDF2.PdfFileReader(entire_pdf_file)
   num_pages = entire_pdf.getNumPages()
+
+  split = models.Split(exam=exam, secret=utils.generate_random_string(40))
+  split.pdf.save('new', files.File(entire_pdf_file))
+  split.save()
 
   # assume each page has questions on one side and nothing on the other
   num_pages_per_exam = exam.page_count * 2
-  num_students = num_pages / num_pages_per_exam
-
-  for cur_student in range(num_students):
-    # for each student, create a new pdf
-    single_student_pdf = PyPDF2.PdfFileWriter()
-
-    for cur_page in range(num_pages_per_exam):
-      page = entire_pdf.pages[cur_student * num_pages_per_exam + cur_page]
-      single_student_pdf.addPage(page)
-
-    single_student_pdf.write(open('/tmp/%s%d.pdf' % (name_prefix, cur_student), 'wb'))
 
   os.remove(temp_pdf_name)
-  _create_and_upload_exam_answers(exam, name_prefix, num_pages_per_exam, num_students)
+  _create_and_upload_split_pages(split, num_pages, num_pages_per_exam)
 
 
-def _create_and_upload_exam_answers(exam, name_prefix, num_pages_per_exam, num_students):
+def _create_and_upload_split_pages(split, num_pages, num_pages_per_exam):
   """
-  Associates a JPEG with every ExamAnswerPage. Creates QuestionPartAnswers for each
-  student. Runs the PDF -> JPEG converter worker for all student exams, uploading the
+  For each page in the pdf, create a `SplitPage` and associated a JPEG with it.
+  Runs the PDF -> JPEG converter worker for all pages, uploading the
   JPEGs to S3.
   """
-  NUM_STUDENTS_PER_WORKER = 10
-  num_workers = (num_students - 1) / NUM_STUDENTS_PER_WORKER + 1
-
-  threads = []
-  question_parts = models.QuestionPart.objects.filter(exam=exam)
+  NUM_PAGES_PER_WORKER = 200
+  num_workers = (num_pages - 1) / NUM_PAGES_PER_WORKER + 1
 
   for worker in range(num_workers):
     print 'Spawning worker %d' % worker
-    offset = worker * NUM_STUDENTS_PER_WORKER
-    students = range(offset, min(num_students, offset + NUM_STUDENTS_PER_WORKER))
+    offset = worker * NUM_PAGES_PER_WORKER
+    pages = range(offset, min(num_pages, offset + NUM_PAGES_PER_WORKER))
 
-    jpeg_prefixes = map(lambda student: 'exam-pages/%s' %
-      utils.generate_random_string(40), students)
-    pdf_paths = []
-    exam_answer_ids = []
+    jpeg_prefixes = map(lambda student: 'split-pages/%s' %
+      utils.generate_random_string(40), pages)
 
-    for cur_student in students:
-      exam_answer = models.ExamAnswer(course_user=None, exam=exam,
-        page_count=num_pages_per_exam)
-      temp_pdf_name = '/tmp/%s%d.pdf' % (name_prefix, cur_student)
-      temp_pdf = file(temp_pdf_name, 'rb')
+    for page in pages:
+      # We make a guess for `begins_exam_answer` by assuming all the exams
+      # uploaded have the correct number of pages
+      split_page = models.SplitPage(split=split, page_number=page + 1,
+      begins_exam_answer=(page % num_pages_per_exam == 0))
 
-      exam_answer.pdf.save('new', files.File(temp_pdf))
-      exam_answer.save()
+      jpeg_name = '%s.jpeg' % jpeg_prefixes[page - offset]
+      jpeg_field = file_fields.ImageFieldFile(instance=None,
+        field=file_fields.FileField(), name=jpeg_name)
 
-      os.remove(temp_pdf_name)
-      pdf_paths.append(exam_answer.pdf.name)
-      exam_answer_ids.append(exam_answer.id)
+      small_jpeg_name = '%s-small.jpeg' % jpeg_prefixes[page - offset]
+      small_jpeg_field = file_fields.ImageFieldFile(instance=None,
+        field=file_fields.FileField(), name=small_jpeg_name)
 
-      for cur_page in range(num_pages_per_exam):
-        # set the JPEG associated with each exam page
-        exam_answer_page = models.ExamAnswerPage(exam_answer=exam_answer,
-          page_number=cur_page + 1)
-        cur_page_num = cur_student * num_pages_per_exam + cur_page
+      large_jpeg_name = '%s-large.jpeg' % jpeg_prefixes[page - offset]
+      large_jpeg_field = file_fields.ImageFieldFile(instance=None,
+        field=file_fields.FileField(), name=large_jpeg_name)
 
-        # below is the JPEG name set by the converter worker
-        jpeg_name = '%s%d.jpeg' % (jpeg_prefixes[cur_student - offset], cur_page + 1)
-        jpeg_field = file_fields.ImageFieldFile(instance=None,
-          field=file_fields.FileField(), name=jpeg_name)
-
-        large_jpeg_name = '%s%d-large.jpeg' % (jpeg_prefixes[cur_student
-          - offset], cur_page + 1)
-        large_jpeg_field = file_fields.ImageFieldFile(instance=None,
-          field=file_fields.FileField(), name=large_jpeg_name)
-
-        exam_answer_page.page_jpeg = jpeg_field
-        exam_answer_page.page_jpeg_large = large_jpeg_field
-        exam_answer_page.save()
-
-      for question_part in question_parts:
-        # create QuestionPartAnswer models for this student
-        answer_pages = ''
-
-        for page in question_part.pages.split(','):
-          page = int(page)
-
-          # assume each page has questions on one side and nothing on the other
-          answer_pages = answer_pages + str(2 * page - 1) + ','
-
-        # remove the trailing comma (,) from the end of answer_pages
-        answer_pages = answer_pages[:-1]
-        question_part_answer = models.QuestionPartAnswer(question_part=question_part,
-          exam_answer=exam_answer, pages=answer_pages)
-        question_part_answer.save()
+      split_page.page_jpeg = jpeg_field
+      split_page.page_jpeg_small = small_jpeg_field
+      split_page.page_jpeg_large = large_jpeg_field
+      split_page.save()
 
     dp = dispatcher.Dispatcher()
 
@@ -190,11 +152,16 @@ def _create_and_upload_exam_answers(exam, name_prefix, num_pages_per_exam, num_s
         'bucket': settings.AWS_STORAGE_BUCKET_NAME,
       },
 
-      'webhook_secret': settings.WEBHOOK_SECRET,
-      'webhook_url': settings.SITE_URL + 'set-blank-pages',
-      'exam_answer_ids': exam_answer_ids,
-      'pdf_paths': pdf_paths,
+      'webhook_data': {
+        'split_id': split.id,
+        'secret': split.secret
+      },
+
+      'webhook_url': settings.SITE_URL + 'update-split-page-state',
+      'pdf_path': split.pdf.name,
       'jpeg_prefixes': jpeg_prefixes,
+      'page_start': pages[0],
+      'page_end': page[-1]
     }
 
     instance_options = {'instance_type': 'm3.medium'}
@@ -210,25 +177,30 @@ def dispatch_worker(dp, *args):
 
 
 @csrf.csrf_exempt
-def set_blank_pages(request):
+def update_split_page_state(request):
   """
-  Processes POST request containing which pages are blank for a given student's
-  exam. More specifically, saves `ExamAnswerPage`s with is_blank = True for the
-  list of blank pages sent in the request. Requires an authentication key to be
-  passed in the request.
-
+  Processes POST request telling us which `SplitPage` has been uploaded
+  and whether or not it is blank.
   Currently called from Orchard.
   """
-  if (request.method == 'POST' and settings.WEBHOOK_SECRET ==
-      request.POST['webhook_secret']):
-    blank_pages = request.POST['blank_pages']
-    exam_answer_id = request.POST['exam_answer_id']
+  if request.method == 'POST':
+    split_id = request.POST['split_id']
+    secret = request.POST['secret']
 
-    for page in blank_pages:
-      exam_answer_page = shortcuts.get_object_or_404(models.ExamAnswerPage,
-        exam_answer=exam_answer_id, page_number=page)
-      exam_answer_page.is_blank = True
-      exam_answer_page.save()
+    # If the split is found, we are authenticated because of the secret
+    split = shortcuts.get_object_or_404(models.Split,
+      split=split_id, secret=secret)
+
+    # Expects `page_number` to be 0 indexed
+    page_number = request.POST['page_number']
+    is_blank = request.POST['is_blank']
+
+    split_page = shortcuts.get_object_or_404(models.SplitPage,
+      split=split, page_number=page_number + 1)
+
+    split_page.is_uploaded = True
+    split_page.is_blank = is_blank
+    split_page.save()
 
     return http.HttpResponse(status=200)
   return http.HttpResponse(status=403)
