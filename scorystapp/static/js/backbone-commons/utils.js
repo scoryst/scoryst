@@ -14,5 +14,8 @@
   // whether a student is viewing the grade page
   Utils.IS_STUDENT_VIEW = /exams\/view/.test(window.location.href);
 
+  // whether the exam is being previewed
+  Utils.IS_PREVIEW = /exams\/preview/.test(window.location.href);
+
   window.Utils = Utils;
 })(this, this.document);

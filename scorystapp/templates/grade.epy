@@ -331,9 +331,8 @@
 <script src="/static/js/grade/views/rubrics-nav-header.js"></script>
 <script src="/static/js/grade/views/rubrics-nav.js"></script>
 <script src="/static/js/grade/views/exam-nav.js"></script>
-<script src="/static/js/grade/views/annotation.js"></script>
 <script src="/static/js/grade/views/exam-canvas.js"></script>
-<script src="/static/js/grade/views/exam-pdf.js"></script>
+<script src="/static/js/grade/views/annotation.js"></script>
 <script src="/static/js/grade/views/student-nav.js"></script>
 <script src="/static/js/grade/views/main.js"></script>
 {% endblock %}

@@ -23,7 +23,7 @@ var MainView = IdempotentView.extend({
           questionPartAnswer = self.questionPartAnswers.at(0);
         }
 
-        self.renderExamPDF(questionPartAnswer);
+        self.renderExamCanvas(questionPartAnswer);
         self.renderStudentNav();
 
         self.renderExamNav(questionPartAnswer);
@@ -45,13 +45,15 @@ var MainView = IdempotentView.extend({
     });
   },
 
-  renderExamPDF: function(questionPartAnswer) {
-    var examPDFView = new ExamPDFView({
-      el: this.$('.exam'),
-      model: questionPartAnswer
+  renderExamCanvas: function(questionPartAnswer) {
+    var examCanvasGradeView = new ExamCanvasGradeView({
+      questionPartAnswer: questionPartAnswer,
+      preloadOtherStudentExams: 2,
+      preloadCurExam: 2,
+      el: this.$('.exam')
     });
 
-    this.registerSubview(examPDFView);
+    this.registerSubview(examCanvasGradeView);
   },
 
   renderStudentNav: function() {

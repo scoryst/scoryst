@@ -141,7 +141,7 @@ urlpatterns = patterns('',
    'scorystapp.views.grade.get_previous_student'),
   url(r'^course/(?P<course_id>\d+)/grade/(?P<exam_answer_id>\d+)/get-next-student/$',
     'scorystapp.views.grade.get_next_student'),
-  url(r'^course/(?P<course_id>\d+)/(grade|exams/view)/(?P<exam_answer_id>\d+)/get-non-blank-pages/$',
+  url(r'^course/(?P<course_id>\d+)/(grade|exams/view|exams/preview)/(?P<exam_answer_id>\d+)/get-non-blank-pages/$',
     'scorystapp.views.grade_or_view.get_non_blank_pages'),
 
   url(r'^course/(?P<course_id>\d+)/(grade|exams/view|exams/preview)/(?P<exam_answer_id>\d+)/exam-page/(?P<exam_page_number>\d+)/annotation/$',
