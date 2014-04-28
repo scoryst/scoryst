@@ -441,6 +441,7 @@ class Split(models.Model):
 
   exam = models.ForeignKey(Exam, db_index=True)
   pdf = models.FileField(upload_to=generate_remote_pdf_name)
+  secret = models.TextField(max_length=1000)
 
 
 class SplitPage(models.Model):
@@ -451,6 +452,7 @@ class SplitPage(models.Model):
 
   split = models.ForeignKey(Split, db_index=True)
   page_number = models.IntegerField()
+  is_uploaded = models.BooleanField(default=False)
   is_blank = models.BooleanField(default=False)
   begins_exam_answer = models.BooleanField(default=False)
 

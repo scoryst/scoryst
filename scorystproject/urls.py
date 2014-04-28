@@ -149,8 +149,8 @@ urlpatterns = patterns('',
   url(r'^course/(?P<course_id>\d+)/(grade|exams/view|exams/preview)/(?P<exam_answer_id>\d+)/exam-page/(?P<exam_page_number>\d+)/annotation/(?P<annotation_id>\d+)/$',
     'scorystapp.views.grade_or_view.manage_annotation'),
 
-  # Set the `ExamAnswerPage`s for a given `ExamAnswer` as blank
-  url(r'^set-blank-pages/$', 'scorystapp.views.upload.set_blank_pages'),
+  # Update the `SplitPage`s as uploaded and (possibly) blank
+  url(r'^update-split-page-state/$', 'scorystapp.views.upload.update_split_page_state'),
 
   # course student view exam
   url(r'^course/(?P<course_id>\d+)/exams/view/(?P<exam_answer_id>\d+)/$',
