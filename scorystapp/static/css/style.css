@@ -1450,3 +1450,32 @@ footer .amp {
 .map-question-parts .success {
   display: none;
 }
+
+.split .navigation {
+  margin-bottom: 20px;
+}
+
+.split .image-container {
+  position: relative;
+  border: 1px solid #bbb;
+  float: left;
+  padding: 1px;
+}
+
+.split img {
+  width: 220px;
+}
+
+.split .image-container .zoom {
+  position: absolute;
+  right: 5px;
+  bottom: 1px;
+}
+
+.split .finish {
+  margin-top: 10px;
+}
+
+.split .selected {
+  border: 1px solid #ff4400;
+}

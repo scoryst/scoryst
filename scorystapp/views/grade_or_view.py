@@ -18,6 +18,14 @@ def get_exam_pdf(request, cur_course_user, exam_answer_id):
   return shortcuts.redirect(exam_answer.pdf.url)
 
 
+@decorators.access_controlled
+@decorators.student_required
+def get_non_blank_pages(request, cur_course_user, exam_answer_id):
+  exam_answer_pages = models.ExamAnswerPage.objects.filter(exam_answer=exam_answer_id)
+  pages = sorted([page.page_number for page in exam_answer_pages if not page.is_blank])
+  return http.HttpResponse(json.dumps(pages), mimetype='application/json')
+
+
 # TODO: confirm security is OK for the API methods below
 @rest_decorators.api_view(['GET'])
 @decorators.access_controlled

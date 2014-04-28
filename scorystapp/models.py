@@ -164,10 +164,7 @@ class Exam(models.Model):
   """ Represents a particular exam associated with a course. """
   def generate_remote_pdf_name(instance, filename):
     """ Generates a name of the form exam-pdf/<random_string><timestamp>.pdf """
-    name = utils.generate_random_string(40)
-    return 'exam-pdf/%s%s.pdf' % (
-      name, timezone.now().strftime('%Y%m%d%H%M%S')
-    )
+    return utils.generate_timestamped_random_name('exam-pdf', 'pdf')
 
   course = models.ForeignKey(Course, db_index=True)
   name = models.CharField(max_length=200)
@@ -203,7 +200,7 @@ class Exam(models.Model):
     """
     Returns the set of exam answers corresponding to this exam. Prefetches all
     fields necessary to compute is_graded() and get_points().
-    """ 
+    """
     return self.examanswer_set.filter(preview=False).prefetch_related(
       'questionpartanswer_set',
       'questionpartanswer_set__rubrics',
@@ -216,7 +213,7 @@ class Exam(models.Model):
     """
     Returns the set of question parts corresponding to this exam. Prefetches
     all fields necessary to compute is_graded() and get_points().
-    """ 
+    """
     return self.questionpart_set.prefetch_related(
       'questionpartanswer_set',
       'questionpartanswer_set__rubrics',
@@ -233,10 +230,7 @@ class ExamPage(models.Model):
   """ JPEG representation of one page of the exam """
   def generate_remote_jpeg_name(instance, filename):
     """ Generates a name of the form exam-jpeg/<random_string><timestamp>.jpeg """
-    name = utils.generate_random_string(40)
-    return 'exam-pages/%s%s.jpeg' % (
-      name, timezone.now().strftime('%Y%m%d%H%M%S')
-    )
+    return utils.generate_timestamped_random_name('exam-jpeg', 'jpeg')
 
   exam = models.ForeignKey(Exam, db_index=True)
   page_number = models.IntegerField()
@@ -281,10 +275,7 @@ class ExamAnswer(models.Model):
   """ Represents a student's exam. """
   def generate_remote_pdf_name(instance, filename):
     """ Generates a name of the form exam-pdf/<random_string><timestamp>.pdf """
-    name = utils.generate_random_string(40)
-    return 'exam-pdf/%s%s.pdf' % (
-      name, timezone.now().strftime('%Y%m%d%H%M%S')
-    )
+    return utils.generate_timestamped_random_name('exam-pdf', 'pdf')
 
   exam = models.ForeignKey(Exam, db_index=True)
   course_user = models.ForeignKey(CourseUser, null=True, blank=True, db_index=True)
@@ -357,15 +348,13 @@ class ExamAnswerPage(models.Model):
   """ JPEG representation of one page of the students exam answer """
   def generate_remote_jpeg_name(instance, filename):
     """ Generates a name of the form exam-jpeg/<random_string><timestamp>.jpeg """
-    name = utils.generate_random_string(40)
-    return 'exam-pages/%s%s.jpeg' % (
-      name, timezone.now().strftime("%Y%m%d%H%M%S")
-    )
+    return utils.generate_timestamped_random_name('exam-jpeg', 'jpeg')
 
   exam_answer = models.ForeignKey(ExamAnswer, db_index=True)
   page_number = models.IntegerField()
   page_jpeg = models.ImageField(upload_to=generate_remote_jpeg_name, blank=True)
   page_jpeg_large = models.ImageField(upload_to=generate_remote_jpeg_name, blank=True)
+  is_blank = models.BooleanField(default=False)
 
   def __unicode__(self):
     if self.exam_answer.course_user:
@@ -433,3 +422,40 @@ class Annotation(models.Model):
 
   def get_exam_page_number(self):
     return exam_page_answer.page_number
+
+
+"""
+Split Models
+Models: Split, SplitPage
+"""
+
+class Split(models.Model):
+  """
+  Represents a pdf file that has been uploaded but not yet "split" into ExamAnswers
+  If N pages were part of a PDF file that was uploaded, we have N `SplitPage`s as
+  part of one `Split`
+  """
+  def generate_remote_pdf_name(instance, filename):
+    """ Generates a name of the form split-pdf/<random_string><timestamp>.pdf """
+    return utils.generate_timestamped_random_name('split-pdf', 'pdf')
+
+  exam = models.ForeignKey(Exam, db_index=True)
+  pdf = models.FileField(upload_to=generate_remote_pdf_name)
+
+
+class SplitPage(models.Model):
+  """
+  Represents a page from the `Split` pdf that is yet to be associated with
+  an `ExamAnswer`
+  """
+
+  split = models.ForeignKey(Split, db_index=True)
+  page_number = models.IntegerField()
+  is_blank = models.BooleanField(default=False)
+  begins_exam_answer = models.BooleanField(default=False)
+
+  # Upload URLs are taken care of by upload.py, however upload_to is required
+  # so we specify none
+  page_jpeg_small = models.ImageField(upload_to='none', blank=True)
+  page_jpeg = models.ImageField(upload_to='none', blank=True)
+  page_jpeg_large = models.ImageField(upload_to='none', blank=True)

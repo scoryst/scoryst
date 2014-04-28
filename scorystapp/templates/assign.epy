@@ -70,7 +70,6 @@
   <script src="/static/js/lib/jquery.custom-scrollbar.min.js"></script>
 
   <script src="/static/js/zoom-lens.js"></script>
-  <script src="/static/js/exam-canvas-base.js"></script>
   <script src="/static/js/exam-canvas.js"></script>
 
   <script src="/static/js/assign/models/exam-answer.js"></script>

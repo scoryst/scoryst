@@ -149,7 +149,6 @@ var ExamCanvasView = IdempotentView.extend({
 
   // callback takes the number of total pages in the exam
   fetchTotalNumPages: function(callback) {
-    var self = this;
     $.ajax({
       url: 'get-exam-page-count/'
     }).done(function(data) {

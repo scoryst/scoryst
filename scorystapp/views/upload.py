@@ -1,7 +1,8 @@
-from django import shortcuts
+from django import http, shortcuts
 from django.core import files
 from django.conf import settings
 from django.db.models.fields import files as file_fields
+from django.views.decorators import csrf
 from scorystapp import models, forms, decorators, utils
 from scorystapp.views import helpers
 from workers import dispatcher
@@ -115,6 +116,7 @@ def _create_and_upload_exam_answers(exam, name_prefix, num_pages_per_exam, num_s
     jpeg_prefixes = map(lambda student: 'exam-pages/%s' %
       utils.generate_random_string(40), students)
     pdf_paths = []
+    exam_answer_ids = []
 
     for cur_student in students:
       exam_answer = models.ExamAnswer(course_user=None, exam=exam,
@@ -127,6 +129,7 @@ def _create_and_upload_exam_answers(exam, name_prefix, num_pages_per_exam, num_s
 
       os.remove(temp_pdf_name)
       pdf_paths.append(exam_answer.pdf.name)
+      exam_answer_ids.append(exam_answer.id)
 
       for cur_page in range(num_pages_per_exam):
         # set the JPEG associated with each exam page
@@ -177,6 +180,9 @@ def _create_and_upload_exam_answers(exam, name_prefix, num_pages_per_exam, num_s
         'bucket': settings.AWS_STORAGE_BUCKET_NAME,
       },
 
+      'webhook_secret': settings.WEBHOOK_SECRET,
+      'webhook_url': settings.SITE_URL + 'set-blank-pages',
+      'exam_answer_ids': exam_answer_ids,
       'pdf_paths': pdf_paths,
       'jpeg_prefixes': jpeg_prefixes,
     })
@@ -189,3 +195,28 @@ def _create_and_upload_exam_answers(exam, name_prefix, num_pages_per_exam, num_s
 
   # wait until all threads have complete
   # [thread.join() for thread in threads]
+
+
+@csrf.csrf_exempt
+def set_blank_pages(request):
+  """
+  Processes POST request containing which pages are blank for a given student's
+  exam. More specifically, saves `ExamAnswerPage`s with is_blank = True for the
+  list of blank pages sent in the request. Requires an authentication key to be
+  passed in the request.
+
+  Currently called from Orchard.
+  """
+  if (request.method == 'POST' and settings.WEBHOOK_SECRET ==
+      request.POST['webhook_secret']):
+    blank_pages = request.POST['blank_pages']
+    exam_answer_id = request.POST['exam_answer_id']
+
+    for page in blank_pages:
+      exam_answer_page = shortcuts.get_object_or_404(models.ExamAnswerPage,
+        exam_answer=exam_answer_id, page_number=page)
+      exam_answer_page.is_blank = True
+      exam_answer_page.save()
+
+    return http.HttpResponse(status=200)
+  return http.HttpResponse(status=403)

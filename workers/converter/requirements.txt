@@ -1,4 +1,7 @@
 boto==2.20.1
 Flask==0.10.1
+numpy==1.8.0
+Pillow==2.3.1
 pycrypto==2.6.1
 PyPDF2==1.19
+requests==2.2.1
