@@ -328,7 +328,6 @@
 
 <script src="/static/js/grade/views/rubric.js"></script>
 <script src="/static/js/grade/views/custom-points.js"></script>
-<script src="/static/js/grade/views/comment.js"></script>
 <script src="/static/js/grade/views/rubrics-nav-header.js"></script>
 <script src="/static/js/grade/views/rubrics-nav.js"></script>
 <script src="/static/js/grade/views/exam-nav.js"></script>

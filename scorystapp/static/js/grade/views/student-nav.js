@@ -22,8 +22,8 @@ var StudentNavView = IdempotentView.extend({
     if (this.$('.next-student').length > 0) {
       // attach events from elements outside this view
       this.listenToDOM($(window), 'keydown', this.handleShortcuts);
-      this.listenToDOM($(window), 'click .next-student', this.goToNextStudent);
-      this.listenToDOM($(window), 'click .previous-student', this.goToPreviousStudent);
+      this.listenToDOM($('.next-student'), 'click', this.goToNextStudent);
+      this.listenToDOM($('.previous-student'), 'click', this.goToPreviousStudent);
       this.enableBackButton();
     } else {
       this.undelegateEvents();
