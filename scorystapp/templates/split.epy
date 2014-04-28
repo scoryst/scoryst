@@ -40,7 +40,7 @@
 </div>
 
 <script type="text/template" class="images-template">
-  <% [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].forEach(function(page) { %>
+  <% pages.forEach(function(page) { %>
     <% if (page.beginsExamAnswer) { %>
       <div class="image-container selected">
     <% } else { %>
@@ -49,8 +49,7 @@
         <button class="btn btn-link zoom">
           <i class="fa fa-search-plus"></i>
         </button>
-        <!-- <img src= "<%= page.pageJpegSmallUrl %>" data-page-id="<%= page.id %>" alt="Thumbnail" /> -->
-        <img src= "http://placekitten.com/g/200/300" data-page-id="<%= page.id %>" alt="Thumbnail" />
+        <img src= "<%= page.pageJpegSmallUrl %>" data-page-id="<%= page.id %>" alt="Thumbnail" />
       </div>
   <% }); %>
 </script>

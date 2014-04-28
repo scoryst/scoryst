@@ -93,7 +93,13 @@ var SplitView = Backbone.View.extend({
   },
 
   showModal: function(event) {
-    this.$modal.find('.modal-content').html('<img src="http://placekitten.com/g/700/900" alt="zoom" />');
+    var $currentTarget = $(event.currentTarget);
+    var imageId = parseInt($currentTarget.siblings('img').attr('data-page-id'), 10);
+    var pageToShow = this.pages.filter(function(page) {
+      return page.id === imageId;
+    })[0];
+
+    this.$modal.find('.modal-content').html('<img src="' + page.pageJpegLargeUrl + '" alt="zoom" />');
     this.$modal.modal();
   }
 });
