@@ -100,7 +100,7 @@ var SplitView = Backbone.View.extend({
       return page.id === imageId;
     })[0];
 
-    var newImage = $('<img>').attr({'src': page.pageJpegLargeUrl, 'alt': 'Zoomed Image'}).html();
+    var newImage = $('<img>').attr({'src': pageToShow.get('pageJpegUrl'), 'alt': 'Zoomed Image'})[0];
     this.$modal.find('.modal-content').html(newImage);
     this.$modal.modal();
   }
