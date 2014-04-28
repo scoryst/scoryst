@@ -31,7 +31,8 @@ var StudentNavView = IdempotentView.extend({
   },
 
   showNavSuccess: function() {
-    // show success icon and then hide it
+    // show success icon and then hide it; note that there is also a success
+    // icon outside of el (at the very bottom of the page)
     var $navSuccessIcon = $('.student-nav-success');
     $navSuccessIcon.show();
 
