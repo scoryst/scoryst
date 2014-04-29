@@ -87,13 +87,12 @@
               </li>
 
               {% if course.has_exams %}
-              {# TODO: Uncomment and fix #}
-              {# <li class="{% path_active_course path 'upload/$' course %}"> #}
-              {#   <a href="/course/{{course.pk}}/upload"> #}
-              {#     <i class="fa fa-upload"></i> #}
-              {#     Upload #}
-              {#   </a> #}
-              {# </li> #}
+              <li class="{% path_active_course path 'upload/$' course %}">
+                <a href="/course/{{course.pk}}/upload">
+                  <i class="fa fa-upload"></i>
+                  Upload
+                </a>
+              </li>
 
               <li class="{% path_active_course path 'grade/$' course %}">
                 <a href="/course/{{course.pk}}/grade">

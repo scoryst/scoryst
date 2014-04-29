@@ -17,7 +17,7 @@ install_retry() {
   done
 }
 
-install_retry python-dev python-setuptools imagemagick
+install_retry python-dev python-setuptools imagemagick libjpeg-dev
 sudo easy_install pip
 
 sudo pip install -r requirements.txt

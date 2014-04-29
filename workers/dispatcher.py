@@ -51,7 +51,8 @@ class Dispatcher(object):
       response = self.dispatch(instance, payload)
     finally:
       # always terminate the instance, regardless of whether an error occurred
-      self.terminate(instance)
+      # self.terminate(instance)
+      pass
 
     return response
 

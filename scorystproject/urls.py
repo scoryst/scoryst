@@ -99,9 +99,9 @@ urlpatterns = patterns('',
     'scorystapp.views.exams.get_saved_exam'),
 
 
-  # uploading student exams
+  # Uploading student exams
   url(r'^course/(?P<course_id>\d+)/upload/$', 'scorystapp.views.upload.upload'),
-  url(r'^course/(?P<course_id>\d+)/upload/exam-answer-pages/(?P<exam_id>\d+)/$', 'scorystapp.views.upload.get_exam_answer_pages'),
+  url(r'^course/(?P<course_id>\d+)/upload/split-pages/(?P<exam_id>\d+)/$', 'scorystapp.views.upload.get_split_pages'),
 
 
   # Backbone's grade overview
@@ -141,7 +141,7 @@ urlpatterns = patterns('',
    'scorystapp.views.grade.get_previous_student'),
   url(r'^course/(?P<course_id>\d+)/grade/(?P<exam_answer_id>\d+)/get-next-student/$',
     'scorystapp.views.grade.get_next_student'),
-  url(r'^course/(?P<course_id>\d+)/(grade|exams/view)/(?P<exam_answer_id>\d+)/get-non-blank-pages/$',
+  url(r'^course/(?P<course_id>\d+)/(grade|exams/view|exams/preview)/(?P<exam_answer_id>\d+)/get-non-blank-pages/$',
     'scorystapp.views.grade_or_view.get_non_blank_pages'),
 
   url(r'^course/(?P<course_id>\d+)/(grade|exams/view|exams/preview)/(?P<exam_answer_id>\d+)/exam-page/(?P<exam_page_number>\d+)/annotation/$',
@@ -149,8 +149,8 @@ urlpatterns = patterns('',
   url(r'^course/(?P<course_id>\d+)/(grade|exams/view|exams/preview)/(?P<exam_answer_id>\d+)/exam-page/(?P<exam_page_number>\d+)/annotation/(?P<annotation_id>\d+)/$',
     'scorystapp.views.grade_or_view.manage_annotation'),
 
-  # Set the `ExamAnswerPage`s for a given `ExamAnswer` as blank
-  url(r'^set-blank-pages/$', 'scorystapp.views.upload.set_blank_pages'),
+  # Update the `SplitPage`s as uploaded and (possibly) blank
+  url(r'^update-split-page-state/$', 'scorystapp.views.upload.update_split_page_state'),
 
   # course student view exam
   url(r'^course/(?P<course_id>\d+)/exams/view/(?P<exam_answer_id>\d+)/$',

@@ -133,13 +133,3 @@ class AnnotationSerializer(serializers.ModelSerializer):
       raise serializers.ValidationError(
         'Annotation for invalid exam answer page: %d' % exam_answer_page.pk)
     return attrs
-
-
-class UploadExamAnswerPageSerializer(serializers.ModelSerializer):
-  name = serializers.CharField(source='exam_answer.course_user.user.get_full_name')
-  page_jpeg_url = serializers.CharField(source='page_jpeg.url', read_only=True)
-
-  class Meta:
-    model = models.ExamAnswerPage
-    fields = ('id', 'name', 'page_jpeg_url')
-    read_only_fields = ('id',)

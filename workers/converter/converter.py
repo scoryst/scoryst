@@ -1,19 +1,30 @@
-from boto.s3 import connection as s3
-import requests
+import json
 import subprocess
-import PyPDF2
 import threading
+import PyPDF2
 import worker
-import numpy as np
-import Image
+import requests
+
+from boto.s3 import connection as s3
+from PIL import Image
 
 class Converter(worker.Worker):
-  BLANK_PAGE_THRESHOLD = 0.02
+  # number of pages to convert per batch
+  PAGES_PER_BATCH = 15
+
+  # norm threshold to determine if a page is a black
+  BLANK_PAGE_THRESHOLD = 0.01
+
 
   def _work(self, payload):
     """
-    Using ImageMagick, converts the given PDFs to JPEGs. PDFs are passed as paths
-    in S3. They're read from S3, converted to JPEGs, and stored back in S3.
+    Using ImageMagick, converts the given PDF to JPEGs. The PDF is passed in as
+    a path in S3. Each page is read and converted to three JPEGs of different
+    sizes (small, medium, and large). The JPEGs are then stored back in S3.
+
+    Makes a POST request to the given webhook each time a page has been
+    successfully uploaded. Passes in the page number that was uploaded and
+    whether it was blank.
 
     Payload should be of the form:
 
@@ -23,31 +34,43 @@ class Converter(worker.Worker):
       "bucket": (string) S3 bucket name
     },
 
-    "pdf_paths": [
-      (string) path to first PDF to be converted,
-      (string) path to second PDF to be converted,
-      ...
-    ],
+    "pdf_path": path to PDF to be converted,
 
     "jpeg_prefixes": [
-      # if prefix is 'pre', JPEGs stored in S3 will be named 'pre1.jpeg', 'pre2.jpeg', etc.
+      # page i of the PDF is stored under the names {jpeg_prefixes[i]}-small.jpg,
+      # {jpeg_prefixes[i]}.jpg, and {jpeg_prefixes[i]}-large.jpg in S3
       (string) prefix for JPEG names for first PDF,
       (string) prefix for JPEG names for second PDF,
       ...
-    ]
+    ],
+
+    "webhoook_url": (string) webhook URL to make a request to,
+    "webhook_data": (*) data to return back to the webhook,
+
+    "page_start": (int) first page of the PDF to convert (inclusive),
+    "page_end": (int) last page of the PDF to convert (inclusive)
     """
+    pdf_path = payload['pdf_path']
     jpeg_prefixes = payload['jpeg_prefixes']
-    exam_answer_ids = payload['exam_answer_ids']
-    webhook_secret = payload['webhook_secret']
+
     webhook_url = payload['webhook_url']
+    webhook_data = payload['webhook_data']
+
+    page_start = payload['page_start']
+    page_end = payload['page_end']
 
     self._log('Connecting to s3')
     connection, bucket = self._connect_to_s3(payload['s3'])
 
-    # convert each PDF in a separate thread
-    for index, pdf_path in enumerate(payload['pdf_paths']):
-      self._convert_pdf(bucket, pdf_path, jpeg_prefixes[index],
-        exam_answer_ids[index], webhook_secret, webhook_url)
+    # create batches of pages to convert
+    for batch_first_page in range(page_start, page_end + 1, self.PAGES_PER_BATCH):
+      batch_last_page = min(batch_first_page + self.PAGES_PER_BATCH - 1, page_end)
+      batch_pages = range(batch_first_page, batch_last_page + 1)
+
+      batch_jpeg_prefixes = jpeg_prefixes[batch_first_page - page_start:
+        batch_last_page + 1 - page_start]
+      self._convert_batch(bucket, pdf_path, batch_pages, batch_jpeg_prefixes,
+        webhook_url, webhook_data)
 
 
   def _connect_to_s3(self, credentials):
@@ -60,100 +83,97 @@ class Converter(worker.Worker):
     return connection, bucket
 
 
-  def _convert_pdf(self, bucket, pdf_path, jpeg_prefix, exam_answer_id,
-    webhook_secret, webhook_url):
-    """
-    Converts the PDF in S3 given by pdf_path to JPEGs. For each page in the PDF,
-    stores a JPEG by name "[jpeg_prefix][pdf_page_number].jpeg" in S3. bucket
-    represents the Boto S3 bucket object.
-    """
-    # download PDF locally
+  def _convert_batch(self, bucket, pdf_path, pages, jpeg_prefixes,
+      webhook_url, webhook_data):
+    """ Converts the given batch of pages in the provided PDF to JPEGs. """
+    # download PDF locally, use first JPEG prefix as its name
     pdf_key = s3.Key(bucket)
     pdf_key.key = pdf_path
 
-    local_jpeg_prefix = jpeg_prefix.replace('/', '-')
+    local_jpeg_prefix = jpeg_prefixes[0].replace('/', '-')
     local_pdf_path = '%s/%s.pdf' % (self.working_dir, local_jpeg_prefix)
+
     pdf_key.get_contents_to_filename(local_pdf_path)
-
-    # get number of pages
-    with open(local_pdf_path, 'rb') as handle:
-      pdf_reader = PyPDF2.PdfFileReader(handle)
-      num_pages = pdf_reader.getNumPages()
-
     threads = []
 
     # convert each page in a separate thread using ImageMagick
-    for page_number in range(0, num_pages):
-      local_large_jpeg_path = '%s/%s%d-large.jpeg' % (self.working_dir,
-        local_jpeg_prefix, page_number + 1)
-      local_jpeg_path = '%s/%s%d.jpeg' % (self.working_dir, local_jpeg_prefix,
-        page_number + 1)
-
-      # single-threaded:
-      # self._upload_page(local_pdf_path, page_number, local_jpeg_path, bucket, jpeg_prefix)
-
-      # multi-threaded:
-      threads.append(threading.Thread(target=self._upload_page_and_detect_blank, args=(local_pdf_path,
-        page_number, local_large_jpeg_path, local_jpeg_path, bucket, jpeg_prefix,
-        webhook_url, webhook_secret)))
+    for page_number, jpeg_prefix in zip(pages, jpeg_prefixes):
+      args = (local_pdf_path, page_number, jpeg_prefix, bucket, webhook_url,
+          webhook_data)
+      threads.append(threading.Thread(target=self._upload_page, args=args))
 
     [thread.start() for thread in threads]
 
-    # wait until all threads have complete
+    # wait until all threads have completed
     [thread.join() for thread in threads]
 
 
-  def _upload_page_and_detect_blank(self, local_pdf_path, page_number, local_large_jpeg_path,
-      local_jpeg_path, bucket, jpeg_prefix, webhook_url, webhook_secret):
-    """
-    Converts a page of a PDF to two JPEGs (one large and one normal), and
-    uploads both to S3.
+  def _upload_page(self, local_pdf_path, page_number, jpeg_prefix, bucket,
+      webhook_url, webhook_data):
+    """ Converts a page of the given PDF to JPEGs. Uploads the JPEGs to S3. """
+    local_jpeg_prefix = jpeg_prefix.replace('/', '-')
+    local_large_jpeg_path = '%s/%s-large.jpeg' % (self.working_dir,
+      local_jpeg_prefix)
+    local_small_jpeg_path = '%s/%s-small.jpeg' % (self.working_dir,
+      local_jpeg_prefix)
+    local_jpeg_path = '%s/%s.jpeg' % (self.working_dir, local_jpeg_prefix)
 
-    Arguments:
-    local_pdf_path -- path to local PDF
-    page_number -- page number to convert
-    local_jpeg_path -- path to save local normal JPEG file
-    local_large_jpeg_path -- path to save local large JPEG file
-
-    bucket -- the S3 bucket to upload to
-    jpeg_prefix -- normal file in S3 will be named "[jpeg_prefix][page_number].jpeg",
-      large file in S3 will be named "[jpeg_prefix][page_number]-large.jpeg"
-    """
     subprocess.check_call(['convert', '-density', '300', '%s[%d]' %
       (local_pdf_path, page_number), local_large_jpeg_path])
-    subprocess.check_call(['convert', '-resize', '800x800', '%s' %
+    subprocess.check_call(['convert', '-resize', '800x800',
       local_large_jpeg_path, local_jpeg_path])
+    subprocess.check_call(['convert', '-resize', '300x300',
+      local_large_jpeg_path, local_small_jpeg_path])
     self._log('Finished converting page %d' % page_number)
 
     # store converted pages in S3
     large_jpeg_key = s3.Key(bucket)
     jpeg_key = s3.Key(bucket)
+    small_jpeg_key = s3.Key(bucket)
 
-    # ImageMagick requires 0-indexed page numbers; we use 1-indexed page
-    # numbers elsewhere
-    large_jpeg_key.key = '%s%d-large.jpeg' % (jpeg_prefix, page_number + 1)
-    jpeg_key.key = '%s%d.jpeg' % (jpeg_prefix, page_number + 1)
+    large_jpeg_key.key = '%s-large.jpeg' % (jpeg_prefix)
+    jpeg_key.key = '%s.jpeg' % (jpeg_prefix)
+    small_jpeg_key.key = '%s-small.jpeg' % (jpeg_prefix)
 
     large_jpeg_key.set_contents_from_filename(local_large_jpeg_path)
     jpeg_key.set_contents_from_filename(local_jpeg_path)
+    small_jpeg_key.set_contents_from_filename(local_small_jpeg_path)
 
     large_jpeg_key.set_acl('public-read')
     jpeg_key.set_acl('public-read')
+    small_jpeg_key.set_acl('public-read')
 
     self._log('Uploaded page %d' % page_number)
+    self._call_webhook(webhook_url, webhook_data, local_jpeg_path, page_number)
 
-    local_jpeg = Image.open(local_jpeg_path)
-    # Subtract 255 so pixels that are white (255, 255, 255) have 0 norm whereas
-    # pixels close to black have a high norm
-    distance_from_white = np.asarray(local_jpeg) - 255
-    norm = np.linalg.norm(distance_from_white / float(local_jpeg.size[0] * local_jpeg.size[1]))
-    if norm < self.BLANK_PAGE_THRESHOLD:
-      # Return blank page information back to Scoryst. Communication via https
 
-      requests.post(webhook_url, data={
-        'blank_pages': page_number,
-        # TODO: This won't work. We dont use exam_answer_ids
-        'exam_answer_id': exam_answer_id,
-        'webhook_secret': webhook_secret
-      })
-      self._log('Detected page number %d as blank' % page_number)
+  def _call_webhook(self, webhook_url, webhook_data, local_jpeg_path, page_number):
+    """ Makes a POST request to the given webhook with upload data. """
+    is_blank = False
+    # read JPEG as black and white (only 0 or 255 intensities)
+    local_jpeg = Image.open(local_jpeg_path).convert('1')
+    intensities = list(local_jpeg.getdata())
+
+    distance_from_white = 0
+    for intensity in intensities:
+      # white has an intensity of 255
+      distance = intensity - 255
+      distance_from_white += distance ** 2
+
+    jpeg_size = local_jpeg.size[0] * local_jpeg.size[1]
+    distance_from_white = (distance_from_white ** 0.5) / jpeg_size
+
+    if distance_from_white < self.BLANK_PAGE_THRESHOLD:
+      is_blank = True
+      self._log('Detected %d as blank page' % page_number)
+
+    data = {
+      'webhook_data': webhook_data,
+      'page_number': page_number,
+      'is_blank': is_blank,
+    }
+
+    # note that we communicate back to the webhook via HTTPS, so no need to be
+    # concerned with security (unless another heartbleed happens)
+    requests.post(webhook_url, data=json.dumps(data), headers={'Content-type': 'application/json'})
+    self._log('Sent webhook for page %d' % page_number)
