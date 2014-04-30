@@ -39,7 +39,11 @@ var ExamCanvasGradeView = ExamCanvasView.extend({
     // mediator events
     this.listenTo(Mediator, 'changeQuestionPartAnswer',
       function(questionPartAnswer) {
+        var oldPageIndex = this.pageIndex;
         this.setPageIndexFromQuestionPartAnswer(questionPartAnswer);
+        if (oldPageIndex === this.pageIndex) {
+          return;
+        }
         this.showPage();
         this.trigger('changeExamPage', this.pages[this.pageIndex]);
         this.updateExamArrows();
