@@ -46,9 +46,10 @@ var MainView = IdempotentView.extend({
   },
 
   renderExamCanvas: function(questionPartAnswer) {
+    var shouldPreloadExams = !Utils.IS_STUDENT_VIEW && !Utils.IS_PREVIEW;
     var examCanvasGradeView = new ExamCanvasGradeView({
       questionPartAnswer: questionPartAnswer,
-      preloadOtherStudentExams: 2,
+      preloadOtherStudentExams: (shouldPreloadExams) ? 2 : 0,
       preloadCurExam: 2,
       el: this.$('.exam')
     });

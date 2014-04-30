@@ -80,7 +80,7 @@ var ExamCanvasGradeView = ExamCanvasView.extend({
       }
     }
 
-    if (this.preloadOtherStudentExams && !Utils.IS_STUDENT_VIEW && !Utils.IS_PREVIEW) {
+    if (this.preloadOtherStudentExams) {
       for (var i = -this.preloadOtherStudentExams; i <= this.preloadOtherStudentExams; i++) {
         // preload page of previous and next students
         var image = new Image();
@@ -212,24 +212,24 @@ var ExamCanvasGradeView = ExamCanvasView.extend({
       }
     }
 
-    var annotation = new AnnotationModel({
+    var annotationModal = new AnnotationModel({
       examPageNumber: this.getCurPageNum(),
       offsetLeft: examPDFX - this.CIRCLE_RADIUS,
       offsetTop: examPDFY - this.CIRCLE_RADIUS
     });
 
-    this.annotations.add(annotation);
+    this.annotations.add(annotationModal);
 
     var annotationView = new AnnotationView({
-      model: annotation,
+      model: annotationModal,
       unsavedComment: commentIfUnsaved
     });
 
     this.annotationViews.push(annotationView);
 
-    var annotationEl = annotationView.render().$el;
-    this.$el.children('.exam-canvas').prepend(annotationEl);
-    annotationEl.find('textarea').focus();
+    var $annotation = annotationView.render().$el;
+    this.$el.children('.exam-canvas').prepend($annotation);
+    $annotation.find('textarea').focus();
     this.registerSubview(annotationView);
   },
 
