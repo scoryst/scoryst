@@ -39,9 +39,8 @@ var ExamCanvasGradeView = ExamCanvasView.extend({
     // mediator events
     this.listenTo(Mediator, 'changeQuestionPartAnswer',
       function(questionPartAnswer) {
-        var oldPageIndex = this.pageIndex;
-        this.setPageIndexFromQuestionPartAnswer(questionPartAnswer);
-        if (oldPageIndex === this.pageIndex) {
+        var pageIndexChanged = this.setPageIndexFromQuestionPartAnswer(questionPartAnswer);
+        if (!pageIndexChanged) {
           return;
         }
         this.showPage();
@@ -138,6 +137,7 @@ var ExamCanvasGradeView = ExamCanvasView.extend({
   },
 
   setPageIndexFromQuestionPartAnswer: function(questionPartAnswer) {
+    var oldPageIndex = this.pageIndex;
     var firstPageStr = questionPartAnswer.get('pages').split(',')[0];
     var firstPage = parseInt(firstPageStr, 10);
     // If we are not already showing the required page
@@ -150,6 +150,8 @@ var ExamCanvasGradeView = ExamCanvasView.extend({
         this.pageIndex = 0;
       }
     }
+
+    return oldPageIndex !== this.pageIndex;
   },
 
   updateExamArrows: function() {
