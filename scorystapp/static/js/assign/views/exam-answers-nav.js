@@ -35,7 +35,7 @@ var ExamAnswersNavView = IdempotentView.extend({
       preloadOtherStudentExams: 0,
       preloadCurExam: 0
     });
-    this.examCanvasView.showPage();
+    this.examCanvasView.render();
 
     var self = this;
 
