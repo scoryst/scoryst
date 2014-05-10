@@ -66,9 +66,21 @@ var ZoomLensView = IdempotentView.extend({
   },
 
   moveZoomLens: function(event) {
-    if (!this.zoomLensEnabled) return;
-    var y = event.offsetY;
+    if (!this.zoomLensEnabled) {
+      return;
+    }
+
     var x = event.offsetX;
+    var y = event.offsetY;
+
+    if (!x || !y) {
+      // Firefox doesn't support offsetX/offsetY; compute it manually.
+      // pageX/Y is where the user's mouse is. offset.left/offset.top
+      // are the absolute location of the exam image element
+      var offset = $(event.currentTarget).offset();
+      x = event.pageX - offset.left;
+      y = event.pageY - offset.top;
+    }
 
     // Get the offset top and left of the large image
     var offsetTop = -(y * this.image.naturalHeight / this.$el.height()) + this.ZOOM_LENS_RADIUS;
