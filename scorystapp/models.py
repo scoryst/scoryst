@@ -119,6 +119,9 @@ class Course(models.Model):
   term = models.IntegerField(choices=TERM_CHOICES)
   year = models.IntegerField(default=timezone.now().year)
 
+  student_enroll_token = models.CharField(max_length=10)
+  ta_enroll_token = models.CharField(max_length=10)
+
   def has_assessments(self):
     """ Returns true if Exams are associated with this course, or false otherwise. """
     return self.assessment_set.count() > 0

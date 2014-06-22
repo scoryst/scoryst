@@ -27,32 +27,50 @@
     </div>
 
     <div class="col-xs-6">
-      <h2>Add People</h2>
-
-      <form class="form add-people" method="post">
-        {% csrf_token %}
-        <span class="error">{{ add_people_form.non_field_errors.as_text }}</span>
-
-        <div class="form-group {% if add_people_form.people.errors %}has-error{% endif %}">
-          <p>Paste in input as comma-separated values for first name, last name, email, and student ID. They will automatically be added to the class.</p>
-
-          {% render_field add_people_form.people class="form-control" %}
-          <span class="error">{{ add_people_form.people.errors.as_text }}</span>
+      <div class="row">
+      <h2>Enroll Link</h2>
+      <p>
+        <div class="enroll">
+          You can share the following enroll link with students in this course:
+          <br />
+          <a href="/enroll/{{course.student_enroll_token}}">https://scoryst.com/enroll/{{course.student_enroll_token}}/</a>
         </div>
 
-        <div class="form-group">
-          <span>Add as</span>
-
-          {% for radio in add_people_form.privilege %}
-            <label class="radio-inline {% if forloop.first %}spacing-left{% endif %}">
-              {{ radio.tag }}{{ radio.choice_label }}
-            </label>
-          {% endfor %}
-
-          <button class="btn btn-primary" type="submit">Submit</button>
-          <span class="error">{{ add_people_form.privilege.errors.as_text }}</span>
+        <div class="enroll">
+          You can share the following enroll link with teaching assistants in this course:
+          <br />
+          <a href="/enroll/{{course.ta_enroll_token}}">https://scoryst.com/enroll/{{course.ta_enroll_token}}/</a>
         </div>
-      </form>
+      </p>
+      </div>
+      <div class="row">
+        <h2>Add People</h2>
+
+        <form class="form add-people" method="post">
+          {% csrf_token %}
+          <span class="error">{{ add_people_form.non_field_errors.as_text }}</span>
+
+          <div class="form-group {% if add_people_form.people.errors %}has-error{% endif %}">
+            <p>Alternatively, paste in input as comma-separated values for first name, last name, email, and student ID. They will automatically be added to the class.</p>
+
+            {% render_field add_people_form.people class="form-control" %}
+            <span class="error">{{ add_people_form.people.errors.as_text }}</span>
+          </div>
+
+          <div class="form-group">
+            <span>Add as</span>
+
+            {% for radio in add_people_form.privilege %}
+              <label class="radio-inline {% if forloop.first %}spacing-left{% endif %}">
+                {{ radio.tag }}{{ radio.choice_label }}
+              </label>
+            {% endfor %}
+
+            <button class="btn btn-primary" type="submit">Submit</button>
+            <span class="error">{{ add_people_form.privilege.errors.as_text }}</span>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </div>

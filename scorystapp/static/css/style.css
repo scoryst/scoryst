@@ -1006,6 +1006,18 @@ footer .amp {
   float: left;
 }
 
+.login .sign-up {
+  margin-left: 8px;
+  margin-top: 7px;
+  float: left;
+}
+
+.login .bullet {
+  margin-top: 7px;
+  margin-left: 8px;
+  float: left;
+}
+
 /* Roster page */
 .roster .popover {
   width: 160px;
@@ -1021,6 +1033,11 @@ footer .amp {
 
 .roster .overview {
   width: 100%;
+}
+
+.roster .enroll {
+  margin-top: 15px;
+  margin-bottom: 15px;
 }
 
 /* arrows for sorting table in roster page */
@@ -1486,4 +1503,17 @@ footer .amp {
 
 .split .selected {
   border: 1px solid #ff4400;
+}
+
+.welcome input {
+  width: 60%;
+  margin-top: 15px;
+  display: inline-block;
+}
+
+.welcome button[type="submit"] {
+  float: none;
+  margin-top: 15px;
+  margin-left: 10px;
+  display: inline;
 }

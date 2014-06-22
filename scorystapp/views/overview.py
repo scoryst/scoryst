@@ -1,6 +1,6 @@
 from django import shortcuts, http
 from scorystapp import models, forms, decorators, serializers, overview_serializers
-from scorystapp.views import helpers, grade_or_view, send_email
+from scorystapp.views import helpers, grade_or_view, email_sender
 from rest_framework import decorators as rest_decorators, response
 import json
 
@@ -106,5 +106,5 @@ def release_grades(request, cur_course_user, assessment_id):
   released previously.
   """
   assessment = shortcuts.get_object_or_404(models.Assessment, pk=assessment_id)
-  send_email.send_assessment_graded_email(request, assessment)
+  email_sender.send_assessment_graded_email(request, assessment)
   return http.HttpResponse('')

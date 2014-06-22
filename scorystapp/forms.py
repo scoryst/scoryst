@@ -25,14 +25,24 @@ class HorizontalRadioRenderer(forms.RadioSelect.renderer):
     return html.mark_safe(full_html)
 
 
-# TODO: Currently not in use.
-# Will be needed once we allow anyone to create an account
 class UserSignupForm(forms.Form):
   """ Allow a student to sign up. """
-  username = forms.CharField(max_length=100)
-  password = forms.CharField(max_length=100)
-  college_student_id = forms.IntegerField()
-  college_username = forms.CharField(max_length=100)
+  first_name = forms.CharField(label='First Name', max_length=100)
+  last_name = forms.CharField(label='Last Name', max_length=100)
+  email = forms.EmailField(label='School Email', max_length=100)
+  student_id = forms.CharField(label='Student ID', max_length=100)
+
+  def clean_email(self):
+    """ Converts email address to lowercase, makes sure it is unique and ends with .edu. """
+    email = self.cleaned_data['email'].lower()
+
+    if models.User.objects.filter(email=email).count() > 0:
+      raise forms.ValidationError('A user with that email already exists.')
+
+    if not email.endswith('.edu'):
+      raise forms.ValidationError('Must be a valid .edu email address.')
+
+    return email
 
 
 class UserLoginForm(forms.Form):
@@ -60,6 +70,35 @@ class UserLoginForm(forms.Form):
     #     user.is_signed_up = True
     #     user.save()
     return data
+
+
+class TokenForm(forms.Form):
+  """ Allows the user to enroll in a class using the token """
+  token = forms.CharField(max_length=10)
+
+  def clean_token(self):
+    """ Ensures the token is valid """
+    token = self.cleaned_data.get('token')
+    valid = False
+
+    try:
+      course = models.Course.objects.get(student_enroll_token=token)
+    except models.Course.DoesNotExist:
+      pass
+    else:
+      valid = True
+
+    try:
+      course = models.Course.objects.get(ta_enroll_token=token)
+    except models.Course.DoesNotExist:
+      pass
+    else:
+      valid = True
+
+    if not valid:
+      raise forms.ValidationError('Please enter a valid token')
+
+    return token
 
 
 class AddPeopleForm(forms.Form):
@@ -214,6 +253,7 @@ class CourseForm(forms.ModelForm):
   """ Model Form for creating a new course """
   class Meta:
     model = models.Course
+    exclude = ('student_enroll_token', 'ta_enroll_token')
 
 
 class QuestionPartForm(forms.ModelForm):

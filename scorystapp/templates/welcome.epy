@@ -1,0 +1,36 @@
+{% extends "layout.epy" %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container welcome">
+  <div class="row">
+    <div class="col-xs-6">
+      <h2>Welcome</h2>
+      <span>
+        Use the navigation bar on the left to choose a class you are enrolled in.
+        If the instructor has created an assignment, you may use the upload page
+        to upload your solutions.
+        If your assignment has been graded, you can view your grades and statistics.
+      </span>
+    </div>
+
+    <div class="col-xs-6">
+      <h2>Not Enrolled Yet?</h2>
+      <span>
+        If you are an instructor and want to use Scoryst,
+        <a href="mailto:hello@scoryst.com">contact us</a>.
+        If you are a student or a TA and you do not see your course listed on the left,
+        enter the class token below:
+      </span>
+      <form method="post">
+        {% csrf_token %}
+        <span class="error">{{ sign_up_form.non_field_errors.as_text }}</span>
+        {% render_field token_form.token class="form-control" %}
+        <button type="submit" class="btn btn-primary">Enroll</button>
+        <span class="error">{{ token_form.token.errors.as_text }}</span>
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

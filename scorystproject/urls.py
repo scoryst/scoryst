@@ -16,11 +16,19 @@ urlpatterns = patterns('',
   url(r'^admin/jsi18n/', 'django.views.i18n.javascript_catalog'),
   url(r'^$', 'scorystapp.views.general.landing_page'),
   url(r'^login/$', 'scorystapp.views.auth.login'),
+  url(r'^login/redirect/(?P<redirect_path>.*?enroll/(?P<token>\w+)/)$', 'scorystapp.views.auth.login'),
   url(r'^login/redirect/(?P<redirect_path>.*?)$', 'scorystapp.views.auth.login'),
+  url(r'^login/enroll/(?P<token>\w+)/$', 'scorystapp.views.auth.login'),
   url(r'^logout/$', 'scorystapp.views.auth.logout'),
   url(r'^new-course/$', 'scorystapp.views.course.new_course'),
   url(r'^about/$', 'scorystapp.views.general.about'),
+  url(r'^welcome/$', 'scorystapp.views.general.welcome'),
 
+  # sign-up
+  url(r'^sign-up/$', 'scorystapp.views.auth.sign_up'),
+
+  # enroll
+  url(r'^enroll/(?P<token>\w+)/$', 'scorystapp.views.course.enroll'),
 
   # course roster
   # TODO: naming of views now that we have separate files; e.g. roster.delete

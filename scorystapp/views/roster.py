@@ -1,6 +1,6 @@
 from django import forms as django_forms, http, shortcuts
 from scorystapp import models, forms, decorators, utils, serializers
-from scorystapp.views import helpers, send_email
+from scorystapp.views import helpers, email_sender
 from rest_framework import decorators as rest_decorators, response
 
 
@@ -47,7 +47,7 @@ def roster(request, cur_course_user):
         course_user.save()
         course_users.append(course_user)
 
-      send_email.send_added_to_course_email(request, course_users)
+      email_sender.send_added_to_course_email(request, course_users)
       return shortcuts.redirect(request.path)
   else:
     form = forms.AddPeopleForm()

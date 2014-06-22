@@ -54,7 +54,7 @@ def _send_assessment_graded_email(request, course_users, assessment):
 def _send_added_to_course_email(request, course_users):
   """
   Sends an email to each course_user telling him that he has been added as an instructor/TA etc.
-  to the given course. If the user hasn't signed up, it also allows them to set their password.
+  to the given course. If the user hasn't signed up, it also allows the user to set a password.
   """
 
   messages = []
@@ -101,6 +101,28 @@ def _send_added_to_course_email(request, course_users):
     messages.append((subject, email, from_email, [user.email]))
 
   mail.send_mass_mail(tuple(messages))
+
+
+def send_sign_up_confirmation(request, user):
+  """ Sends a confirmation email to the given user. """
+  current_site = get_current_site(request)
+  site_name = current_site.name
+  domain = current_site.domain
+  from_email = 'Scoryst <signup@%s>' % domain
+
+  context = {
+    'email': user.email,
+    'domain': domain,
+    'site_name': site_name,
+    'user': user,
+    'protocol': 'https',
+    'uid': http.int_to_base36(user.pk),
+    'token': default_token_generator.make_token(user),
+  }
+  email_template_name = 'email/sign-up-confirmation.epy'
+  subject = 'Welcome to Scoryst'
+  email = loader.render_to_string(email_template_name, context)
+  mail.send_mail(subject, email, from_email, [user.email])
 
 
 def send_added_to_course_email(request, course_users, send_to_students=False):
