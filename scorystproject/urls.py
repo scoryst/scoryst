@@ -102,11 +102,16 @@ urlpatterns = patterns('',
   url(r'^course/(?P<course_id>\d+)/assessments/create/(?P<assessment_id>\d+)/get-saved-exam/$',
     'scorystapp.views.assessments.get_saved_assessment'),
 
-
   # Uploading student exams
   url(r'^course/(?P<course_id>\d+)/upload/$', 'scorystapp.views.upload.upload'),
   url(r'^course/(?P<course_id>\d+)/upload/split-pages/(?P<exam_id>\d+)/$', 'scorystapp.views.upload.get_split_pages'),
 
+  # Submitting student homework
+  url(r'^course/(?P<course_id>\d+)/submit/$', 'scorystapp.views.submit.submit'),
+  url(r'^course/(?P<course_id>\d+)/submit/(?P<submission_id>\d+)/$', 'scorystapp.views.submit.map_submission'),
+  url(r'^course/(?P<course_id>\d+)/submit/(?P<submission_id>\d+)/submission-page/$', 'scorystapp.views.submit.get_submission_pages'),
+  url(r'^course/(?P<course_id>\d+)/submit/(?P<submission_id>\d+)/response/$', 'scorystapp.views.submit.get_responses'),
+  url(r'^course/(?P<course_id>\d+)/submit/(?P<submission_id>\d+)/response/(?P<response_id>\d+)/$', 'scorystapp.views.submit.update_response'),
 
   # Backbone's grade overview
   url(r'^course/(?P<course_id>\d+)/(grade|assessments/view)/$', 'scorystapp.views.overview.grade_overview'),

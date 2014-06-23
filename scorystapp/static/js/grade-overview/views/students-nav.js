@@ -39,7 +39,7 @@ var StudentsNavView = IdempotentView.extend({
         self.selectedOptionValue = 0;
         self.isGradedChecked = true;
         self.isUngradedChecked = true;
-        self.isUnmappedChecked = true;
+        self.isUnmappedChecked = false;
 
         self.renderFilters();
         self.renderStudentsList();

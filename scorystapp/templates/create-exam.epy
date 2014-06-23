@@ -169,7 +169,7 @@
   <script src="/static/js/lib/tooltip.js"></script>
   <script src="/static/js/lib/popover.js"></script>
   {% include 'backbone.epy' %}
-  <script src="/static/js/backbone-commons/idempotent.js"></script>
+  <script src="/static/js/common/views/idempotent.js"></script>
   <script src="/static/js/zoom-lens.js"></script>
   <script src="/static/js/exam-canvas.js"></script>
 

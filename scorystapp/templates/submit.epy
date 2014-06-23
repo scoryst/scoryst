@@ -1,0 +1,67 @@
+{% extends 'layout.epy' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container submit">
+  <div class="row">
+    <div class="col-xs-6">
+      <h2>Submit Homework</h2>
+      <p>Submit your homework using the form below. We'll record the submission time as soon as your upload is complete. You may resubmit as many times as you'd like; we'll only consider your latest submission.</p>
+
+      <form class="form upload-exam" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <span class="error">{{form.non_field_errors.as_text}}</span>
+
+        <div class="form-group">
+          <label for="id_homework_id">Homework</label>
+
+          {% render_field form.homework_id class="form-control" placeholder="Midterm Exam"%}
+          <span class="error">{{form.homework_id.errors.as_text}}</span>
+        </div>
+
+        <div class="form-group">
+          <label for="id_homework_file">PDF</label>
+          {% render_field form.homework_file %}
+          <span class="error">{{form.homework_file.errors.as_text}}</span>
+        </div>
+
+        <div class="form-group">
+          <button class="btn btn-primary" type="submit">Submit</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="col-xs-6">
+      <h2>History</h2>
+
+      <table class="table table-striped table-condensed">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Submission time</th>
+            <th>PDF</th>
+            <th>Finalized?</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for submission in submission_set %}
+          <tr>
+            <td>{{ submission.assessment.name }}</td>
+            <td>{{ submission.time|date:"D, M n, P" }}</td>
+            <td><a href="{{ submission.pdf.url }}" target="_blank">Homework</a></td>
+            <td>
+              {% if submission.is_finalized %}
+                Yes
+              {% else %}
+                <a href="{{ submission.id }}/">No</a>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

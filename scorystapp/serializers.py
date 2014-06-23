@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from scorystapp import models
 
+
 class QuestionPartSerializer(serializers.ModelSerializer):
   grade_down = serializers.BooleanField(source='assessment.grade_down', read_only=True)
 
@@ -113,10 +114,50 @@ class CourseUserSerializer(serializers.ModelSerializer):
 
 
 class SubmissionPageSerializer(serializers.ModelSerializer):
+  page_jpeg_url = serializers.CharField(source='page_jpeg.url', read_only=True)
+  page_jpeg_small_url = serializers.CharField(source='page_jpeg_small.url',
+    read_only=True)
+
   class Meta:
     model = models.SubmissionPage
-    fields = ('id', 'page_number', 'submission')
+    fields = ('id', 'page_number', 'page_jpeg_url', 'page_jpeg_small_url',
+      'submission')
     read_only_fields = ('id', 'page_number', 'submission')
+
+
+class SubmitResponseSerializer(serializers.ModelSerializer):
+  question_number = serializers.IntegerField(read_only=True,
+    source='question_part.question_number')
+  part_number = serializers.IntegerField(read_only=True,
+    source='question_part.part_number')
+  pages = serializers.RegexField(regex=r'\d+(,\d+)*', required=False)
+
+  def validate_pages(self, attrs, source):
+    """ Validates that the pages are in the correct range. """
+    pages = attrs.get(source, '')
+    if pages == '':
+      # force pages to be empty string (it may have been None)
+      attrs[source] = ''
+      return attrs
+
+    used_pages = {}
+    pages = map(int, pages.split(','))
+    num_pages = self.object.submission.page_count
+
+    for page_num in pages:
+      if page_num <= 0 or page_num > num_pages:
+        raise serializers.ValidationError('Page %d is outside valid range.' % page_num)
+
+      if page_num in used_pages:
+        raise serializers.ValidationError('Cannot repeat page %d' % page_num)
+      used_pages[page_num] = True
+
+    return attrs
+
+  class Meta:
+    model = models.Response
+    fields = ('id', 'pages', 'question_number', 'part_number')
+    read_only_fields = ('id',)
 
 
 class AnnotationSerializer(serializers.ModelSerializer):

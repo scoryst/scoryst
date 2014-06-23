@@ -86,14 +86,16 @@
                 </a>
               </li>
 
-              {% if course.has_assessments %}
+              {% if course.has_exams %}
               <li class="{% path_active_course path 'upload/$' course %}">
                 <a href="/course/{{course.pk}}/upload">
                   <i class="fa fa-upload"></i>
                   Upload
                 </a>
               </li>
+              {% endif %}
 
+              {% if course.has_assessments %}
               <li class="{% path_active_course path 'grade/$' course %}">
                 <a href="/course/{{course.pk}}/grade">
                   <i class="fa fa-pencil"></i>
@@ -121,9 +123,18 @@
               <li class="{% path_active_course path 'assessments/view/$' course %}">
                 <a href="/course/{{course.pk}}/assessments/view">
                   <i class="fa fa-file-text"></i>
-                  View Exams
+                  View Grades
                 </a>
               </li>
+
+              {% if course.has_homeworks %}
+              <li class="{% path_active_course path 'submit/$' course %}">
+                <a href="/course/{{course.pk}}/submit">
+                  <i class="fa fa-upload"></i>
+                  Submit
+                </a>
+              </li>
+              {% endif %}
 
               <li class="{% path_active_course path 'statistics/$' course %}">
                 <a href="/course/{{course.pk}}/statistics">

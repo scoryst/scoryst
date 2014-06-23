@@ -81,7 +81,7 @@
   </label>
   <label class="checkbox-inline">
     <input type="checkbox" class="unmapped" <% if (isUnmappedChecked) { %> checked <% } %> >
-    No assessment (<%= numUnmapped %>)
+    No upload (<%= numUnmapped %>)
   </label>
   <br />
   Filter by :
@@ -241,8 +241,8 @@
     <script src="/static/js/lib/jquery.custom-scrollbar.min.js"></script>
   {% endif %}
 
-  <script src="/static/js/backbone-commons/idempotent.js"></script>
-  <script src="/static/js/backbone-commons/utils.js"></script>
+  <script src="/static/js/common/views/idempotent.js"></script>
+  <script src="/static/js/common/utils.js"></script>
 
   <script src="/static/js/grade-overview/models/response.js"></script>
   <script src="/static/js/grade-overview/models/assessment.js"></script>

@@ -153,6 +153,9 @@ def _upload_pdf_for_exam_answers(pdf_info_list):
         # Erase the existing pdf file
         temp_pdf.truncate(0)
         # Load the new one from S3
+        # TODO: this actually reads the file from S3 fully into RAM, and then
+        # writes it to temp_pdf. streaming the file would be ideal, so as to
+        # not require as much memory
         temp_pdf.write(urllib2.urlopen(url).read())
         entire_pdf = PyPDF2.PdfFileReader(temp_pdf)
         cur_url = url

@@ -20,10 +20,10 @@
         <span class="error">{{form.non_field_errors.as_text}}</span>
 
         <div class="form-group">
-          <label for="id_exam_name">Exam name</label>
+          <label for="id_exam_id">Exam</label>
 
-          {% render_field form.exam_name class="form-control" placeholder="Midterm Exam"%}
-          <span class="error">{{form.exam_name.errors.as_text}}</span>
+          {% render_field form.exam_id class="form-control" placeholder="Midterm Exam"%}
+          <span class="error">{{form.exam_id.errors.as_text}}</span>
         </div>
 
         <div class="form-group">

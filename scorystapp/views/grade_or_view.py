@@ -6,6 +6,7 @@ from rest_framework import decorators as rest_decorators, response as rest_frame
 
 @decorators.access_controlled
 @decorators.student_required
+@decorators.submission_released_required
 def get_assessment_solutions_pdf(request, cur_course_user, submission_id):
   submission = shortcuts.get_object_or_404(models.Submission, pk=submission_id)
   return shortcuts.redirect(submission.assessment.solutions_pdf.url)
@@ -13,6 +14,7 @@ def get_assessment_solutions_pdf(request, cur_course_user, submission_id):
 
 @decorators.access_controlled
 @decorators.student_required
+@decorators.submission_released_required
 def get_assessment_pdf(request, cur_course_user, submission_id):
   submission = shortcuts.get_object_or_404(models.Submission, pk=submission_id)
   return shortcuts.redirect(submission.pdf.url)
@@ -20,6 +22,7 @@ def get_assessment_pdf(request, cur_course_user, submission_id):
 
 @decorators.access_controlled
 @decorators.student_required
+@decorators.submission_released_required
 def get_non_blank_pages(request, cur_course_user, submission_id):
   submission_pages = models.SubmissionPage.objects.filter(submission=submission_id)
   pages = sorted([page.page_number for page in submission_pages if not page.is_blank])
@@ -30,6 +33,7 @@ def get_non_blank_pages(request, cur_course_user, submission_id):
 @rest_decorators.api_view(['GET'])
 @decorators.access_controlled
 @decorators.student_required
+@decorators.submission_released_required
 def list_responses(request, cur_course_user, submission_id):
   """ Returns a list of responses for the provided asessment. """
   responses = models.Response.objects.filter(
@@ -44,6 +48,7 @@ def list_responses(request, cur_course_user, submission_id):
 @rest_decorators.api_view(['GET', 'PUT'])
 @decorators.access_controlled
 @decorators.student_required
+@decorators.submission_released_required
 def manage_response(request, cur_course_user, submission_id,
     response_id):
   """ Manages a single Response by allowing reads/updates. """
@@ -76,6 +81,7 @@ def manage_response(request, cur_course_user, submission_id,
 @rest_decorators.api_view(['GET', 'POST'])
 @decorators.access_controlled
 @decorators.student_required
+@decorators.submission_released_required
 def list_rubrics(request, cur_course_user, submission_id, response_id):
   """ Returns a list of Rubrics for the given Response. """
   response = shortcuts.get_object_or_404(models.Response,
@@ -104,6 +110,7 @@ def list_rubrics(request, cur_course_user, submission_id, response_id):
 @rest_decorators.api_view(['GET', 'PUT', 'DELETE'])
 @decorators.access_controlled
 @decorators.student_required
+@decorators.submission_released_required
 def manage_rubric(request, cur_course_user, submission_id, response_id, rubric_id):
   """ Manages a single Rubric by allowing reads/updates. """
   response = shortcuts.get_object_or_404(models.Response,
@@ -134,6 +141,7 @@ def manage_rubric(request, cur_course_user, submission_id, response_id, rubric_i
 @rest_decorators.api_view(['GET', 'POST'])
 @decorators.access_controlled
 @decorators.student_required
+@decorators.submission_released_required
 def list_annotations(request, cur_course_user, submission_id, assessment_page_number):
   """ Returns a list of Annotations for the provided submission and page number """
   submission_page = shortcuts.get_object_or_404(models.SubmissionPage,
@@ -161,6 +169,7 @@ def list_annotations(request, cur_course_user, submission_id, assessment_page_nu
 @rest_decorators.api_view(['GET', 'PUT', 'DELETE'])
 @decorators.access_controlled
 @decorators.student_required
+@decorators.submission_released_required
 def manage_annotation(request, cur_course_user, submission_id, assessment_page_number, annotation_id):
   """ Manages a single Annotation by allowing reads/updates. """
   annotation = shortcuts.get_object_or_404(models.Annotation, pk=annotation_id)

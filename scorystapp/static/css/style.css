@@ -1293,7 +1293,7 @@ footer .amp {
   float: none;
 }
 
-/* statistics */
+/* For statistics. */
 .statistics .table-container {
   clear: both;
 }
@@ -1463,20 +1463,20 @@ footer .amp {
   margin-bottom: 20px;
 }
 
-.split .image-container {
+.split .image-container, .select-pages .image-container {
   position: relative;
-  border: 1px solid #bbb;
+  border: 1px solid #ccc;
   float: left;
   padding: 1px;
 }
 
-.split img {
+.split img, .select-pages img {
   width: 220px;
 }
 
-.split .image-container .zoom {
+.split .image-container .zoom, .select-pages .image-container .zoom {
   position: absolute;
-  right: 5px;
+  left: 0;
   bottom: 1px;
 }
 
@@ -1484,6 +1484,47 @@ footer .amp {
   margin-top: 10px;
 }
 
-.split .selected {
+.split .selected, .select-pages .selected {
   border: 1px solid #ff4400;
+}
+
+/* For submit. */
+.map-submission .nav li {
+  width: 170px;
+  text-align: center;
+}
+
+.select-pages .loading {
+  display: block;
+  margin: 150px auto 0;
+}
+
+.select-pages .page {
+  width: 175px;
+  height: 230px;
+  cursor: pointer;
+}
+
+.select-pages .image-container {
+  margin-bottom: 5px;
+  margin-right: 5px;
+}
+
+.map-submission .success {
+  display: none;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.map-submission .success i {
+  float: left;
+  padding-left: 2px;
+  width: 33px;
+  font-size: 25px;
+  line-height: 40px;
+}
+
+.map-submission .affix {
+  width: 360px;
+  top: 40px;
 }

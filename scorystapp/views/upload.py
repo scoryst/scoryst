@@ -32,9 +32,9 @@ def upload(request, cur_course_user):
   exam_choices = [(exam.id, exam.name) for exam in exams]
 
   if request.method == 'POST':
-    form = forms.StudentExamsUploadForm(request.POST, request.FILES, exam_choices=exam_choices)
+    form = forms.ExamsUploadForm(exam_choices, request.POST, request.FILES)
     if form.is_valid():
-      exam = shortcuts.get_object_or_404(models.Exam, pk=form.cleaned_data['exam_name'], course=cur_course)
+      exam = shortcuts.get_object_or_404(models.Exam, pk=form.cleaned_data['exam_id'], course=cur_course)
 
       # Breaks the pdf into jpegs and uploads them to S3 after creating `SplitPage` objects
       name_prefix = exam.name.replace(' ', '') + utils.generate_random_string(5)
@@ -43,7 +43,7 @@ def upload(request, cur_course_user):
       # redirect back to the upload page, which will show upload progress
       return shortcuts.redirect('/course/%s/upload/' % (cur_course_user.course.id,))
   else:
-    form = forms.StudentExamsUploadForm(exam_choices=exam_choices)
+    form = forms.ExamsUploadForm(exam_choices)
 
   return helpers.render(request, 'upload.epy', {
     'title': 'Upload',

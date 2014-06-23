@@ -5,6 +5,7 @@ from scorystapp.views import helpers
 
 @decorators.access_controlled
 @decorators.student_required
+@decorators.submission_released_required
 def view_assessment(request, cur_course_user, submission_id):
   """
   Intended as the URL for students who are viewing their assessment. Renders the same

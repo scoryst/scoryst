@@ -77,7 +77,6 @@ def consistent_course_user_assessment_required(fn):
     if 'assessment_id' in kwargs and 'response_id' in kwargs:
       if assessment != response.submission.assessment:
         raise http.Http404('Response not consistent with the assessment trying to be accessed.')
-
     return fn(request, course_user, *args, **kwargs)
 
   return validate_course_user_assessment_consistency
@@ -97,7 +96,7 @@ def access_controlled(fn):
 
 def student_required(fn):
   """ Returns the function below: """
-  def validate_student(request, course_user, submission_id, *args, **kwargs):
+  def validate_student(request, course_user, *args, **kwargs):
     """
     Validates that the current course user matches the user that the submission
     belongs to, or that the current course user is an instructor/TA.
@@ -110,11 +109,13 @@ def student_required(fn):
         ...
     """
     if (course_user.privilege != models.CourseUser.INSTRUCTOR and
-        course_user.privilege != models.CourseUser.TA):
+        course_user.privilege != models.CourseUser.TA and
+        'submission_id' in kwargs):
+      submission_id = kwargs['submission_id']
       submission = shortcuts.get_object_or_404(models.Submission, pk=submission_id)
       if submission.course_user != course_user:
         raise http.Http404('This submission doesn\'t seem to belong to you.')
-    return fn(request, course_user, submission_id, *args, **kwargs)
+    return fn(request, course_user, *args, **kwargs)
 
   return validate_student
 
@@ -177,17 +178,25 @@ def instructor_for_any_course_required(fn):
 
 def submission_released_required(fn):
   """ Returns the function below: """
-  def validate_submission_released(request, course_user, assessment_id, *args, **kwargs):
+  def validate_submission_released(request, course_user, *args, **kwargs):
     """
     Validates that the submission corresponding to the given course user is
     released.
     """
     if course_user.privilege == models.CourseUser.STUDENT:
-      submission = shortcuts.get_object_or_404(models.Submission,
-        assessment__id=assessment_id, course_user=course_user.pk)
-      if not submission.released:
-        raise http.Http404('Exam answer has not been released.')
+      if 'assessment_id' in kwargs:
+        assessment_id = kwargs['assessment_id']
+        # Can't do get_object_or_404 because multiple submissions might have been submitted
+        submissions = models.Submission.objects.filter(assessment__id=assessment_id,
+          course_user=course_user.pk, released=True)
+        if submissions.count() == 0:
+          raise http.Http404('No released submissions.')
 
-    return fn(request, course_user, assessment_id, *args, **kwargs)
+      elif 'submission_id' in kwargs:
+        submission_id = kwargs['submission_id']
+        shortcuts.get_object_or_404(models.Submission,
+          pk=submission_id, released=True)
+
+    return fn(request, course_user, *args, **kwargs)
 
   return validate_submission_released

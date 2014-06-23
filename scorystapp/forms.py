@@ -3,7 +3,7 @@ from bootstrap3_datetime import widgets as datetime_widgets
 from django import forms
 from django.contrib.auth import authenticate, forms as django_forms
 from django.contrib.admin import widgets
-from django.utils import html
+from django.utils import html, timezone
 import PyPDF2
 import pdb
 
@@ -165,32 +165,60 @@ class AssessmentUploadForm(forms.Form):
     return solutions_file
 
 
-class StudentExamsUploadForm(forms.Form):
-  """ Allows student exams to be uploaded """
-
-  def __init__(self, *args, **kwargs):
-    """ We pass in exam_choices from upload.py and retrieve the argument here  """
-    exam_choices = kwargs.pop('exam_choices')
-    super(StudentExamsUploadForm, self).__init__(*args, **kwargs)
-    self.fields['exam_name'].choices = exam_choices
-
-  # 100MB
-  # TODO: Decide our max size. 100MB seems plausible if the pdf had 40 students
-  # but it also might be too large for us to handle when we expand.
+class ExamsUploadForm(forms.Form):
+  """ Allows exams to be uploaded. """
+  # 100MB max PDF size, as multiple exams can be uploaded
   MAX_ALLOWABLE_PDF_SIZE = 1024 * 1024 * 100
 
-  exam_name = forms.ChoiceField()
+  exam_id = forms.ChoiceField()
   exam_file = forms.FileField()
 
+
+  def __init__(self, exam_choices, *args, **kwargs):
+    """ Sets up the `exam_id` choice field to hold the given choices. """
+    super(ExamsUploadForm, self).__init__(*args, **kwargs)
+    self.fields['exam_id'].choices = exam_choices
+
+
   def clean_exam_file(self):
-    """
-    Ensure that the exam_file is less than MAX_ALLOWABLE_PDF_SIZE and is a valid
-    pdf
-    """
+    """ Ensure exam_file is a pdf of appropriate size. """
     exam_file = self.cleaned_data.get('exam_file')
     if exam_file:
-      _validate_pdf_file(exam_file, StudentExamsUploadForm.MAX_ALLOWABLE_PDF_SIZE)
+      _validate_pdf_file(exam_file, ExamsUploadForm.MAX_ALLOWABLE_PDF_SIZE)
     return exam_file
+
+
+class HomeworkUploadForm(forms.Form):
+  """ Allows homework to be uploaded. """
+  # 40MB max PDF size, as only a single homework can be uploaded
+  MAX_ALLOWABLE_PDF_SIZE = 1024 * 1024 * 40
+
+  homework_id = forms.ChoiceField()
+  homework_file = forms.FileField()
+
+
+  def __init__(self, homework_choices, *args, **kwargs):
+    """ Sets up the `homework_id` choice field to hold the given choices. """
+    super(HomeworkUploadForm, self).__init__(*args, **kwargs)
+    self.fields['homework_id'].choices = homework_choices
+
+
+  def clean(self):
+    """ Ensure that it's not past the submission deadline. """
+    data = self.cleaned_data
+    homework = models.Homework.objects.get(pk=data['homework_id'])
+
+    if timezone.now() > homework.submission_deadline:
+      raise forms.ValidationError('Cannot submit past the deadline.')
+    return data
+
+
+  def clean_exam_file(self):
+    """ Ensure exam_file is a pdf of appropriate size. """
+    homework_file = self.cleaned_data.get('homework_file')
+    if homework_file:
+      _validate_pdf_file(homework_file, HomeworkUploadForm.MAX_ALLOWABLE_PDF_SIZE)
+    return homework_file
 
 
 def _validate_pdf_file(pdf_file, max_size):
@@ -198,6 +226,7 @@ def _validate_pdf_file(pdf_file, max_size):
   if pdf_file.size > max_size:
     max_size_in_mb = max_size / float(1024 * 1024)
     user_size_in_mb = pdf_file.size / float(1024 * 1024)
+
     raise forms.ValidationError('Max size allowed is %d MB but file size is %d MB' %
       (max_size_in_mb, user_size_in_mb))
 
@@ -207,7 +236,8 @@ def _validate_pdf_file(pdf_file, max_size):
     PyPDF2.PdfFileReader(pdf_file)
   except:
     raise forms.ValidationError('The PDF file is invalid and may be corrupted')
-  pdf_file.seek(0)  # Undo work of PdfFileReader
+
+  pdf_file.seek(0)  # undo work of PyPDF2
 
 
 class CourseForm(forms.ModelForm):

@@ -16,7 +16,9 @@ def statistics(request, cur_course_user):
   else:
     submission_set = models.Submission.objects.filter(assessment__course=cur_course.pk,
       course_user=cur_course_user).order_by('assessment__id')
-    assessment_set = [submission.assessment for submission in submission_set if submission.released]
+    # We use set to only have unique assessments
+    assessment_set = set([submission.assessment for submission in submission_set
+      if submission.released])
 
   return helpers.render(request, 'statistics.epy', {
       'title': 'Statistics',

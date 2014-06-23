@@ -316,9 +316,9 @@
 <script src="/static/js/lib/jquery-ui.custom.min.js"></script>
 
 <script src="/static/js/popover-confirm.js"></script>
-<script src="/static/js/backbone-commons/idempotent.js"></script>
-<script src="/static/js/backbone-commons/mediator.js"></script>
-<script src="/static/js/backbone-commons/utils.js"></script>
+<script src="/static/js/common/views/idempotent.js"></script>
+<script src="/static/js/common/mediator.js"></script>
+<script src="/static/js/common/utils.js"></script>
 
 <script src="/static/js/assessment-canvas.js"></script>
 <script src="/static/js/zoom-lens.js"></script>

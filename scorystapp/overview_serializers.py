@@ -71,6 +71,11 @@ class CourseUserGradedSerializer(serializers.ModelSerializer):
     else:
       submission = submissions[0]
 
+    # If the submission has not been released to the students, there should be no way
+    # for the student to see his points
+    if not submission.released and course_user.privilege == models.CourseUser.STUDENT:
+      return []
+
     response_set = submission.response_set.all()
     is_assessment_graded = True
     assessment_graders = set()

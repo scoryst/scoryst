@@ -1,0 +1,85 @@
+{% extends 'layout.epy' %}
+
+{% block content %}
+<div class="container map-submission">
+  <div class="row">
+    <div class="col-xs-4">
+      <div data-spy="affix" data-offset-top="50">
+        <h2>Map Submission</h2>
+        <p>Your PDF has been uploaded, and we've recorded your submission time. Please take a few moments to tell us which questions you answered on which pages. This is required to finalize your submission.</p>
+
+        <ul class="nav nav-pills question-part-nav">
+        {% for qp in question_parts %}
+          <li data-question-number="{{qp.question_number}}"
+            data-part-number="{{qp.part_number}}">
+              <a href="#">
+                Question {{qp.question_number}}, Part {{qp.part_number}}
+              </a>
+          </li>
+        {% endfor %}
+        </ul>
+
+        <div class="success">
+          <i class="fa fa-check-circle-o"></i>
+
+          You've successfully mapped all questions!<br />
+          You may now return to the <a href="/course/{{course.id}}/submit">submission page</a>.
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xs-8 select-pages">
+      <h2>Processing PDF</h2>
+      <p>We're currently processing your PDF. Give us a minute.</p>
+
+      <img src="/static/img/loading-bar.gif" alt="Loading..." class="loading" />
+
+      <!-- Pages will be inserted here using an underscore template. -->
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" role="dialog">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <!-- Zoomed image will be added dynamically. -->
+    </div>
+  </div>
+</div>
+
+<script type="text/template" class="select-pages-template">
+  <h2>Select Pages</h2>
+  <p>
+    Select the pages that correspond to question <%= questionNumber %>, part
+    <%= partNumber %>. You may zoom into any page by clicking the magnifying glass in the bottom left. Pages already selected are highlighted in orange.
+  </p>
+
+  <% submissionPages.forEach(function(page) { %>
+    <% if (page.isSelected) { %>
+      <div class="image-container selected">
+    <% } else { %>
+      <div class="image-container">
+    <% } %>
+        <button class="btn btn-link zoom">
+          <i class="fa fa-search-plus"></i>
+        </button>
+
+        <img src="<%= page.pageJpegSmallUrl %>" alt="Page thumbnail"
+          class="page" data-zoomed-src="<%= page.pageJpegUrl %>"
+          data-page-number="<%= page.pageNumber %>" />
+      </div>
+  <% }); %>
+</script>
+{% endblock %}
+
+{% block js %}
+{% include 'backbone.epy' %}
+<script>var pageCount = {{submission.page_count}};</script>
+<script src="/static/js/lib/modal.js"></script>
+<script src="/static/js/lib/affix.js"></script>
+<script src="/static/js/common/utils.js"></script>
+
+<script src="/static/js/submit/models/submission-page.js"></script>
+<script src="/static/js/submit/models/response.js"></script>
+<script src="/static/js/submit/views/map-submission.js"></script>
+{% endblock %}

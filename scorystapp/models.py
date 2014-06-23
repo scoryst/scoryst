@@ -120,8 +120,27 @@ class Course(models.Model):
   year = models.IntegerField(default=timezone.now().year)
 
   def has_assessments(self):
-    """ Returns true if Exams are associated with this course, or false otherwise. """
+    """
+    Returns true if Assessments are associated with this course, or false
+    otherwise.
+    """
     return self.assessment_set.count() > 0
+
+
+  def has_exams(self):
+    """
+    Returns true if Exams are associated with this course, or false otherwise.
+    """
+    return self.assessment_set.filter(homework=None).count() > 0
+
+
+  def has_homeworks(self):
+    """
+    Returns true if Homeworks are associated with this course, or false
+    otherwise.
+    """
+    return self.assessment_set.filter(exam=None).count() > 0
+
 
   def __unicode__(self):
     return '%s (%s %d)' % (self.name, self.TERM_CHOICES[self.term][1], self.year)
@@ -170,7 +189,7 @@ class Assessment(models.Model):
   course = models.ForeignKey(Course, db_index=True)
   name = models.CharField(max_length=200)
 
-  # Whether the exam is being graded up or graded down
+  # Whether the assessment is being graded up or graded down
   grade_down = models.BooleanField(default=True)
   cap_score = models.BooleanField(default=True)
 
@@ -265,7 +284,8 @@ class QuestionPart(models.Model):
   # `response` is associated with pages. This is because for most homeworks,
   # student responses can be of arbitrary length and they do the response to page
   # mapping themselves
-  pages = models.CommaSeparatedIntegerField(max_length=200, null=True)
+  pages = models.CommaSeparatedIntegerField(max_length=200,
+    null=True, blank=True)
 
   def __unicode__(self):
     return 'Q%d.%d (%d Point(s))' % (self.question_number, self.part_number,
@@ -291,7 +311,7 @@ Models: Submission, Submission, Response
 class Submission(models.Model):
   """ Represents a student's assessment (homework or exam). """
   def generate_remote_pdf_name(instance, filename):
-    """ Generates a name of the form `filename`/<random_string><timestamp>.pdf """
+    """ Generates a name of the form `filename`/<random_string><timestamp>. """
     return utils.generate_timestamped_random_name(filename, 'pdf')
 
   assessment = models.ForeignKey(Assessment, db_index=True)
@@ -299,6 +319,8 @@ class Submission(models.Model):
 
   page_count = models.IntegerField()
   pdf = models.FileField(upload_to=generate_remote_pdf_name)
+  time = models.DateTimeField(null=True, blank=True)
+
   released = models.BooleanField(default=False)
   preview = models.BooleanField(default=False)
 
@@ -348,6 +370,12 @@ class Submission(models.Model):
         return False
     return True
 
+  def is_finalized(self):
+    """ Returns true if there are no unmapped responses. """
+    unmapped_responses = self.response_set.filter(models.Q(pages="")
+      | models.Q(pages=None))
+    return unmapped_responses.count() == 0
+
   def __unicode__(self):
     if self.course_user:
       return '%s (%s)' % (self.assessment.name, self.course_user.user.get_full_name())
@@ -364,6 +392,7 @@ class SubmissionPage(models.Model):
   submission = models.ForeignKey(Submission, db_index=True)
   page_number = models.IntegerField()
   page_jpeg = models.ImageField(upload_to=generate_remote_jpeg_name, blank=True)
+  page_jpeg_small = models.ImageField(upload_to=generate_remote_jpeg_name, blank=True)
   page_jpeg_large = models.ImageField(upload_to=generate_remote_jpeg_name, blank=True)
   is_blank = models.BooleanField(default=False)
 
@@ -380,7 +409,7 @@ class Response(models.Model):
   submission = models.ForeignKey(Submission, db_index=True)
 
   question_part = models.ForeignKey(QuestionPart, db_index=True)
-  pages = models.CommaSeparatedIntegerField(max_length=200)
+  pages = models.CommaSeparatedIntegerField(max_length=200, blank=True)
 
   grader_comments = models.TextField(null=True, blank=True, max_length=1000)
   grader = models.ForeignKey(CourseUser, null=True, blank=True, db_index=True)
@@ -459,7 +488,7 @@ class Split(models.Model):
 class SplitPage(models.Model):
   """
   Represents a page from the `Split` pdf that is yet to be associated with
-  an `Submission`
+  a `Submission`
   """
   def generate_remote_jpeg_name(instance, filename):
     """ Generates a name of the form split-jpeg/<random_string><timestamp>.jpeg """
@@ -473,6 +502,6 @@ class SplitPage(models.Model):
 
   # Upload URLs are taken care of by upload.py, however upload_to is required
   # so we specify none
-  page_jpeg_small = models.ImageField(upload_to=generate_remote_jpeg_name, blank=True)
   page_jpeg = models.ImageField(upload_to=generate_remote_jpeg_name, blank=True)
+  page_jpeg_small = models.ImageField(upload_to=generate_remote_jpeg_name, blank=True)
   page_jpeg_large = models.ImageField(upload_to=generate_remote_jpeg_name, blank=True)

@@ -115,7 +115,7 @@
 <script src="/static/js/lib/popover.js"></script>
 <script src="/static/js/lib/jquery.tablesorter.min.js"></script>
 
-<script src="/static/js/backbone-commons/idempotent.js"></script>
+<script src="/static/js/common/views/idempotent.js"></script>
 <script src="/static/js/popover-confirm.js"></script>
 
 <script src="/static/js/roster/course-user-model.js"></script>

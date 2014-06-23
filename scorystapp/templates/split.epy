@@ -12,6 +12,7 @@
       <button class="btn btn-default previous-images">
         <i class="fa fa-long-arrow-left"></i> Previous Images
       </button>
+
       <button class="btn btn-default next-images">
         Next Images <i class="fa fa-long-arrow-right"></i>
       </button>
@@ -49,7 +50,9 @@
         <button class="btn btn-link zoom">
           <i class="fa fa-search-plus"></i>
         </button>
-        <img src= "<%= page.pageJpegSmallUrl %>" data-page-id="<%= page.id %>" alt="Thumbnail" />
+
+        <img src="<%= page.pageJpegSmallUrl %>" alt="Page thumbnail"
+          data-page-id="<%= page.id %>" />
       </div>
   <% }); %>
 </script>
@@ -58,8 +61,8 @@
 
 {% block js %}
 {% include 'backbone.epy' %}
-<script src="/static/js/backbone-commons/mediator.js"></script>
-<script src="/static/js/backbone-commons/utils.js"></script>
+<script src="/static/js/common/mediator.js"></script>
+<script src="/static/js/common/utils.js"></script>
 <script src="/static/js/split/view.js"></script>
 <script src="/static/js/split/model.js"></script>
 <script src="/static/js/lib/modal.js"></script>

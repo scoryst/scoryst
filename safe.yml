@@ -1,2 +1,5 @@
 files:
   aws-key: workers/scoryst.pem
+  evangelist-server.crt: scorystapp/apis/evangelist-server.crt
+  evangelist-client.crt: scorystapp/apis/evangelist-client.crt
+  evangelist-client.key: scorystapp/apis/evangelist-client.key
