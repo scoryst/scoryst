@@ -302,8 +302,6 @@ var AssessmentFormView = IdempotentView.extend({
       assessmentInfo.push(questionPartInfo);
     });
 
-    console.log(assessmentInfo);
-
     this.$('#id_question_part_points').val(JSON.stringify(assessmentInfo));
     this.$('form').submit();
   },
