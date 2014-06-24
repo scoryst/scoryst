@@ -92,7 +92,7 @@ def _upload_and_split_task(exam, temp_pdf_name):
   num_pages = entire_pdf.getNumPages()
 
   split = models.Split(exam=exam, secret=utils.generate_random_string(40))
-  split.pdf.save('new', files.File(entire_pdf_file))
+  split.pdf.save('split-pdf', files.File(entire_pdf_file))
   split.save()
 
   # assume each page has questions on one side and nothing on the other

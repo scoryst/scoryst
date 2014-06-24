@@ -360,193 +360,6 @@ footer .amp {
   position: absolute;
 }
 
-/* CSS for create assessment page */
-.create-exam .fa-trash-o {
-  float: right;
-  cursor: pointer;
-  font-size: 20px;
-  margin-top: 5px;
-}
-
-.create-exam .error {
-  margin-top: 0;
-}
-
-.part-li .fa-trash-o {
-  font-size: 18px;
-}
-
-.rubric-li .fa-trash-o {
-  font-size: 16px;
-  margin-top: 7px;
-}
-
-.create-exam h3, .create-exam h4 {
-  cursor: pointer;
-}
-
-.create-exam .fa-chevron-circle-down,
-.create-exam .fa-chevron-circle-up {
-  cursor: pointer;
-}
-
-.create-exam .popover {
-  width: 300px;
-}
-
-.popover .cancel {
-  margin-left: 5px;
-}
-
-.confirm-popover {
-  width: 160px;
-}
-
-.create-exam .grade-style {
-  overflow: hidden;
-  padding-left: 3px;
-}
-
-.create-exam .grade-style .radio {
-  float: left;
-  margin-right: 10px;
-}
-
-.create-exam .grade-style .radio + .radio {
-  margin-top: 10px;
-}
-
-.create-exam .grade-style .info-popover {
-  display: inline-block;
-  margin-top: 11px;
-}
-
-.create-exam span.form-group input {
-  margin-bottom: 5px;
-}
-
-.question-list {
-  padding-left: 0;
-}
-
-.question-list ul {
-  padding-left: 0;
-}
-
-.question-list > li {
-  margin-bottom: 5px;
-}
-
-.question-list > li > ul > li {
-  overflow: hidden;
-}
-
-.question-list li {
-  list-style-type: none;
-}
-
-.create-exam h3 {
-  padding-bottom: 4px;
-  border-bottom: 1px solid #ddd;
-  margin-bottom: 15px;
-  font-size: 22px;
-  font-weight: normal;
-}
-
-.create-exam h4 {
-  font-weight: normal;
-}
-
-.part-meta {
-  overflow: hidden;
-}
-
-.create-exam .points {
-  float: left;
-  margin-right: 10px;
-}
-
-.create-exam .points input {
-  width: 60px;
-  display: inline-block;
-  margin-left: 5px;
-}
-
-.pages {
-  float: left;
-}
-
-.pages input {
-  width: 60px;
-  display: inline-block;
-  margin-left: 5px;
-}
-
-.create-exam input[type="text"] {
-  display: inline-block;
-  padding-left: 8px;
-  padding-right: 8px;
-}
-
-.create-exam .rubric-description {
-  width: 150px;
-  margin-left: 3px;
-}
-
-.create-exam .rubric-points {
-  width: 35px;
-  margin-right: 3px;
-}
-
-.rubrics, .add-buttons {
-  overflow: hidden;
-}
-
-.create-exam .add-rubric, .create-exam .add-part, .create-exam .add-question {
-  margin-bottom: 10px;
-  background: #f6f6f6;
-  padding: 8px 10px;
-  cursor: pointer;
-  opacity: 0.7;
-}
-
-.create-exam .add-rubric:hover, .create-exam .add-part:hover, .create-exam .add-question:hover {
-  opacity: 1;
-}
-
-.create-exam .add-part h4, .create-exam .add-question h3 {
-  line-height: 32px;
-  margin-bottom: 0;
-}
-
-.create-exam .add-rubric i, .create-exam .add-part i, .create-exam .add-question i {
-  display: block;
-  float: left;
-  font-size: 24px;
-  line-height: 35px;
-  margin-right: 15px;
-  height: 90%;
-}
-
-.create-exam .add-part i {
-  height: 50px;
-  line-height: 60px;
-}
-
-.add-part .form-group {
-  margin-bottom: 0;
-}
-
-.done-rubric {
-  display: block;
-  width: 100%;
-}
-
-.separator {
-  color: #999;
-  padding: 0 5px;
-}
-
 /* CSS for grade page */
 .grade .nav-title {
   font-size: 18px;
@@ -563,11 +376,15 @@ footer .amp {
   cursor: pointer;
 }
 
-.grade .well {
+.grade .well, .assessment .well {
   box-shadow: none;
   border: none;
+  border-box-shadow: none;
   -webkit-box-shadow: none;
-}
+  -moz-box-shadow: none;
+  -ms-box-shadow: none;
+  -o-box-shadow: none;
+  -khtml-box-shadow: none;}
 
 /* Styling for keyboard shortcuts. */
 .grade .shortcut {
@@ -1145,6 +962,10 @@ footer .amp {
 }
 
 /* Assessments page */
+.assessments .initially-hide {
+  display: none;
+}
+
 .assessments .edit {
   margin-right: 10px;
 }
@@ -1161,8 +982,43 @@ footer .amp {
   padding-left: 2px;
 }
 
-.assessments .assessment-fields {
+.assessments .exam-fields {
   display: none;
+}
+
+.assessments button.next-question, .assessments button.submit-num-questions {
+  display: none;
+}
+
+.assessments .small-input {
+  width: 10%;
+  display: inline-block;
+  margin: 2px 2px;
+}
+
+.assessments .question {
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+.assessments .create-new-assessment {
+  float: right;
+  margin-top: -7px;
+}
+
+.assessments .no-homework, .assessments .no-exam {
+  margin-bottom: 20px;
+}
+
+/* fixes the datetimepicker icon to match height of the input box */
+.assessments .input-group-addon {
+  padding: 8px 12px 9px 12px
+}
+
+.assessments .submission-deadline-instructions {
+  margin-top: -12px;
+  font-size: 12px;
+  margin-bottom: 15px;
 }
 
 /* Progress tracker. */

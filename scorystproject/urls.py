@@ -95,12 +95,18 @@ urlpatterns = patterns('',
   # course assessments
   url(r'^course/(?P<course_id>\d+)/assessments/$',
     'scorystapp.views.assessments.assessments'),
+  url(r'^course/(?P<course_id>\d+)/assessments/assessment/$',
+    'scorystapp.views.assessments.list_assessments'),
+  url(r'^course/(?P<course_id>\d+)/assessments/create/(?P<assessment_id>\d+)/assessment/$',
+    'scorystapp.views.assessments.list_assessments'),
+  url(r'^course/(?P<course_id>\d+)/assessments/create/(?P<assessment_id>\d+)/assessment/$',
+    'scorystapp.views.assessments.list_question_parts'),
   url(r'^course/(?P<course_id>\d+)/assessments/delete/(?P<assessment_id>\d+)/$',
     'scorystapp.views.assessments.delete_assessment'),
   url(r'^course/(?P<course_id>\d+)/assessments/create/(?P<assessment_id>\d+)/$',
     'scorystapp.views.assessments.create_assessment'),
-  url(r'^course/(?P<course_id>\d+)/assessments/create/(?P<assessment_id>\d+)/get-saved-exam/$',
-    'scorystapp.views.assessments.get_saved_assessment'),
+  url(r'^course/(?P<course_id>\d+)/assessments/create/(?P<assessment_id>\d+)/question-part/$',
+    'scorystapp.views.assessments.list_question_parts'),
 
 
   # Uploading student exams

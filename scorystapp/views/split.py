@@ -167,7 +167,7 @@ def _upload_pdf_for_exam_answers(pdf_info_list):
     # TODO: Race condition where someone edits the exam_answer object (aka assigns a student)
     # to an exam_answer while pdf.save() is running
     exam_answer = shortcuts.get_object_or_404(models.Submission, pk=exam_answer_id)
-    exam_answer.pdf.save('new', files.File(single_exam_answer_file))
+    exam_answer.pdf.save('exam-answer-pdf', files.File(single_exam_answer_file))
     exam_answer.save()
 
     os.remove(single_exam_answer_file_name)

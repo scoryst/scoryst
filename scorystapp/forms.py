@@ -1,11 +1,9 @@
 from scorystapp import models
-from bootstrap3_datetime import widgets as datetime_widgets
 from django import forms
 from django.contrib.auth import authenticate, forms as django_forms
 from django.contrib.admin import widgets
 from django.utils import html
 import PyPDF2
-import pdb
 
 
 class HorizontalRadioRenderer(forms.RadioSelect.renderer):
@@ -47,18 +45,18 @@ class UserLoginForm(forms.Form):
   def clean(self):
     """ Confirms the user provided valid credentials. """
     data = self.cleaned_data
-    # email = data.get('email')
-    # password = data.get('password')
+    email = data.get('email')
+    password = data.get('password')
 
-    # user = authenticate(username=email, password=password)
-    # if email and password:
-    #   if user is None:
-    #     raise forms.ValidationError('Invalid credentials.')
-    #   elif not user.is_active:
-    #     raise forms.ValidationError('User is not active.')
-    #   elif not user.is_signed_up:
-    #     user.is_signed_up = True
-    #     user.save()
+    user = authenticate(username=email, password=password)
+    if email and password:
+      if user is None:
+        raise forms.ValidationError('Invalid credentials.')
+      elif not user.is_active:
+        raise forms.ValidationError('User is not active.')
+      elif not user.is_signed_up:
+        user.is_signed_up = True
+        user.save()
     return data
 
 
@@ -110,36 +108,42 @@ class AddPeopleForm(forms.Form):
 class AssessmentUploadForm(forms.Form):
   """ Allows an exam to be uploaded along with the empty and solutions pdf file """
   MAX_ALLOWABLE_PDF_SIZE = 1024 * 1024 * 20
+
   HOMEWORK_TYPE = 'homework'
   EXAM_TYPE = 'exam'
-
   ASSESSMENT_TYPES = (
       (HOMEWORK_TYPE, 'Homework'),
       (EXAM_TYPE, 'Exam'),
   )
 
+  GRADE_DOWN_TYPE = 'down'
+  GRADE_UP_TYPE = 'up'
+  GRADE_TYPES = (
+      (GRADE_DOWN_TYPE, 'Grade down'),
+      (GRADE_UP_TYPE, 'Grade up'),
+  )
+
   assessment_type = forms.ChoiceField(choices=ASSESSMENT_TYPES,
-    widget=forms.RadioSelect(renderer=HorizontalRadioRenderer), initial='homework')
-  name = forms.CharField(max_length=100)
+    widget=forms.RadioSelect(renderer=HorizontalRadioRenderer), initial=HOMEWORK_TYPE)
+  name = forms.CharField(max_length=40)
+  grade_type = forms.ChoiceField(choices=GRADE_TYPES,
+    widget=forms.RadioSelect(renderer=HorizontalRadioRenderer), initial=GRADE_DOWN_TYPE)
 
   exam_file = forms.FileField(required=False)
   solutions_file = forms.FileField(required=False)
 
-  submission_deadline = forms.DateTimeField(required=False, widget=datetime_widgets.DateTimePicker(options=False))
+  submission_deadline = forms.DateTimeField(required=False, input_formats=['%m/%d/%Y %I:%M %p'])
 
+  question_part_points = forms.CharField()
 
   def clean(self):
     assessment_type = self.cleaned_data.get('assessment_type')
-    if assessment_type == self.EXAM_TYPE and not self.cleaned_data.get('exam_file'):
-      # exam PDF required; add error to respective field
-      self._errors['exam_file'] = self.error_class(['Must provide an exam PDF.'])
-      # This field is not valid, so remove from the cleaned_data
-      del self.cleaned_data['exam_file']
-    elif assessment_type == self.HOMEWORK_TYPE and not self.cleaned_data.get('submission_deadline'):
+    if assessment_type == self.HOMEWORK_TYPE and not self.cleaned_data.get('submission_deadline'):
       # homework submission time required; add error to respective field
       self._errors['submission_deadline'] = self.error_class(['Must provide valid submission deadline.'])
       # This field is not valid, so remove from the cleaned_data
-      del self.cleaned_data['submission_deadline']
+      if 'submission_deadline' in self.cleaned_data:
+        del self.cleaned_data['submission_deadline']
 
     return self.cleaned_data
 

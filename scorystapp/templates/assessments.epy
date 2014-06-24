@@ -4,13 +4,32 @@
 {% block content %}
   <div class="container assessments">
     <div class="row">
-      <div class="col-xs-6">
-        <h2>Assessments</h2>
-        {% if assessment_edit_list %}
-          <table class="table table-striped table-condensed">
+      <div class="col-xs-6 assessments-tables">
+        <h2>Homework</h2>
+        {% if homework_assignments_exist %}
+          <table class="table table-striped table-condensed homework-table">
             <thead>
               <tr>
-                <th>Assessment</th>
+                <th>Name</th>
+                <th>Solutions PDF</th>
+                <th>Submission Deadline</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <!-- This will be filled in with backbone. -->
+            </tbody>
+          </table>
+        {% else %}
+          <p class="no-homework">There are no homework assignments.</p>
+        {% endif %}
+        <h2>Exams</h2>
+        {% if exams_exist %}
+          <table class="table table-striped table-condensed exam-table">
+            <thead>
+              <tr>
+                <th>Name</th>
                 <th>PDF</th>
                 <th>Page count</th>
                 <th>Actions</th>
@@ -18,123 +37,205 @@
             </thead>
 
             <tbody>
-              {% for assessment, can_edit in assessment_edit_list %}
-                <tr>
-                  <td>{{assessment.name}}</td>
-                  <td>
-                    {% if assessment.exam_pdf %}
-                      <a href="{{assessment.exam_pdf.url}}" target="_blank">Exam</a>
-                    {% endif %}
-                    {% if assessment.solutions_pdf %}
-                      /
-                      <a href="{{assessment.solutions_pdf.url}}" target="_blank">Solutions</a>
-                    {% endif %}
-                  </td>
-
-                  <td>{{assessment.page_count}}</td>
-                  <td>
-                    {% if can_edit %}
-                      <a href="/course/{{course.pk}}/assessments/create/{{assessment.pk}}"
-                          class="edit">
-                        <i class="fa fa-pencil"></i>
-                      </a>
-
-                      <a href="/course/{{course.pk}}/exams/delete/{{assessment.pk}}"
-                          class="delete">
-                        <i class="fa fa-trash-o"></i>
-                      </a>
-                    {% else %}
-                      None
-                      <a class="info-popover" data-trigger="hover">
-                        <i class="fa fa-question-circle"></i>
-                      </a>
-                    {% endif %}
-                  </td>
-                </tr>
-              {% endfor %}
+              <!-- This will be filled in with backbone. -->
             </tbody>
           </table>
         {% else %}
-          <p>No homework assignments or exams created yet.</p>
+          <p class="no-exam">There are no exams.</p>
         {% endif %}
       </div>
 
-      <div class="col-xs-6">
-        <h2>Create an Assessment</h2>
-        <ol class="track-progress">
-          <li class="active">
-            <span>1.</span> Prepare
-          </li>
-          <li>
-            <span>2.</span> Create
-          </li>
-          <li>
-            <span>3.</span> Preview
-          </li>
-        </ol>
-
-        <form class="form upload-exam" method="post" enctype="multipart/form-data">
+      <div class="col-xs-6 assessment-form">
+        {% if assessment_id %}
+          <a href="../.." class="btn btn-danger create-new-assessment">
+            <i class="fa fa-times"></i> Disable editing</a>
+          <h2>Edit an assessment</h2>
+        {% else %}
+          <h2>Create an Assessment</h2>
+        {% endif %}
+        <form class="form upload-assessment" {% if assessment_id %} data-assessment-id={{assessment_id}} {% endif %} method="post" enctype="multipart/form-data">
           {% csrf_token %}
-          <span class="error">{{form.non_field_errors.as_text}}</span>
 
           <div class="form-group">
-            <label for="id_assessment_type">Type</label>
-            <br />
-            {% render_field form.assessment_type %}
-            <span class="error">{{form.assessment_type.errors.as_text}}</span>
+            <span class="assessment-type-radio">
+              <label for="id_assessment_type">Type</label>
+              <br />  <!-- ensures label and radio buttons are on different lines -->
+              {% render_field form.assessment_type %}
+            </span>
           </div>
 
           <div class="form-group">
             <label for="id_name">Name</label>
-            {% render_field form.name class="form-control" placeholder="Problem Set 1" %}
-            <span class="error">{{form.name.errors.as_text}}</span>
+            {% render_field form.name class="form-control" placeholder="Problem Set 1" maxlength="40" %}
+            <span class="error initially-hide name-error">Enter a name.</span>
+          </div>
+
+          <div class="form-group">
+            {% render_field form.grade_type class="assessment-type" %}
+            <a class="info-popover" data-trigger="hover">
+              <i class="fa fa-question-circle"></i>
+            </a>
           </div>
 
           <div class="exam-fields">
             <div class="form-group">
-              <label for="id_exam_file">Exam PDF</label>
-              {% render_field form.exam_file %}
-              <span class="error">{{form.exam_file.errors.as_text}}</span>
+              <label for="id_exam_file">Exam PDF</label><br />
+              {% render_field form.exam_file class="initially-hide" %}
+              <span class="exam-file-help initially-hide">An <a class="exam-pdf" href="#" target="_blank">exam PDF</a> has already been uploaded. <a class="show-file-upload" href="#">Click here</a> to upload a new one.</span>
+              <span class="error initially-hide exam-file-error">A blank exam PDF is required.</span>
             </div>
           </div>
 
           <div class="homework-fields">
+            <label for="id_submission_deadline">Submission Deadline</label>
             <div class="form-group">
-              <label for="id_submission_deadline">Submission Deadline</label>
-              {% render_field form.submission_deadline class="form-control" placeholder="12/31/2014 23:59" %}
-              <span class="error">{{form.submission_deadline.errors.as_text}}</span>
+              <div class="input-group date submission-deadline">
+                {% render_field form.submission_deadline class="form-control" placeholder=current_time %}
+                <span class="input-group-addon"><span class="fa fa-calendar"></span>
+                </span>
+              </div>
+            </div>
+            <p class="submission-deadline-instructions">Enter a date and time, or select one by clicking the calendar icon.</p>
+            <span class="error initially-hide submission-error">Enter a valid future submission deadline. You may select it using the calendar.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="solutions_file">Solutions PDF (optional)</label><br />
+            {% render_field form.solutions_file class="initially-hide" %}
+            <span class="solutions-file-help initially-hide">A <a class="solutions-pdf" href="#" target="_blank">solutions PDF</a> has already been uploaded. <a class="show-file-upload" href="#">Click here</a> to upload a new one.</span>
+          </div>
+
+          <div class="form-group">
+            This assessment has <input class="form-control num-questions small-input" type="text" placeholder="8" maxlength="2"> question(s).
+            <br />
+            <span class="num-questions-error error initially-hide">Enter a positive integer.</span>
+            <div class="questions-form">
+              <!-- This will be filled in with backbone. -->
             </div>
           </div>
 
           <div class="form-group">
-            <label for="solutions_file">Solutions PDF (optional)</label>
-            {% render_field form.solutions_file %}
-            <span class="error">{{form.solutions_file.errors.as_text}}</span>
+            {% render_field form.question_part_points class="initially-hide" %}
           </div>
 
-          <div class="form-group">
-            <button class="btn btn-primary" type="submit">Proceed</button>
-          </div>
         </form>
+        <button class="btn btn-primary submit">Submit</button>
       </div>
     </div>
   </div>
+
+  <script type="text/template" class="exam-row-template">
+    <tr>
+      <td><%= name %></td>
+      <td>
+        <a href="<%= examPdf %>" target="_blank">Exam</a>
+        <% if (solutionsPdf) { %>
+          /
+          <a href="<%= solutionsPdf %>" target="_blank">Solutions</a>
+        <% } %>
+      </td>
+      <td>
+        <%= pageCount %>
+      </td>
+      <td>
+        <% if (isEditable) { %>
+          <a href="/course/<%=course%>/assessments/create/<%=id%>"
+              class="edit">
+            <i class="fa fa-pencil"></i>
+          </a>
+
+          <a href="/course/<%=course%>/assessments/delete/<%=id%>"
+              class="delete">
+            <i class="fa fa-trash-o"></i>
+          </a>
+        <% } else { %>
+          None
+          <a class="info-popover" data-trigger="hover">
+            <i class="fa fa-question-circle"></i>
+          </a>
+        <% } %>
+      </td>
+    </tr>
+  </script>
+
+  <script type="text/template" class="homework-row-template">
+    <tr>
+      <td><%= name %></td>
+      <td>
+        <% if (solutionsPdf) { %>
+          <a href="<%= solutionsPdf %>" target="_blank">Solutions</a>
+        <% } else { %>
+          None
+        <% } %>
+      </td>
+      <td>
+        <%= submissionDeadline %>
+      </td>
+      <td>
+        <% if (isEditable) { %>
+          <a href="/course/<%=course%>/assessments/create/<%=id%>"
+              class="edit">
+            <i class="fa fa-pencil"></i>
+          </a>
+
+          <a href="/course/<%=course%>/assessments/delete/<%=id%>"
+              class="delete">
+            <i class="fa fa-trash-o"></i>
+          </a>
+        <% } else { %>
+          None
+          <a class="info-popover" data-trigger="hover">
+            <i class="fa fa-question-circle"></i>
+          </a>
+        <% } %>
+      </td>
+    </tr>
+  </script>
+
+  <script type="text/template" class="question-form-template">
+    <div class="well question">
+      Question <%=questionNum%> has <input class="form-control num-parts small-input" placeholder="1" type="text" maxlength="2"> part(s)
+      <br />
+      <span class="num-parts-error error initially-hide">Enter a positive integer for the number of parts.<br /></span>
+      <div class="parts-form"></div>
+    </div>
+  </script>
+
+  <script type="text/template" class="part-form-template">
+    <div class="part">
+      Part <%=partNum%> is out of <input type="text" class="small-input points
+      form-control" maxlength="6"> points <% if (isExam) { %> and spans page(s) <input type="text"
+      class="small-input pages form-control" placeholder="2,3"> <% } %>
+      <br />
+      <span class="error points-error initially-hide">Enter a positive float for the number of points.<br /></span>
+      <span class="error pages-error initially-hide">Enter page numbers with commas in between.<br /></span>
+    </div>
+  </script>
+{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="/static/css/lib/bootstrap-datetimepicker.min.css" />
 {% endblock %}
 
 {% block js %}
+{% include 'backbone.epy' %}
 <script src="/static/js/lib/tooltip.js"></script>
 <script src="/static/js/lib/popover.js"></script>
 <script src="/static/js/popover-confirm.js"></script>
-<script src="/static/js/assessments.js"></script>
-<script src="/static/js/lib/collapse.min.js"></script>
-<!--
-<script type="text/javascript" src="/admin/jsi18n/"></script>
-<script type="text/javascript" src="/static/admin/js/core.js"></script>
-<script type="text/javascript" src="/static/admin/js/admin/RelatedObjectLookups.js"></script>
-<script type="text/javascript" src="/static/admin/js/jquery.js"></script>
-<script type="text/javascript" src="/static/admin/js/jquery.init.js"></script>
-<script type="text/javascript" src="/static/admin/js/actions.js"></script>
-<script type="text/javascript" src="/static/admin/js/calendar.js"></script>
-<script type="text/javascript" src="/static/admin/js/admin/DateTimeShortcuts.js"></script> -->
-{% endblock %}
 
+<script src="/static/js/backbone-commons/idempotent.js"></script>
+<script src="/static/js/backbone-commons/mediator.js"></script>
+<script src="/static/js/backbone-commons/utils.js"></script>
+
+<!-- Added for the datetime picker -->
+<script src="/static/js/lib/collapse.js"></script>
+<script src="/static/js/lib/transition.js"></script>
+<script src="/static/js/lib/moment.min.js"></script>
+<script src="/static/js/lib/bootstrap-datetimepicker.min.js"></script>
+
+<script src="/static/js/assessments/models/assessment.js"></script>
+<script src="/static/js/assessments/models/question-part.js"></script>
+<script src="/static/js/assessments/views/assessment-form.js"></script>
+<script src="/static/js/assessments/views/assessment-tables.js"></script>
+<script src="/static/js/assessments/views/main.js"></script>
+{% endblock %}
