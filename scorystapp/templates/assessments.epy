@@ -43,7 +43,7 @@
             </tbody>
           </table>
         {% else %}
-          <div class="initially-hide no-exam">There are no exams.</div>
+          <div class="no-exam">There are no exams.</div>
         {% endif %}
       </div>
 
@@ -92,7 +92,7 @@
             <div class="form-group">
               <label for="id_submission_deadline">Submission Deadline</label>
               {% render_field form.submission_deadline class="form-control" placeholder="12/31/2014 23:59" %}
-              <span class="error initially-hide submission-error">Enter a valid submission deadline. You may select it using the calendar.</span>
+              <span class="error initially-hide submission-error">Enter a valid future submission deadline. You may select it using the calendar.</span>
             </div>
           </div>
 
@@ -204,7 +204,7 @@
       form-control" maxlength="6"> points <% if (isExam) { %> and spans page(s) <input type="text"
       class="small-input pages form-control" placeholder="2,3"> <% } %>
       <br />
-      <span class="error points-error initially-hide">Enter a positive integer for the number of points.<br /></span>
+      <span class="error points-error initially-hide">Enter a positive float for the number of points.<br /></span>
       <span class="error pages-error initially-hide">Enter page numbers with commas in between.<br /></span>
     </div>
   </script>

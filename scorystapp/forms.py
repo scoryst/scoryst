@@ -46,18 +46,18 @@ class UserLoginForm(forms.Form):
   def clean(self):
     """ Confirms the user provided valid credentials. """
     data = self.cleaned_data
-    # email = data.get('email')
-    # password = data.get('password')
+    email = data.get('email')
+    password = data.get('password')
 
-    # user = authenticate(username=email, password=password)
-    # if email and password:
-    #   if user is None:
-    #     raise forms.ValidationError('Invalid credentials.')
-    #   elif not user.is_active:
-    #     raise forms.ValidationError('User is not active.')
-    #   elif not user.is_signed_up:
-    #     user.is_signed_up = True
-    #     user.save()
+    user = authenticate(username=email, password=password)
+    if email and password:
+      if user is None:
+        raise forms.ValidationError('Invalid credentials.')
+      elif not user.is_active:
+        raise forms.ValidationError('User is not active.')
+      elif not user.is_signed_up:
+        user.is_signed_up = True
+        user.save()
     return data
 
 

@@ -3,6 +3,7 @@ var AssessmentFormView = IdempotentView.extend({
   INTEGER_REGEX: /^\d+$/,
   FLOAT_REGEX: /^\d+(\.\d+)?$|^\.\d+$/,
   BLANK_STRING_REGEX: /^\s*$/,
+  UTC_PST_OFFSET: 7 * 60000,
 
   events: {
     'change input[type="radio"]:checked': 'showHomeworkOrExam',
@@ -44,6 +45,11 @@ var AssessmentFormView = IdempotentView.extend({
           self.populateFields();
         }
       });
+    } else {
+      // the exam PDF and solutions PDF inputs are hidden initially because they
+      // are not shown when editing an assessment and a PDF has been uploaded;
+      // if not editing, show all inputs
+      this.$('input').show();
     }
 
     this.addGradeTypePopover();
@@ -81,7 +87,7 @@ var AssessmentFormView = IdempotentView.extend({
   addGradeTypePopover: function() {
     var infoPopoverText = 'If grading down, assessments have perfect scores' +
       ' initially, and each rubric deducts points from the total score. If' +
-      ' grading up, exams have 0 points awarded initially, and each rubric' +
+      ' grading up, assessments have 0 points awarded initially, and each rubric' +
       ' awards points to the total score.';
 
     var $infoPopover = this.$('.info-popover');
@@ -178,9 +184,26 @@ var AssessmentFormView = IdempotentView.extend({
       }
     }
 
-    // if homework, validate that a submission deadline is entered
+    // if homework, validate that a submission deadline is entered and that it
+    // is in the future
     else {
-      if (this.$('#id_submission_deadline').val()) {
+      var submissionDeadlineIsValid = true;
+      var submissionString = this.$('#id_submission_deadline').val();
+
+      if (!submissionString) {
+        submissionDeadlineIsValid = false;
+      }
+
+      var curUtcTime = (new Date).getTime();
+      var userEnteredTime = new Date(submissionString);
+      // we assume the user is in PST; convert to UTC
+      // TODO: handle other timezones and daylight savings
+      var utcUserEnteredTime = userEnteredTime - this.UTC_PST_OFFSET;
+      if (utcUserEnteredTime < curUtcTime) {
+        submissionDeadlineIsValid = false;
+      }
+
+      if (submissionDeadlineIsValid) {
         this.$('.submission-error').hide();
       } else {
         this.$('.submission-error').show();
