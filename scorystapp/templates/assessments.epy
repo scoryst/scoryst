@@ -43,7 +43,7 @@
             </tbody>
           </table>
         {% else %}
-          <div class="display-none no-exam">There are no exams.</div>
+          <div class="initially-hide no-exam">There are no exams.</div>
         {% endif %}
       </div>
 
@@ -61,15 +61,15 @@
           <div class="form-group">
             <span class="assessment-type-radio">
               <label for="id_assessment_type">Type</label>
-              <br />
+              <br />  <!-- ensures label and radio buttons are on different lines -->
               {% render_field form.assessment_type %}
             </span>
           </div>
 
           <div class="form-group">
             <label for="id_name">Name</label>
-            {% render_field form.name class="form-control" placeholder="Problem Set 1" %}
-            <span class="error display-none name-error">Enter a name.</span>
+            {% render_field form.name class="form-control" placeholder="Problem Set 1" maxlength="40" %}
+            <span class="error initially-hide name-error">Enter a name.</span>
           </div>
 
           <div class="form-group">
@@ -82,9 +82,9 @@
           <div class="exam-fields">
             <div class="form-group">
               <label for="id_exam_file">Exam PDF</label><br />
-              {% render_field form.exam_file %}
-              <span class="exam-file-help display-none">An <a class="exam-pdf" href="#" target="_blank">exam PDF</a> has already been uploaded. Upload to replace the previous PDF, or leave blank to keep old PDF. </span>
-              <span class="error display-none exam-file-error">A blank exam PDF is required.</span>
+              {% render_field form.exam_file class="initially-hide" %}
+              <span class="exam-file-help initially-hide">An <a class="exam-pdf" href="#" target="_blank">exam PDF</a> has already been uploaded. <a class="show-file-upload" href="#">Click here</a> to upload a new one.</span>
+              <span class="error initially-hide exam-file-error">A blank exam PDF is required.</span>
             </div>
           </div>
 
@@ -92,28 +92,27 @@
             <div class="form-group">
               <label for="id_submission_deadline">Submission Deadline</label>
               {% render_field form.submission_deadline class="form-control" placeholder="12/31/2014 23:59" %}
-              <span class="error display-none submission-error">Enter a valid submission deadline. You may select it using the calendar.</span>
+              <span class="error initially-hide submission-error">Enter a valid submission deadline. You may select it using the calendar.</span>
             </div>
           </div>
 
           <div class="form-group">
             <label for="solutions_file">Solutions PDF (optional)</label><br />
-            {% render_field form.solutions_file %}
-            <span class="solutions-file-help display-none">A <a class="solutions-pdf" href="#" target="_blank">solutions PDF</a> has already been uploaded. Upload to replace the previous PDF, or leave blank to keep old PDF. </span>
+            {% render_field form.solutions_file class="initially-hide" %}
+            <span class="solutions-file-help initially-hide">A <a class="solutions-pdf" href="#" target="_blank">solutions PDF</a> has already been uploaded. <a class="show-file-upload" href="#">Click here</a> to upload a new one.</span>
           </div>
 
           <div class="form-group">
-            This assessment has <input class="form-control num-questions small-input"
-            type="text" placeholder="8" maxlength="2"> question(s).
+            This assessment has <input class="form-control num-questions small-input" type="text" placeholder="8" maxlength="2"> question(s).
             <br />
-            <span class="num-questions-error error display-none">Enter a positive integer.</span>
+            <span class="num-questions-error error initially-hide">Enter a positive integer.</span>
             <div class="questions-form">
               <!-- This will be filled in with backbone. -->
             </div>
           </div>
 
           <div class="form-group">
-            {% render_field form.question_part_points class="display-none" %}
+            {% render_field form.question_part_points class="initially-hide" %}
           </div>
 
         </form>
@@ -192,10 +191,9 @@
 
   <script type="text/template" class="question-form-template">
     <div class="well question">
-      Question <%=questionNum%> has <input class="form-control num-parts small-input"
-      placeholder="1" type="text" maxlength="2"> part(s)
+      Question <%=questionNum%> has <input class="form-control num-parts small-input" placeholder="1" type="text" maxlength="2"> part(s)
       <br />
-      <span class="num-parts-error error display-none">Enter a positive integer for the number of parts.<br /></span>
+      <span class="num-parts-error error initially-hide">Enter a positive integer for the number of parts.<br /></span>
       <div class="parts-form"></div>
     </div>
   </script>
@@ -203,10 +201,11 @@
   <script type="text/template" class="part-form-template">
     <div class="part">
       Part <%=partNum%> is out of <input type="text" class="small-input points
-      form-control" maxlength="3"> points <% if (isExam) { %> and spans page(s) <input type="text"
+      form-control" maxlength="6"> points <% if (isExam) { %> and spans page(s) <input type="text"
       class="small-input pages form-control" placeholder="2,3"> <% } %>
       <br />
-      <span class="error points-error display-none">Enter a positive integer for the number of points.<br /><span>
+      <span class="error points-error initially-hide">Enter a positive integer for the number of points.<br /></span>
+      <span class="error pages-error initially-hide">Enter page numbers with commas in between.<br /></span>
     </div>
   </script>
 {% endblock %}
@@ -223,7 +222,6 @@
 
 <script src="/static/js/assessments/models/assessment.js"></script>
 <script src="/static/js/assessments/models/question-part.js"></script>
-<script src="/static/js/assessments/views/question-parts-form.js"></script>
 <script src="/static/js/assessments/views/assessment-form.js"></script>
 <script src="/static/js/assessments/views/assessment-tables.js"></script>
 <script src="/static/js/assessments/views/main.js"></script>

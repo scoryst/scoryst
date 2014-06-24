@@ -59,8 +59,8 @@ class AssessmentSerializer(serializers.ModelSerializer):
   class Meta:
     model = models.Assessment
     fields = ('id', 'name', 'course', 'is_exam', 'page_count', 'solutions_pdf',
-              'submission_deadline', 'exam_pdf', 'can_edit', 'grade_down')
-    read_only_fields = ('id', 'name', 'course')
+              'submission_deadline', 'exam_pdf', 'can_edit')
+    read_only_fields = ('id', 'name', 'course', 'grade_down')
 
 
 class QuestionPartSerializer(serializers.ModelSerializer):
@@ -75,4 +75,5 @@ class QuestionPartSerializer(serializers.ModelSerializer):
   class Meta:
     model = models.QuestionPart
     fields = ('id', 'assessment', 'question_number', 'part_number', 'max_points', 'pages')
-    read_only_fields = ('id',)
+    read_only_fields = ('id', 'assessment', 'question_number', 'part_number',
+                        'max_points', 'pages')

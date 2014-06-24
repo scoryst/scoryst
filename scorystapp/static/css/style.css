@@ -379,8 +379,12 @@ footer .amp {
 .grade .well, .assessment .well {
   box-shadow: none;
   border: none;
+  border-box-shadow: none;
   -webkit-box-shadow: none;
-}
+  -moz-box-shadow: none;
+  -ms-box-shadow: none;
+  -o-box-shadow: none;
+  -khtml-box-shadow: none;}
 
 /* Styling for keyboard shortcuts. */
 .grade .shortcut {
@@ -958,7 +962,7 @@ footer .amp {
 }
 
 /* Assessments page */
-.assessments .display-none {
+.assessments .initially-hide {
   display: none;
 }
 
@@ -995,10 +999,6 @@ footer .amp {
 .assessments .question {
   margin-bottom: 10px;
   margin-top: 10px;
-}
-
-.assessments .exam-file-help, .assessments .solutions-file-help {
-  font-size: 11px;
 }
 
 .assessments .create-new-assessment {

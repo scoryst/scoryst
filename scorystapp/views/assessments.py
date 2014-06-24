@@ -5,8 +5,10 @@ from django.contrib import messages
 from scorystapp import models, forms, decorators, utils, assessments_serializers
 from scorystapp.views import helpers
 from django.conf import settings
+from datetime import datetime
 import json, shlex, subprocess, tempfile, threading
 import os
+import pytz
 import PyPDF2
 from rest_framework import serializers
 from rest_framework import decorators as rest_decorators, response as rest_framework_response
@@ -51,18 +53,27 @@ def _handle_assessment_form_submission(request, cur_course_user, assessment_id=N
   course = cur_course_user.course
   grade_down = (data['grade_type'] == 'down')
 
-  # Delete old `QuestionPart`s before new ones are created
   if assessment_id:
     assessment = shortcuts.get_object_or_404(models.Assessment, pk=assessment_id)
-    qpa = models.QuestionPart.objects.filter(assessment=assessment)
-    qpa.delete()
+
+    if hasattr(assessment, 'homework'):
+      # If the submission deadline entered is in the past, generate an error
+      submission_deadline = data['submission_deadline']
+      print submission_deadline
+      print datetime.now(pytz.timezone('US/Pacific'))
+      if submission_deadline < datetime.now(pytz.timezone('US/Pacific')):
+        return http.HttpResponse(status=500)
+
+    # Delete old `QuestionPart`s before new ones are created
+    qp = models.QuestionPart.objects.filter(assessment=assessment)
+    qp.delete()
 
   # Handle exam creation/editing
   if data['assessment_type'] == 'exam':
     exam = None
     if assessment_id:  # assessment is exam and is being edited
       exam = shortcuts.get_object_or_404(models.Exam, pk=assessment_id)
-      exam.name = data['name']
+      exam.name = data['name'].strip()
       exam.grade_down = grade_down
       exam.save()
 
@@ -101,6 +112,7 @@ def _handle_assessment_form_submission(request, cur_course_user, assessment_id=N
       homework = shortcuts.get_object_or_404(models.Homework, pk=assessment_id)
       homework.name = data['name']
       homework.grade_down = grade_down
+      homework.submission_deadline = data['submission_deadline']
     else:
       homework = models.Homework(course=course, name=data['name'],
         grade_down=grade_down, submission_deadline=data['submission_deadline'])
@@ -207,17 +219,16 @@ def _upload_exam_pdf_as_jpeg_to_s3(f, exam):
 
 def _upload_pdf_to_s3(f, assessment, assessment_pdf_field):
   """ Uploads a pdf file representing an assessment or its solutions to s3 """
-  def upload(f, assessment):
-    assessment_pdf_field.save('new', files.File(f))
-    assessment.save()
-  t = threading.Thread(target=upload, args=(f, assessment)).start()
+  assessment_pdf_field.save('new', files.File(f))
+  assessment.save()
 
 
 @rest_decorators.api_view(['GET'])
 @decorators.access_controlled
 def list_assessments(request, cur_course_user, assessment_id=None):
   """ Returns a list of `Assessment`s for the provided course. """
-  assessments = models.Assessment.objects.filter(course=cur_course_user.course)
+  assessments = models.Assessment.objects.filter(
+    course=cur_course_user.course).order_by('id')
   serializer = assessments_serializers.AssessmentSerializer(assessments, many=True)
   return rest_framework_response.Response(serializer.data)
 

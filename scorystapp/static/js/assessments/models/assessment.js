@@ -12,11 +12,6 @@ var AssessmentModel = Backbone.Model.extend({
       throw 'Can only read assessments.';
     }
 
-    // add CSRF token to requests
-    options.beforeSend = function(xhr) {
-      xhr.setRequestHeader('X-CSRFToken', CSRF_TOKEN);
-    };
-
     return Backbone.sync.apply(this, arguments);
   }
 });

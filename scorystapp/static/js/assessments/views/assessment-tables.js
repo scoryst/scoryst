@@ -15,27 +15,27 @@ var AssessmentTablesView = IdempotentView.extend({
 
   render: function() {
     // divide the assessments by type into different arrays
-    var homeworkAssignments = [];
+    var homeworks = [];
     var exams = [];
 
     this.assessments.forEach(function(assessment) {
       if (assessment.get('isExam')) {
         exams.push(assessment.toJSON());
       } else {
-        homeworkAssignments.push(assessment.toJSON());
+        homeworks.push(assessment.toJSON());
       }
     });
 
     var self = this;
 
     // fill in the homework table
-    var $homeworkTable = $('.homework-table tbody');
-    homeworkAssignments.forEach(function(homework) {
+    var $homeworkTable = this.$('.homework-table tbody');
+    homeworks.forEach(function(homework) {
       $homeworkTable.append(self.templates.homeworkTableTemplate(homework));
     });
 
     // fill in the exams table
-    var $examTable = $('.exam-table tbody');
+    var $examTable = this.$('.exam-table tbody');
     exams.forEach(function(exam) {
       $examTable.append(self.templates.examTableTemplate(exam));
     });
@@ -50,6 +50,6 @@ var AssessmentTablesView = IdempotentView.extend({
     $infoPopover.popover({ content: infoPopoverText });
 
     // create the popover to warn deletion from roster
-    $('.delete').popoverConfirm();
+    this.$('.delete').popoverConfirm();
   }
 });

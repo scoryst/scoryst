@@ -14,12 +14,8 @@ var MainView = IdempotentView.extend({
 
         // user is editing an existing assessment
         if (self.assessmentId) {
-          self.assessment = self.assessments.filter(function(assessment) {
-            return assessment.id === self.assessmentId;
-          });
+          self.assessment = self.assessments.findWhere({ id: self.assessmentId });
 
-          // remove the array, resulting in the assessment the user is editing
-          self.assessment = self.assessment[0];
           self.renderAssessmentsForm(self.assessment);
         }
 
@@ -27,10 +23,6 @@ var MainView = IdempotentView.extend({
         else {
           self.renderAssessmentsForm();
         }
-      },
-
-      error: function() {
-        // TODO: Log error message.
       }
     });
   },

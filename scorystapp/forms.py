@@ -125,10 +125,10 @@ class AssessmentUploadForm(forms.Form):
   )
 
   assessment_type = forms.ChoiceField(choices=ASSESSMENT_TYPES,
-    widget=forms.RadioSelect(renderer=HorizontalRadioRenderer), initial='homework')
-  name = forms.CharField(max_length=100)
+    widget=forms.RadioSelect(renderer=HorizontalRadioRenderer), initial=HOMEWORK_TYPE)
+  name = forms.CharField(max_length=40)
   grade_type = forms.ChoiceField(choices=GRADE_TYPES,
-    widget=forms.RadioSelect(renderer=HorizontalRadioRenderer), initial='down')
+    widget=forms.RadioSelect(renderer=HorizontalRadioRenderer), initial=GRADE_DOWN_TYPE)
 
   exam_file = forms.FileField(required=False)
   solutions_file = forms.FileField(required=False)
@@ -139,6 +139,7 @@ class AssessmentUploadForm(forms.Form):
 
   def clean(self):
     assessment_type = self.cleaned_data.get('assessment_type')
+    print assessment_type
     if assessment_type == self.HOMEWORK_TYPE and not self.cleaned_data.get('submission_deadline'):
       # homework submission time required; add error to respective field
       self._errors['submission_deadline'] = self.error_class(['Must provide valid submission deadline.'])

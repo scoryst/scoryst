@@ -13,12 +13,11 @@ var QuestionPartModel = Backbone.Model.extend({
 
   sync: function(method, model, options) {
     options = options || {};
-    if (method !== 'read' && method !== 'create') {
-      throw 'Can only read/create question parts.';
+    // only read is necessary because all of the creation/deletes are done
+    // purely from the backend
+    if (method !== 'read') {
+      throw 'Can only read question parts.';
     }
-
-    // add CSRF token to requests
-    options.beforeSend = Utils.beforeSendCSRFHandler;
 
     return Backbone.sync.apply(this, arguments);
   }
