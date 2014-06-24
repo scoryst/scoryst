@@ -1,4 +1,4 @@
-import pytz
+from django.utils import timezone
 from rest_framework import serializers
 from scorystapp import models
 
@@ -48,8 +48,8 @@ class AssessmentSerializer(serializers.ModelSerializer):
   def get_submission_deadline(self, assessment):
     """ Submission deadline is a string returning the time in PST. """
     if hasattr(assessment, 'homework'):
-      tz = pytz.timezone('US/Pacific')
-      return assessment.homework.submission_deadline.astimezone(tz).strftime('%m/%d/%Y %H:%M')
+      local_time = timezone.localtime(assessment.homework.submission_deadline)
+      return local_time.strftime('%m/%d/%Y %H:%M')
     return None
 
   def get_can_edit(self, assessment):

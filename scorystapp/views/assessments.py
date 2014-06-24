@@ -5,10 +5,10 @@ from django.contrib import messages
 from scorystapp import models, forms, decorators, utils, assessments_serializers
 from scorystapp.views import helpers
 from django.conf import settings
+from django.utils import timezone
 from datetime import datetime
 import json, shlex, subprocess, tempfile, threading
 import os
-import pytz
 import PyPDF2
 from rest_framework import serializers
 from rest_framework import decorators as rest_decorators, response as rest_framework_response
@@ -51,7 +51,6 @@ def _handle_assessment_form_submission(request, cur_course_user, assessment_id=N
   data = form.cleaned_data
   assessment = None
   course = cur_course_user.course
-  grade_down = (data['grade_type'] == 'down')
 
   # Additional validation
   # For homework, ensure that the submission deadline is after the current date/time
@@ -60,82 +59,89 @@ def _handle_assessment_form_submission(request, cur_course_user, assessment_id=N
   # Return an error status, which is not actually returned to the user
   if data['assessment_type'] == 'homework':
     submission_deadline = data['submission_deadline']
-    if submission_deadline < datetime.now(pytz.timezone('US/Pacific')):
+    if submission_deadline < timezone.localtime(timezone.now()):
       return http.HttpResponse(status=400)
   elif not assessment_id and not 'exam_file' in request.FILES:
     return http.HttpResponse(status=400)
 
-    # Delete old `QuestionPart`s before new ones are created
-    qp = models.QuestionPart.objects.filter(assessment=assessment)
+  # Delete old `QuestionPart`s before new ones are created
+  if assessment_id:
+    qp = models.QuestionPart.objects.filter(assessment__pk=assessment_id)
     qp.delete()
 
-  # Handle exam creation/editing
   if data['assessment_type'] == 'exam':
-    # _handle_exam_form_submission(request, )
-    exam = None
-    if assessment_id:  # assessment is exam and is being edited
-      exam = shortcuts.get_object_or_404(models.Exam, pk=assessment_id)
-      exam.name = data['name'].strip()
-      exam.grade_down = grade_down
-      exam.save()
-
-      # Delete old `ExamPage`s
-      exam_pages = models.ExamPage.objects.filter(exam=exam)
-      exam_pages.delete()
-    else:  # assessment is exam and is being created
-      # We set page_count = 0 here and update it after uploading images
-      exam = models.Exam(course=course, name=data['name'], grade_down=grade_down, page_count=0)
-      exam.save()  # need exam id for uploading, so we save immediately
-
-    if 'exam_file' in request.FILES:
-      page_count = _upload_exam_pdf_as_jpeg_to_s3(request.FILES['exam_file'], exam)
-      _upload_pdf_to_s3(request.FILES['exam_file'], exam, exam.exam_pdf, 'exam-pdf')
-      exam.page_count = page_count
-
-    exam.save()
-
-    if 'solutions_file' in request.FILES:
-      _upload_pdf_to_s3(request.FILES['solutions_file'], exam, exam.solutions_pdf,
-        'exam-solutions-pdf')
-
-    assessment = exam
-
-    # Create question parts for the exam
-    question_part_info = json.loads(data['question_part_points'])
-    for i, part_info in enumerate(question_part_info):
-      for j, (points, pages) in enumerate(part_info):
-        pages = pages.replace(' ', '')
-        new_question_part = models.QuestionPart(assessment=assessment,
-          question_number=i+1, part_number=j+1, max_points=points, pages=pages)
-        new_question_part.save()
-
-  # Handle homework creation/editing
+    assessment = _handle_exam_form_submission(request, assessment_id, data, course)
   else:
-    if assessment_id:
-      homework = shortcuts.get_object_or_404(models.Homework, pk=assessment_id)
-      homework.name = data['name']
-      homework.grade_down = grade_down
-      homework.submission_deadline = data['submission_deadline']
-    else:
-      homework = models.Homework(course=course, name=data['name'],
-        grade_down=grade_down, submission_deadline=data['submission_deadline'])
-    homework.save()
-
-    if 'solutions_file' in request.FILES:
-      _upload_pdf_to_s3(request.FILES['solutions_file'], homework, homework.solutions_pdf,
-        'homework-solutions-pdf')
-
-    assessment = homework
-
-    # Create question parts for the assessment
-    question_part_points = json.loads(data['question_part_points'])
-    for i, part_points in enumerate(question_part_points):
-      for j, points in enumerate(part_points):
-        new_question_part = models.QuestionPart(assessment=assessment,
-          question_number=i+1, part_number=j+1, max_points=points)
-        new_question_part.save()
+    assessment = _handle_homework_form_submission(request, assessment_id, data, course)
 
   return shortcuts.redirect('/course/%d/assessments/create/%d' % (cur_course_user.course.pk, assessment.pk))
+
+
+def _handle_exam_form_submission(request, assessment_id, data, course):
+  exam = None
+  grade_down = (data['grade_type'] == 'down')
+  if assessment_id:  # exam is being edited
+    exam = shortcuts.get_object_or_404(models.Exam, pk=assessment_id)
+    exam.name = data['name'].strip()
+    exam.grade_down = grade_down
+    exam.save()
+
+    # Delete old `ExamPage`s
+    exam_pages = models.ExamPage.objects.filter(exam=exam)
+    exam_pages.delete()
+  else:  # assessment is exam and is being created
+    # We set page_count = 0 here and update it after uploading images
+    exam = models.Exam(course=course, name=data['name'], grade_down=grade_down, page_count=0)
+    exam.save()  # need exam id for uploading, so we save immediately
+
+  if 'exam_file' in request.FILES:
+    page_count = _upload_exam_pdf_as_jpeg_to_s3(request.FILES['exam_file'], exam)
+    _upload_pdf_to_s3(request.FILES['exam_file'], exam, exam.exam_pdf, 'exam-pdf')
+    exam.page_count = page_count
+
+  exam.save()
+
+  if 'solutions_file' in request.FILES:
+    _upload_pdf_to_s3(request.FILES['solutions_file'], exam, exam.solutions_pdf,
+      'exam-solutions-pdf')
+
+  # Create question parts for the exam
+  question_part_info = json.loads(data['question_part_points'])
+  for i, part_info in enumerate(question_part_info):
+    for j, (points, pages) in enumerate(part_info):
+      pages = pages.replace(' ', '')
+      new_question_part = models.QuestionPart(assessment=exam,
+        question_number=i+1, part_number=j+1, max_points=points, pages=pages)
+      new_question_part.save()
+
+  return exam
+
+
+def _handle_homework_form_submission(request, assessment_id, data, course):
+  grade_down = (data['grade_type'] == 'down')
+  if assessment_id:
+    homework = shortcuts.get_object_or_404(models.Homework, pk=assessment_id)
+    homework.name = data['name']
+    homework.grade_down = grade_down
+    homework.submission_deadline = data['submission_deadline']
+  else:
+    homework = models.Homework(course=course, name=data['name'],
+      grade_down=grade_down, submission_deadline=data['submission_deadline'])
+  homework.save()
+
+  if 'solutions_file' in request.FILES:
+    _upload_pdf_to_s3(request.FILES['solutions_file'], homework, homework.solutions_pdf,
+      'homework-solutions-pdf')
+
+  # Create question parts for the assessment
+  question_part_points = json.loads(data['question_part_points'])
+  for i, part_points in enumerate(question_part_points):
+    for j, points in enumerate(part_points):
+      new_question_part = models.QuestionPart(assessment=homework,
+        question_number=i+1, part_number=j+1, max_points=points)
+      new_question_part.save()
+
+  return homework
 
 
 @decorators.access_controlled

@@ -73,7 +73,7 @@
           </div>
 
           <div class="form-group">
-            {% render_field form.grade_type %}
+            {% render_field form.grade_type class="assessment-type" %}
             <a class="info-popover" data-trigger="hover">
               <i class="fa fa-question-circle"></i>
             </a>

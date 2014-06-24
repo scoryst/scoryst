@@ -6,7 +6,7 @@ var AssessmentFormView = IdempotentView.extend({
   UTC_PST_OFFSET: 7 * 60000,
 
   events: {
-    'change input[type="radio"]:checked': 'showHomeworkOrExam',
+    'change input[name="assessment_type"]:checked': 'showHomeworkOrExam',
     'keydown .num-questions': 'updateNumQuestions',
     'keydown .num-parts': 'updateNumParts',
     'keydown .points': 'validatePoints',
@@ -369,9 +369,9 @@ var AssessmentFormView = IdempotentView.extend({
       this.$('#id_solutions_file').show();
     }
 
-    // populate the dynamic form fields (question part info)
+    // populate the dynamic form fields (question part info):
     // first, populate the `questionPartInfo` array that contains information
-    // about the points (and pages, if `isExam`), grouped by parts
+    // about the points (and pages, if `isExam`), grouped by the parts
     // ex: [[5, 10], [5]] is an assessment that has two parts for question 1,
     // worth 5 points and 10 points, and one part for question 2 worth 5 points
     var questionPartInfo = [];
