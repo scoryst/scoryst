@@ -1015,6 +1015,12 @@ footer .amp {
   padding: 8px 12px 9px 12px
 }
 
+.assessments .submission-deadline-instructions {
+  margin-top: -12px;
+  font-size: 12px;
+  margin-bottom: 15px;
+}
+
 /* Progress tracker. */
 .track-progress {
   background-color: #ecf0f1;

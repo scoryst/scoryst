@@ -90,11 +90,12 @@
             <label for="id_submission_deadline">Submission Deadline</label>
             <div class="form-group">
               <div class="input-group date submission-deadline">
-                {% render_field form.submission_deadline class="form-control" placeholder="12/31/2014 11:59 PM" %}
+                {% render_field form.submission_deadline class="form-control" placeholder=current_time %}
                 <span class="input-group-addon"><span class="fa fa-calendar"></span>
                 </span>
               </div>
             </div>
+            <p class="submission-deadline-instructions">Enter a date and time, or select one by clicking the calendar icon.</p>
             <span class="error initially-hide submission-error">Enter a valid future submission deadline. You may select it using the calendar.</span>
           </div>
 

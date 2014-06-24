@@ -34,7 +34,8 @@ def _render_assessments_page(request, cur_course_user):
     'course': cur_course_user.course,
     'form': forms.AssessmentUploadForm(),
     'homework_assignments_exist': models.Homework.objects.filter(course=cur_course_user.course).count() > 0,
-    'exams_exist': models.Exam.objects.filter(course=cur_course_user.course).count() > 0
+    'exams_exist': models.Exam.objects.filter(course=cur_course_user.course).count() > 0,
+    'current_time': timezone.localtime(timezone.now()).strftime('%m/%d/%Y %I:%M %p')
   })
 
 
