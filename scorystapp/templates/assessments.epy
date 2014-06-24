@@ -225,4 +225,7 @@
 <script src="/static/js/assessments/views/assessment-form.js"></script>
 <script src="/static/js/assessments/views/assessment-tables.js"></script>
 <script src="/static/js/assessments/views/main.js"></script>
+
+<!-- Needed for the datetime picker -->
+<script src="/static/js/lib/collapse.min.js"></script>
 {% endblock %}

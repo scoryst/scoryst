@@ -369,11 +369,11 @@ var AssessmentFormView = IdempotentView.extend({
       this.$('#id_solutions_file').show();
     }
 
-    // populate the dynamic form fields (question part info):
-    // first, populate the `questionPartInfo` array that contains information
-    // about the points (and pages, if `isExam`), grouped by the parts
-    // ex: [[5, 10], [5]] is an assessment that has two parts for question 1,
-    // worth 5 points and 10 points, and one part for question 2 worth 5 points
+    // populate the dynamic form fields (question part info). first, populate
+    // the `questionPartInfo` array that contains information about the points
+    // (and pages, if `isExam`), grouped by the parts. ex: [[5, 10], [5]] is an
+    // assessment that has two parts for question 1, worth 5 points and 10
+    // points, and one part for question 2 worth 5 points
     var questionPartInfo = [];
     var partsInfo = [];
     var questionNum = 1;
