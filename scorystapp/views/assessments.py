@@ -53,16 +53,17 @@ def _handle_assessment_form_submission(request, cur_course_user, assessment_id=N
   course = cur_course_user.course
   grade_down = (data['grade_type'] == 'down')
 
-  if assessment_id:
-    assessment = shortcuts.get_object_or_404(models.Assessment, pk=assessment_id)
-
-    if hasattr(assessment, 'homework'):
-      # If the submission deadline entered is in the past, generate an error
-      submission_deadline = data['submission_deadline']
-      print submission_deadline
-      print datetime.now(pytz.timezone('US/Pacific'))
-      if submission_deadline < datetime.now(pytz.timezone('US/Pacific')):
-        return http.HttpResponse(status=500)
+  # Additional validation
+  # For homework, ensure that the submission deadline is after the current date/time
+  # For an exam that is being created, ensure that an exam PDF is uploaded. This
+  # was removed from the Django form because it's not required for editing
+  # Return an error status, which is not actually returned to the user
+  if data['assessment_type'] == 'homework':
+    submission_deadline = data['submission_deadline']
+    if submission_deadline < datetime.now(pytz.timezone('US/Pacific')):
+      return http.HttpResponse(status=400)
+  elif not assessment_id and not 'exam_file' in request.FILES:
+    return http.HttpResponse(status=400)
 
     # Delete old `QuestionPart`s before new ones are created
     qp = models.QuestionPart.objects.filter(assessment=assessment)
@@ -85,7 +86,7 @@ def _handle_assessment_form_submission(request, cur_course_user, assessment_id=N
       exam = models.Exam(course=course, name=data['name'], grade_down=grade_down, page_count=0)
       exam.save()  # need exam id for uploading, so we save immediately
 
-    if (assessment_id and 'exam_file' in request.FILES) or not assessment_id:
+    if 'exam_file' in request.FILES:
       page_count = _upload_exam_pdf_as_jpeg_to_s3(request.FILES['exam_file'], exam)
       _upload_pdf_to_s3(request.FILES['exam_file'], exam, exam.exam_pdf)
       exam.page_count = page_count

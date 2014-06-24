@@ -409,6 +409,7 @@ var AssessmentFormView = IdempotentView.extend({
 
   showFileUpload: function(event) {
     // hides the message and shows the file upload field
+    event.preventDefault();
     $viewUploadFieldLink = $(event.currentTarget);
     $viewUploadFieldLink.parent().hide();
     $viewUploadFieldLink.parent().siblings('input').show();
