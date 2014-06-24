@@ -344,7 +344,6 @@ var AssessmentFormView = IdempotentView.extend({
     // be changed after creation
     this.$('.assessment-type-radio').hide();
 
-    // populate name field
     this.$nameField.val(this.assessment.get('name'));
 
     // select correct grade up/down option; change to grade down (up is default)

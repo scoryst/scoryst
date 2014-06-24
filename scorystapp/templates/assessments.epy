@@ -22,9 +22,7 @@
             </tbody>
           </table>
         {% else %}
-          <div class="no-homework">
-            There are no homework assignments.
-          </div>
+          <p class="no-homework">There are no homework assignments.</p>
         {% endif %}
         <h2>Exams</h2>
         {% if exams_exist %}
@@ -43,7 +41,7 @@
             </tbody>
           </table>
         {% else %}
-          <div class="no-exam">There are no exams.</div>
+          <p class="no-exam">There are no exams.</p>
         {% endif %}
       </div>
 
@@ -225,7 +223,4 @@
 <script src="/static/js/assessments/views/assessment-form.js"></script>
 <script src="/static/js/assessments/views/assessment-tables.js"></script>
 <script src="/static/js/assessments/views/main.js"></script>
-
-<!-- Needed for the datetime picker -->
-<script src="/static/js/lib/collapse.min.js"></script>
 {% endblock %}
