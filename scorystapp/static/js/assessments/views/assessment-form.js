@@ -27,14 +27,21 @@ var AssessmentFormView = IdempotentView.extend({
     this.assessment = options.assessment;
     this.isExam = false;
 
-    this.$('#id_submission_deadline_picker').datetimepicker({'format': 'MM/DD/YYYY HH:mm'});
-
     this.$homeworkFields = this.$('.homework-fields');
     this.$examFields = this.$('.exam-fields');
     this.$nameField = this.$('#id_name');
     this.$numQuestionsField = this.$('.num-questions');
     this.$numQuestionsError = this.$('.num-questions-error');
     this.$questionsForm = this.$('.questions-form');
+
+    this.$('.submission-deadline').datetimepicker({
+        icons: {
+            time: "fa fa-clock-o",
+            date: "fa fa-calendar",
+            up: "fa fa-arrow-up",
+            down: "fa fa-arrow-down"
+        }
+    });
 
     // if editing an assessment, populate the fields with the saved values
     if (this.assessment) {
@@ -48,8 +55,8 @@ var AssessmentFormView = IdempotentView.extend({
     } else {
       // the exam PDF and solutions PDF inputs are hidden initially because they
       // are not shown when editing an assessment and a PDF has been uploaded;
-      // if not editing, show all inputs
-      this.$('input').show();
+      // if not editing, show all file inputs
+      this.$('input[type="file"]').show();
     }
 
     this.addGradeTypePopover();

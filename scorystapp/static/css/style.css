@@ -1010,6 +1010,11 @@ footer .amp {
   margin-bottom: 20px;
 }
 
+/* fixes the datetimepicker icon to match height of the input box */
+.assessments .input-group-addon {
+  padding: 8px 12px 9px 12px
+}
+
 /* Progress tracker. */
 .track-progress {
   background-color: #ecf0f1;

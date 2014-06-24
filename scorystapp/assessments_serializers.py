@@ -49,7 +49,7 @@ class AssessmentSerializer(serializers.ModelSerializer):
     """ Submission deadline is a string returning the time in PST. """
     if hasattr(assessment, 'homework'):
       local_time = timezone.localtime(assessment.homework.submission_deadline)
-      return local_time.strftime('%m/%d/%Y %H:%M')
+      return local_time.strftime('%m/%d/%Y %I:%M %p')
     return None
 
   def get_is_editable(self, assessment):

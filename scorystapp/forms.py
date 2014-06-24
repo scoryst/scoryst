@@ -1,5 +1,4 @@
 from scorystapp import models
-from bootstrap3_datetime import widgets as datetime_widgets
 from django import forms
 from django.contrib.auth import authenticate, forms as django_forms
 from django.contrib.admin import widgets
@@ -133,18 +132,18 @@ class AssessmentUploadForm(forms.Form):
   exam_file = forms.FileField(required=False)
   solutions_file = forms.FileField(required=False)
 
-  submission_deadline = forms.DateTimeField(required=False, widget=datetime_widgets.DateTimePicker(options=False))
+  submission_deadline = forms.DateTimeField(required=False, input_formats=['%m/%d/%Y %I:%M %p'])
 
   question_part_points = forms.CharField()
 
   def clean(self):
     assessment_type = self.cleaned_data.get('assessment_type')
-    print assessment_type
     if assessment_type == self.HOMEWORK_TYPE and not self.cleaned_data.get('submission_deadline'):
       # homework submission time required; add error to respective field
       self._errors['submission_deadline'] = self.error_class(['Must provide valid submission deadline.'])
       # This field is not valid, so remove from the cleaned_data
-      del self.cleaned_data['submission_deadline']
+      if 'submission_deadline' in self.cleaned_data:
+        del self.cleaned_data['submission_deadline']
 
     return self.cleaned_data
 

@@ -87,11 +87,15 @@
           </div>
 
           <div class="homework-fields">
+            <label for="id_submission_deadline">Submission Deadline</label>
             <div class="form-group">
-              <label for="id_submission_deadline">Submission Deadline</label>
-              {% render_field form.submission_deadline class="form-control" placeholder="12/31/2014 23:59" %}
-              <span class="error initially-hide submission-error">Enter a valid future submission deadline. You may select it using the calendar.</span>
+              <div class="input-group date submission-deadline">
+                {% render_field form.submission_deadline class="form-control" placeholder="12/31/2014 11:59 PM" %}
+                <span class="input-group-addon"><span class="fa fa-calendar"></span>
+                </span>
+              </div>
             </div>
+            <span class="error initially-hide submission-error">Enter a valid future submission deadline. You may select it using the calendar.</span>
           </div>
 
           <div class="form-group">
@@ -208,6 +212,10 @@
   </script>
 {% endblock %}
 
+{% block css %}
+<link rel="stylesheet" href="/static/css/lib/bootstrap-datetimepicker.min.css" />
+{% endblock %}
+
 {% block js %}
 {% include 'backbone.epy' %}
 <script src="/static/js/lib/tooltip.js"></script>
@@ -217,6 +225,12 @@
 <script src="/static/js/backbone-commons/idempotent.js"></script>
 <script src="/static/js/backbone-commons/mediator.js"></script>
 <script src="/static/js/backbone-commons/utils.js"></script>
+
+<!-- Added for the datetime picker -->
+<script src="/static/js/lib/collapse.js"></script>
+<script src="/static/js/lib/transition.js"></script>
+<script src="/static/js/lib/moment.min.js"></script>
+<script src="/static/js/lib/bootstrap-datetimepicker.min.js"></script>
 
 <script src="/static/js/assessments/models/assessment.js"></script>
 <script src="/static/js/assessments/models/question-part.js"></script>
