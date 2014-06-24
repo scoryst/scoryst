@@ -71,6 +71,7 @@ def _handle_assessment_form_submission(request, cur_course_user, assessment_id=N
 
   # Handle exam creation/editing
   if data['assessment_type'] == 'exam':
+    # _handle_exam_form_submission(request, )
     exam = None
     if assessment_id:  # assessment is exam and is being edited
       exam = shortcuts.get_object_or_404(models.Exam, pk=assessment_id)
@@ -88,13 +89,14 @@ def _handle_assessment_form_submission(request, cur_course_user, assessment_id=N
 
     if 'exam_file' in request.FILES:
       page_count = _upload_exam_pdf_as_jpeg_to_s3(request.FILES['exam_file'], exam)
-      _upload_pdf_to_s3(request.FILES['exam_file'], exam, exam.exam_pdf)
+      _upload_pdf_to_s3(request.FILES['exam_file'], exam, exam.exam_pdf, 'exam-pdf')
       exam.page_count = page_count
 
     exam.save()
 
     if 'solutions_file' in request.FILES:
-      _upload_pdf_to_s3(request.FILES['solutions_file'], exam, exam.solutions_pdf)
+      _upload_pdf_to_s3(request.FILES['solutions_file'], exam, exam.solutions_pdf,
+        'exam-solutions-pdf')
 
     assessment = exam
 
@@ -120,7 +122,8 @@ def _handle_assessment_form_submission(request, cur_course_user, assessment_id=N
     homework.save()
 
     if 'solutions_file' in request.FILES:
-      _upload_pdf_to_s3(request.FILES['solutions_file'], homework, homework.solutions_pdf)
+      _upload_pdf_to_s3(request.FILES['solutions_file'], homework, homework.solutions_pdf,
+        'homework-solutions-pdf')
 
     assessment = homework
 
@@ -190,7 +193,7 @@ def upload(temp_pdf_name, num_pages, exam):
 
     # Save it
     exam_page = models.ExamPage(exam=exam, page_number=page_number+1)
-    exam_page.page_jpeg.save('new', files.File(temp_jpeg))
+    exam_page.page_jpeg.save('exam-jpeg', files.File(temp_jpeg))
     exam_page.page_jpeg_large = exam_page.page_jpeg
     exam_page.save()
 
@@ -218,9 +221,9 @@ def _upload_exam_pdf_as_jpeg_to_s3(f, exam):
   return pdf.getNumPages()
 
 
-def _upload_pdf_to_s3(f, assessment, assessment_pdf_field):
+def _upload_pdf_to_s3(f, assessment, assessment_pdf_field, aws_folder_name):
   """ Uploads a pdf file representing an assessment or its solutions to s3 """
-  assessment_pdf_field.save('new', files.File(f))
+  assessment_pdf_field.save(aws_folder_name, files.File(f))
   assessment.save()
 
 
