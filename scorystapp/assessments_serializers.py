@@ -59,7 +59,7 @@ class AssessmentSerializer(serializers.ModelSerializer):
   class Meta:
     model = models.Assessment
     fields = ('id', 'name', 'course', 'is_exam', 'page_count', 'solutions_pdf',
-              'submission_deadline', 'exam_pdf', 'is_editable')
+              'submission_deadline', 'exam_pdf', 'is_editable', 'grade_down')
     read_only_fields = ('id', 'name', 'course', 'grade_down')
 
 

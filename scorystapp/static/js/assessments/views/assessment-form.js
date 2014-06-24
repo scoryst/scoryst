@@ -355,6 +355,7 @@ var AssessmentFormView = IdempotentView.extend({
 
     // select correct grade up/down option; change to grade down (up is default)
     if (!this.assessment.get('gradeDown')) {
+      console.log(this.assessment);
       this.$('#id_grade_type_1').prop('checked', true);
     }
 

@@ -80,6 +80,7 @@ def _handle_assessment_form_submission(request, cur_course_user, assessment_id=N
 def _handle_exam_form_submission(request, assessment_id, data, course):
   exam = None
   grade_down = (data['grade_type'] == 'down')
+
   if assessment_id:  # exam is being edited
     exam = shortcuts.get_object_or_404(models.Exam, pk=assessment_id)
     exam.name = data['name'].strip()
@@ -119,6 +120,8 @@ def _handle_exam_form_submission(request, assessment_id, data, course):
 
 def _handle_homework_form_submission(request, assessment_id, data, course):
   grade_down = (data['grade_type'] == 'down')
+  homework = None
+
   if assessment_id:
     homework = shortcuts.get_object_or_404(models.Homework, pk=assessment_id)
     homework.name = data['name']
