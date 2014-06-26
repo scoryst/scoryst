@@ -165,6 +165,24 @@
 
       {% block content %}{% endblock %}
 
+      {% if name %}
+        <div class="feedback">
+          <div class="feedback-title">
+            Feedback <i class="fa fa-expand"></i>
+          </div>
+          <div class="feedback-rest">
+            <div class="feedback-thank">Hey {{name}},
+              thanks for your feedback. It really helps us improve our product.
+              <div class="feedback-more" tabindex="1">I have more feedback</div>
+            </div>
+            <div class="feedback-give">
+              <textarea placeholder="Type your feedback here."></textarea>
+            </div>
+            <div class="feedback-submit" role="button">Submit</div>
+          </div>
+        </div>
+      {% endif %}
+
       <footer>
         <div class="exact-container clearfix">
           <p>Copyright &copy; {{year}} Scoryst</p>
@@ -183,6 +201,7 @@
     {% compress js %}
       <script src="/static/js/lib/jquery.cookie.js"></script>
       <script src="/static/js/script-pre.js"></script>
+      <script src="/static/js/feedback.js"></script>
 
       {% block js %}{% endblock %}
 

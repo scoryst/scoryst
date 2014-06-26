@@ -23,7 +23,7 @@
         ask your instructor for an enrollment link.
       </span>
     </div>
-
   </div>
 </div>
+
 {% endblock %}

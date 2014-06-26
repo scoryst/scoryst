@@ -23,6 +23,7 @@ urlpatterns = patterns('',
   url(r'^new-course/$', 'scorystapp.views.course.new_course'),
   url(r'^about/$', 'scorystapp.views.general.about'),
   url(r'^welcome/$', 'scorystapp.views.general.welcome'),
+  url(r'^feedback/$', 'scorystapp.views.feedback.feedback'),
 
   # sign-up
   url(r'^sign-up/$', 'scorystapp.views.auth.sign_up'),
