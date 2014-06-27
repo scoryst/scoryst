@@ -119,7 +119,7 @@ var MapSubmissionView = Backbone.View.extend({
 
     // There are three states:
     // 1) responsePages === null, meaning the student hasn't selected anything
-    // 2) responsePages === [], meaning the student has no answer
+    // 2) responsePages is an empty array, meaning the student has no answer
     // 3) responsePages is an array of integers representing the selected pages
 
     this.responsePages = responsePages;
