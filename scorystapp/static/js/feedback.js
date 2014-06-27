@@ -36,9 +36,7 @@ $(function() {
   });
 
   // The user wants to give more feedback
-  $more.click(function() {
-    toggleGiveFeedbackThank();
-  });
+  $more.click(toggleGiveFeedbackThank);
 
   // Toggle between showing the give feedback view and thanking the user
   function toggleGiveFeedbackThank() {
@@ -47,6 +45,6 @@ $(function() {
   }
 
   function isBlank(str) {
-    return (!str || /^\s*$/.test(str));
+    return $.trim(str) === '';
   }
 });

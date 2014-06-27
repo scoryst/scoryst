@@ -1548,9 +1548,9 @@ body.landing-page {
   width: 220px;
   background-color: #222;
   position: absolute;
-  right: 200px;
-  z-index: 99999;
   bottom: 0;
+  right: 200px;
+  z-index: 100;
   border: 3px solid #222;
 }
 
@@ -1592,7 +1592,7 @@ body.landing-page {
   float: right;
   margin: 0 7px 5px 0;
   background-color: #222;
-  border: 1px solid;
+  border: 1px solid #222;
 }
 
 .feedback .feedback-more {

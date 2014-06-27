@@ -171,15 +171,13 @@
             Feedback <i class="fa fa-expand"></i>
           </div>
           <div class="feedback-rest">
-            <div class="feedback-thank">Hey {{name}},
-              thanks for your feedback. It really helps us improve our product.
-              <div class="feedback-more" tabindex="1">I have more feedback</div>
+            <div class="feedback-thank">
+              Hey {{name}}, thanks for your feedback. It really helps us improve our product.
+              <div class="feedback-more">I have more feedback</div>
             </div>
 
             <div class="feedback-give">
-              <div class="feedback-textarea">
                 <textarea placeholder="Type your feedback here."></textarea>
-              </div>
               <div class="feedback-submit-div">
                 <a class="btn btn-primary feedback-submit">Submit</a>
               </div>

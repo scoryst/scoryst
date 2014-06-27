@@ -16,11 +16,15 @@ def feedback(request):
     subject = 'You have feedback!'
     from_email = 'Scoryst <hello@%s>' % domain
     to_email = 'Scoryst <hello@%s>' % domain
-    email = '%s has feedback for you:\n%s' % (
+    reply_email = request.user.email
+    body = '%s has feedback for you:\n%s' % (
       request.user.get_full_name(), request.POST['feedback']
     )
 
-    mail.send_mail(subject, email, from_email, [to_email])
+    headers = { 'Reply-To': reply_email }
+    msg = mail.EmailMessage(subject, body, from_email, [to_email], headers=headers)
+    msg.content_subtype = "html"
+    msg.send()
     return http.HttpResponse(status=200)
 
   return http.Http404
