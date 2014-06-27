@@ -175,10 +175,15 @@
               thanks for your feedback. It really helps us improve our product.
               <div class="feedback-more" tabindex="1">I have more feedback</div>
             </div>
+
             <div class="feedback-give">
-              <textarea placeholder="Type your feedback here."></textarea>
+              <div class="feedback-textarea">
+                <textarea placeholder="Type your feedback here."></textarea>
+              </div>
+              <div class="feedback-submit-div">
+                <a class="btn btn-primary feedback-submit">Submit</a>
+              </div>
             </div>
-            <div class="feedback-submit" role="button">Submit</div>
           </div>
         </div>
       {% endif %}

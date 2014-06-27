@@ -215,8 +215,9 @@ BROKER_URL = 'redis://localhost:6379/0'
 CELERY_IMPORTS=('scorystapp.views.exams', 'scorystapp.views.upload',
   'workers.dispatcher', 'scorystapp.views.split', 'scorystapp.views.submit')
 
-EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
-CELERY_EMAIL_BACKEND = 'djrill.mail.backends.djrill.DjrillBackend'
+# Use console to flush emails locally, on production, we use a proper backend
+# in local_settings.py
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Imported from local_settings
 MANDRILL_API_KEY = ''

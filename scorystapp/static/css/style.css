@@ -1544,14 +1544,14 @@ body.landing-page {
   top: 40px;
 }
 
-
 .feedback {
   width: 220px;
-  background-color: #fff;
+  background-color: #222;
   position: absolute;
   right: 200px;
   z-index: 99999;
   bottom: 0;
+  border: 3px solid #222;
 }
 
 .feedback .fa-expand {
@@ -1565,7 +1565,6 @@ body.landing-page {
 .feedback .feedback-title {
   margin: 0;
   cursor: pointer;
-  background-color: #2980b9;
   height: 35px;
   padding-left: 17px;
   color: #fff;
@@ -1574,8 +1573,7 @@ body.landing-page {
 }
 
 .feedback textarea {
-  padding-left: 10px;
-  padding-top: 10px;
+  padding: 10px;
   resize: none;
   outline: none;
   width: 100%;
@@ -1585,25 +1583,22 @@ body.landing-page {
   color: #555;
 }
 
+.feedback .feedback-submit-div {
+  height: 40px;
+  background-color: #fcfcfc;
+}
+
 .feedback .feedback-submit {
-  font-size: 18px;
-  line-height: 35px;
-  text-align: center;
-  height: 35px;
-  cursor: pointer;
-  background-color: #2980b9;
-  color: #fff;
+  float: right;
+  margin: 0 7px 5px 0;
+  background-color: #222;
+  border: 1px solid;
 }
 
-.feedback .feedback-thank {
-  position: relative;
-  padding-top: 5px;
-}
-
-.feedback .feedback-thank .feedback-more {
+.feedback .feedback-more {
   position: absolute;
-  bottom: 5px;
-  right: 5px;
+  bottom: 10px;
+  right: 10px;
   color: #4484a8;
   cursor: pointer;
 }
@@ -1613,14 +1608,12 @@ body.landing-page {
 }
 
 .feedback .feedback-thank {
-  display: none;
-}
-
-.feedback .feedback-thank {
-  background-color: #fff;
+  background-color: #fcfcfc;
   color: #555;
-  height: 135px;
+  display: none;
+  height: 175px;
   line-height: normal;
+  position: relative;
   padding-top: 7px;
   padding-left: 10px;
   margin: 0;
