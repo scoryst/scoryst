@@ -192,13 +192,13 @@ var MapSubmissionView = Backbone.View.extend({
 
   setNoAnswer: function(event) {
     var $checkbox = $(event.currentTarget);
+    this.$('.image-container').removeClass('selected');
+
     if ($checkbox.is(':checked')) {
       // empty string signifies no answer
-      this.$('.image-container').removeClass('selected');
       this.response.save({ pages: '' });
     } else {
       // null signifies no pages selected
-      this.$('.image-container').removeClass('selected');
       this.response.save({ pages: null });
     }
 
