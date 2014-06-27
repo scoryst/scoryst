@@ -65,6 +65,15 @@
     glass in the bottom left. Pages already selected are highlighted in red.
   </p>
 
+  <label>
+    <% if (noAnswer) { %>
+      <input type="checkbox" class="no-answer" checked="checked" />
+    <% } else { %>
+      <input type="checkbox" class="no-answer" />
+    <% } %>
+    I did not answer this question.
+  </label>
+
   <% submissionPages.forEach(function(page) { %>
     <% if (page.isSelected) { %>
       <div class="image-container selected">

@@ -413,7 +413,8 @@ class Response(models.Model):
   submission = models.ForeignKey(Submission, db_index=True)
 
   question_part = models.ForeignKey(QuestionPart, db_index=True)
-  pages = models.CommaSeparatedIntegerField(max_length=200, blank=True)
+  pages = models.CommaSeparatedIntegerField(max_length=200, null=True,
+    blank=True)
 
   grader_comments = models.TextField(null=True, blank=True, max_length=1000)
   grader = models.ForeignKey(CourseUser, null=True, blank=True, db_index=True)

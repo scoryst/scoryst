@@ -84,7 +84,7 @@ def _create_empty_responses(submission):
   question_parts = submission.assessment.questionpart_set.all()
   for qp in question_parts:
     response = models.Response(submission=submission, question_part=qp,
-      pages="", grader_comments=None, grader=None, custom_points=None)
+      pages=None, grader_comments=None, grader=None, custom_points=None)
     response.save()
 
 

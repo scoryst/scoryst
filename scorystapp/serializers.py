@@ -134,10 +134,8 @@ class SubmitResponseSerializer(serializers.ModelSerializer):
 
   def validate_pages(self, attrs, source):
     """ Validates that the pages are in the correct range. """
-    pages = attrs.get(source, '')
-    if pages == '':
-      # force pages to be empty string (it may have been None)
-      attrs[source] = ''
+    pages = attrs.get(source)
+    if pages == None or pages == '':
       return attrs
 
     used_pages = {}

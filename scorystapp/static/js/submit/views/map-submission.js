@@ -5,7 +5,8 @@ var MapSubmissionView = Backbone.View.extend({
   events: {
     'click .question-part-nav li': 'updateQuestionPart',
     'click .select-pages .page': 'selectPage',
-    'click .zoom': 'showZoomedImage'
+    'click .zoom': 'showZoomedImage',
+    'change [type="checkbox"]': 'setNoAnswer',
   },
 
   initialize: function(options) {
@@ -60,15 +61,18 @@ var MapSubmissionView = Backbone.View.extend({
     var templateData = {
       questionNumber: this.questionNumber,
       partNumber: this.partNumber,
-      submissionPages: this.submissionPages.toJSON()
+      submissionPages: this.submissionPages.toJSON(),
+      noAnswer: _.isArray(this.responsePages) && this.responsePages.length === 0
     };
 
-    var self = this;
-    templateData.submissionPages.forEach(function(page) {
-      if (self.responsePages.indexOf(page.pageNumber) !== -1) {
-        page.isSelected = true;
-      }
-    });
+    if (this.responsePages !== null) {
+      var self = this;
+      templateData.submissionPages.forEach(function(page) {
+        if (self.responsePages.indexOf(page.pageNumber) !== -1) {
+          page.isSelected = true;
+        }
+      });
+    }
 
     this.$selectPages.html(this.template(templateData));
     this.showSuccessIfDone();
@@ -76,7 +80,7 @@ var MapSubmissionView = Backbone.View.extend({
   },
 
   showSuccessIfDone: function() {
-    var unmappedResponses = this.responses.where({ pages: '' });
+    var unmappedResponses = this.responses.where({ pages: null });
     if (unmappedResponses.length === 0) {
       this.$success.show();
       this.$failure.hide();
@@ -103,15 +107,20 @@ var MapSubmissionView = Backbone.View.extend({
     // get response that corresponds to the new question part and re-render
     this.response = this.findResponseForQuestionPart(this.questionNumber, this.partNumber);
 
-    // keep track of the pages that contain the response
+    // keep track of pages that contain the response
     var responsePages = this.response.get('pages');
     if (responsePages === "") {
       responsePages = [];
-    } else {
+    } else if (responsePages !== null) {
       responsePages = responsePages.split(',').map(function(page) {
         return parseInt(page, 10);
       });
     }
+
+    // There are three states:
+    // 1) responsePages === null, meaning the student hasn't selected anything
+    // 2) responsePages === [], meaning the student has no answer
+    // 3) responsePages is an array of integers representing the selected pages
 
     this.responsePages = responsePages;
     this.render();
@@ -160,12 +169,39 @@ var MapSubmissionView = Backbone.View.extend({
       this.responsePages.splice(index, 1);
     } else {
       // select page
+      if (this.responsePages === null) {
+        this.responsePages = [];
+      }
+
       this.responsePages.push(pageNumber);
     }
 
     $container.toggleClass('selected');
     this.responsePages = _.sortBy(this.responsePages);
-    this.response.save({ pages: this.responsePages.join(',') });
+
+    if (this.responsePages.length === 0) {
+      // null signifies no pages selected
+      this.response.save({ pages: null });
+    } else {
+      this.$('.no-answer').prop('checked', false);
+      this.response.save({ pages: this.responsePages.join(',') });
+    }
+
+    this.showSuccessIfDone();
+  },
+
+  setNoAnswer: function(event) {
+    var $checkbox = $(event.currentTarget);
+    if ($checkbox.is(':checked')) {
+      // empty string signifies no answer
+      this.$('.image-container').removeClass('selected');
+      this.response.save({ pages: '' });
+    } else {
+      // null signifies no pages selected
+      this.$('.image-container').removeClass('selected');
+      this.response.save({ pages: null });
+    }
+
     this.showSuccessIfDone();
   }
 });
