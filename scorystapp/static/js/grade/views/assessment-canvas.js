@@ -1,14 +1,15 @@
 var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
   CIRCLE_RADIUS: 10,  // specified in style.css as radius of annotation
 
+  template: _.template($('.annotation-info-template').html()),
+
   initialize: function(options) {
     this.constructor.__super__.initialize.apply(this, arguments);
 
     this.$assessmentImage = this.$assessmentCanvas.find('.assessment-image');
     this.$previousPage = this.$el.find('.previous-page');
     this.$nextPage = this.$el.find('.next-page');
-    this.$previousAnnotationInfoButton = this.$el.find('button.previous');
-    this.$nextAnnotationInfoButton = this.$el.find('button.next');
+    this.$annotationInfoModal = this.$el.find('.annotation-info-modal');
     this.response = options.response;
 
     var self = this;
@@ -21,16 +22,22 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
 
     // custom events for going through info about annotations
     var self = this;
-    this.listenToDOM(this.$el.find('.annotation-info-modal'), 'show.bs.modal', function() {
+    this.listenToDOM(this.$annotationInfoModal, 'show.bs.modal', function() {
+      self.$annotationInfoModal.html(self.template());
+      self.$previousAnnotationInfoButton = self.$el.find('button.previous');
+      self.$nextAnnotationInfoButton = self.$el.find('button.next');
+
+
       var $allAnnotationInfo = self.$el.find('.annotation-info li');
       $allAnnotationInfo.hide();
       self.$currAnnotationInfo = $allAnnotationInfo.eq(0);
       self.$currAnnotationInfo.show();
       self.$nextAnnotationInfoButton.show();
       self.$previousAnnotationInfoButton.hide();
+
+      self.listenToDOM(self.$previousAnnotationInfoButton, 'click', self.goToPreviousAnnotationInfo);
+      self.listenToDOM(self.$nextAnnotationInfoButton, 'click', self.goToNextAnnotationInfo);
     });
-    this.listenToDOM(this.$previousAnnotationInfoButton, 'click', this.goToPreviousAnnotationInfo);
-    this.listenToDOM(this.$nextAnnotationInfoButton, 'click', this.goToNextAnnotationInfo);
     this.listenToDOM(this.$assessmentImage, 'click', this.createAnnotation);
 
     // keep track of annotations on the page
