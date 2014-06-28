@@ -784,7 +784,6 @@ input {
 }
 
 .grade .annotation-success {
-  display: none;
   margin: 12px 5px 0 5px;
   color: #27ae60;
   float: right;

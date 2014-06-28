@@ -1,9 +1,12 @@
 // TODO: browserify
 var AnnotationView = IdempotentView.extend({
   /* How long to display the comment success icon. */
-  ANNOTATION_SUCCESS_DISPLAY_DURATION: 600,
+  ANNOTATION_SUCCESS_DISPLAY_DURATION: 1000,
 
-  template: _.template($('.annotation-template').html()),
+  templates: {
+    annotationTemplate: _.template($('.annotation-template').html()),
+    successTemplate: _.template($('.annotation-success-template').html())
+  },
 
   events: {
     'click .annotation-circle-container': 'toggleAnnotation',
@@ -20,7 +23,7 @@ var AnnotationView = IdempotentView.extend({
 
   render: function() {
     var annotation = this.model.toJSON();
-    this.$el.html(this.template(annotation));
+    this.$el.html(this.templates.annotationTemplate(annotation));
     this.$el.addClass('annotation');
     // Subtract 10 because of padding.
     this.$el.css('top', annotation.offsetTop - 10 + 'px');
@@ -66,22 +69,39 @@ var AnnotationView = IdempotentView.extend({
   },
 
   saveComment: _.debounce(function(event) {
-    // If an empty string or all spaces, do not allow comment to be saved.
+    var self = this;
+
+    // If an empty string or all spaces, destroy the model but keep the view
     if ($.trim(this.$textarea.val()).length == 0) {
+      var collection = this.model.collection;
+      var newModel = new AnnotationModel({
+        assessmentPageNumber: this.model.get('assessmentPageNumber'),
+        offsetLeft: this.model.get('offsetLeft'),
+        offsetTop: this.model.get('offsetTop')
+      });
+
+      this.model.destroy({
+        success: function() {
+          self.model = newModel;
+          collection.add(newModel);
+          self.successfulSave();
+        }
+      });
       return;
     }
 
-    var self = this;
+    // If the comment is valid, save new comment/annotation to the database
+    else {
+      this.model.save({
+        comment: this.$textarea.val()
+      }, {
+        wait: true,
 
-    this.model.save({
-      comment: this.$textarea.val()
-    }, {
-      wait: true,
-
-      success: function() {
-        self.$annotationSuccess.show();
-      }
-    });
+        success: function() {
+          self.successfulSave();
+        }
+      });
+    }
   }, 600),
 
   deleteIfBlank: function() {
@@ -98,8 +118,7 @@ var AnnotationView = IdempotentView.extend({
       success: function() {
         self.removeSideEffects();
         self.remove();
-      },
-      wait: true
+      }
     });
   },
 
@@ -110,6 +129,15 @@ var AnnotationView = IdempotentView.extend({
   },
 
   clearSuccess: function() {
-    this.$annotationSuccess.hide();
+    this.$annotationSuccess.html('');
+  },
+
+  successfulSave: function() {
+    this.$annotationSuccess.html(this.templates.successTemplate());
+
+    var self = this;
+    _.debounce(setTimeout(function() {
+        self.$annotationSuccess.find('.saved').hide();
+      }, self.ANNOTATION_SUCCESS_DISPLAY_DURATION), 100);
   }
 });

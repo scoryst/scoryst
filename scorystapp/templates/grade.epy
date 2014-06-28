@@ -299,11 +299,19 @@
         Delete
       </button>
     <button type="button" class="close"><i class="fa fa-compress"></i></button>
-    <div class="annotation-success">Saved <i class="fa fa-check"></i></div>
+    <span class="annotation-success">
+      <% if (typeof(comment) !== "undefined" && comment.length > 0) { %>
+        <i class="fa fa-check"></i>
+      <% } %>
+    </span>
     {% else %}
     <button type="button" class="close"><i class="fa fa-compress"></i></button>
     {% endif %}
   </div>
+</script>
+
+<script type="text/template" class="annotation-success-template">
+  <span class="saved">Saved</span> <i class="fa fa-check"></i>
 </script>
 
 {% endblock %}

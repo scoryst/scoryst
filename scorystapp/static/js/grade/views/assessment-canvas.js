@@ -192,9 +192,7 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
   renderAnnotations: function() {
     // before rendering, remove all the old views.
     var self = this;
-    this.annotationViews.forEach(function(annotationView) {
-      self.deregisterSubview(annotationView);
-    });
+    this.deregisterSubview();
 
     var curPageNum = this.getCurPageNum();
     this.annotationViews = [];
@@ -236,6 +234,8 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
       return;
     }
 
+    this.deleteBlankAnnotations();
+
     var annotationModal = new AnnotationModel({
       assessmentPageNumber: this.getCurPageNum(),
       offsetLeft: assessmentPDFX - this.CIRCLE_RADIUS,
@@ -273,11 +273,15 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
     // nothing written in the textarea, remove them from the canvas.
     var self = this;
     this.annotationViews.forEach(function(annotationView) {
-      // returns the comment in the unsaved comment; if the comment is unsaved,
-      // or if the view has been previously saved, return undefined
-      var didDelete = annotationView.deleteIfBlank();
-      if (didDelete) {
-        self.deregisterSubview(annotationView);
+      // only try to delete if its a view that has never been saved before;
+      // otherwise, let the view handle it
+      if (annotationView.model.isNew()) {
+        // returns the comment in the unsaved comment; if the comment is unsaved,
+        // or if the view has been previously saved, return undefined
+        var didDelete = annotationView.deleteIfBlank();
+        if (didDelete) {
+          self.deregisterSubview(annotationView);
+        }
       }
     });
   }
