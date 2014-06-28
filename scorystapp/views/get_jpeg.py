@@ -102,8 +102,9 @@ def get_offset_student_jpeg_with_question_number(request, cur_course_user,
     submission=next_submission, page_number=page)
   return shortcuts.redirect(assessment_page.page_jpeg.url)
 
+
 @decorators.access_controlled
-@decorators.instructor_or_ta_required
+@decorators.student_required
 def get_effective_page(request, cur_course_user, submission_id, question_number):
   """ Returns the effective page for the given question of the submission. """
   submission = shortcuts.get_object_or_404(models.Submission, pk=submission_id)
