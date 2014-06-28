@@ -289,24 +289,27 @@
   </div>
   <div class="annotation-comment">
     <% if (typeof(comment) !== "undefined" && comment.length > 0) { %>
-      <textarea class="form-control" placeholder="Enter a comment" disabled="disabled"><%=comment%></textarea>
+      <textarea class="form-control" placeholder="Enter a comment"><%= comment %></textarea>
     <% } else { %>
       <textarea class="form-control" placeholder="Enter a comment"></textarea>
     <% } %>
 
     {% if not is_student_view %}
-    <% if (typeof(comment) !== "undefined" && comment.length > 0) { %>
-      <button type="button" class="btn btn-primary btn-sm edit">Edit</button>
-    <% } else { %>
-      <button type="button" class="btn btn-primary btn-sm save">Save</button>
-    <% } %>
-    <button type="button" class="btn btn-danger btn-sm delete">
-      Delete
-    </button>
-    <i class="fa fa-check annotation-success"></i>
-    {% endif %}
+      <button type="button" class="btn btn-danger btn-sm delete">Delete</button>
     <button type="button" class="close"><i class="fa fa-compress"></i></button>
+    <span class="annotation-success">
+      <% if (typeof(comment) !== "undefined" && comment.length > 0) { %>
+        <i class="fa fa-check"></i>
+      <% } %>
+    </span>
+    {% else %}
+    <button type="button" class="close"><i class="fa fa-compress"></i></button>
+    {% endif %}
   </div>
+</script>
+
+<script type="text/template" class="annotation-success-template">
+  <span class="saved">Saved</span> <i class="fa fa-check"></i>
 </script>
 
 {% endblock %}

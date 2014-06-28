@@ -20,6 +20,10 @@
       </button>
     </div>
     <div class="modal fade annotation-info-modal" tabindex="-1" role="dialog" aria-hidden="true">
+      <!-- The annotation gifs are dynamically inserted -->
+    </div>
+
+    <script type="text/template" class="annotation-info-template">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-body">
@@ -46,7 +50,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </script>
     {% endif %}
 
     <div class="zoom-lens">

@@ -1,15 +1,35 @@
 var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
   CIRCLE_RADIUS: 10,  // specified in style.css as radius of annotation
+  BLUR_TIME: 100,
+
+  template: _.template($('.annotation-info-template').html()),
+
+  events: {
+    'blur textarea': 'deleteBlankAnnotations',
+    'mousedown .annotation': 'sendAnnotationToFront'
+  },
 
   initialize: function(options) {
     this.constructor.__super__.initialize.apply(this, arguments);
 
     this.$assessmentImage = this.$assessmentCanvas.find('.assessment-image');
-    this.$previousPage = this.$el.find('.previous-page');
-    this.$nextPage = this.$el.find('.next-page');
-    this.$previousAnnotationInfoButton = this.$el.find('button.previous');
-    this.$nextAnnotationInfoButton = this.$el.find('button.next');
+    this.$previousPage = this.$('.previous-page');
+    this.$nextPage = this.$('.next-page');
+    this.$annotationInfoModal = this.$('.annotation-info-modal');
     this.response = options.response;
+
+    // keep track of the last time any textarea (from an annotation) was blurred
+    this.lastTextareaBlur = new Date().getTime();
+    var self = this;
+    // if a blur occurs and it is from a textarea with a comment in it, keep
+    // track of the textarea blur time; do this by getting the HTMLElement from
+    // the textarea and listening to the blur event
+    this.$el.get(0).addEventListener('blur', function(event) {
+      var $target = $(event.target);
+      if ($target.is('textarea') && $.trim($target.val()).length > 0) {
+        self.lastTextareaBlur = new Date().getTime();
+      }
+    }, true);
 
     var self = this;
     this.fetchPages(function(pages) {
@@ -35,16 +55,22 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
 
     // custom events for going through info about annotations
     var self = this;
-    this.listenToDOM(this.$el.find('.annotation-info-modal'), 'show.bs.modal', function() {
-      var $allAnnotationInfo = self.$el.find('.annotation-info li');
+    this.listenToDOM(this.$annotationInfoModal, 'show.bs.modal', function() {
+      self.$annotationInfoModal.html(self.template());
+      self.$previousAnnotationInfoButton = self.$('button.previous');
+      self.$nextAnnotationInfoButton = self.$('button.next');
+
+
+      var $allAnnotationInfo = self.$('.annotation-info li');
       $allAnnotationInfo.hide();
       self.$currAnnotationInfo = $allAnnotationInfo.eq(0);
       self.$currAnnotationInfo.show();
       self.$nextAnnotationInfoButton.show();
       self.$previousAnnotationInfoButton.hide();
+
+      self.listenToDOM(self.$previousAnnotationInfoButton, 'click', self.goToPreviousAnnotationInfo);
+      self.listenToDOM(self.$nextAnnotationInfoButton, 'click', self.goToNextAnnotationInfo);
     });
-    this.listenToDOM(this.$previousAnnotationInfoButton, 'click', this.goToPreviousAnnotationInfo);
-    this.listenToDOM(this.$nextAnnotationInfoButton, 'click', this.goToNextAnnotationInfo);
     this.listenToDOM(this.$assessmentImage, 'click', this.createAnnotation);
 
     // keep track of annotations on the page
@@ -207,9 +233,7 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
   renderAnnotations: function() {
     // before rendering, remove all the old views.
     var self = this;
-    this.annotationViews.forEach(function(annotationView) {
-      self.deregisterSubview(annotationView);
-    });
+    this.deregisterSubview();
 
     var curPageNum = this.getCurPageNum();
     this.annotationViews = [];
@@ -244,18 +268,14 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
       return;
     }
 
-    // go through all annotations, and if any have never been saved,
-    // remove them from the canvas
-    var comment;
-    for (var i = 0; i < this.annotationViews.length; i++) {
-      var annotationView = this.annotationViews[i];
-      // returns the comment in the unsaved comment; if the comment is unsaved,
-      // or if the view has been previously saved, return undefined
-      var commentIfUnsaved = annotationView.deleteIfUnsaved();
-      if (commentIfUnsaved) {
-        comment = commentIfUnsaved;
-      }
+    // if a textarea (i.e. annotation) was blurred sometime very recently, then
+    // most likely this event was fired because the user likely wanted to blur
+    // a different annotation. ignore the event, and don't create a new annotation
+    if (new Date().getTime() - this.lastTextareaBlur <= this.BLUR_TIME) {
+      return;
     }
+
+    this.deleteBlankAnnotations();
 
     var annotationModal = new AnnotationModel({
       assessmentPageNumber: this.getCurPageNum(),
@@ -266,8 +286,7 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
     this.annotations.add(annotationModal);
 
     var annotationView = new AnnotationView({
-      model: annotationModal,
-      unsavedComment: commentIfUnsaved
+      model: annotationModal
     });
 
     this.annotationViews.push(annotationView);
@@ -288,5 +307,30 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
         callback(annotations);
       }
     });
+  },
+
+  deleteBlankAnnotations: function() {
+    // remove annotations that haven't been saved and have nothing in their textarea
+    var self = this;
+    this.annotationViews.forEach(function(annotationView) {
+      // only try to delete if it's a view that has never been saved before;
+      // otherwise, let the view handle it
+      if (annotationView.model.isNew()) {
+        var didDelete = annotationView.deleteIfBlank();
+        if (didDelete) {
+          self.deregisterSubview(annotationView);
+        }
+      }
+    });
+  },
+
+  sendAnnotationToFront: function(event) {
+    // first remove the `annotation-front` class to all annotations
+    this.annotationViews.forEach(function(annotationView) {
+      annotationView.removeAnnotationFrontClass();
+    });
+
+    var $annotation = $(event.currentTarget);
+    $annotation.addClass('annotation-front');
   }
 });
