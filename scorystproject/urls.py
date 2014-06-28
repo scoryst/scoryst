@@ -223,8 +223,13 @@ urlpatterns = patterns('',
     '/get-student-jpeg/(?P<offset>(-?\d+))/(?P<page_number>\d+)/$',
     'scorystapp.views.get_jpeg.get_offset_student_jpeg'),
   url((r'^course/(?P<course_id>\d+)/grade/(?P<submission_id>\d+)/get-student-jpeg/'
-    '(?P<offset>(-?\d+))/(?P<question_number>\d+)/(?P<part_number>\d+)/$'),
+    '(?P<offset>(-?\d+))/(?P<question_number>\d+)/$'),
     'scorystapp.views.get_jpeg.get_offset_student_jpeg_with_question_number'),
+
+
+  # effective page for a response that has no pages
+  url((r'^course/(?P<course_id>\d+)/grade/(?P<submission_id>\d+)/get-effective-page/'
+    '(?P<question_number>\d+)/$'), 'scorystapp.views.get_jpeg.get_effective_page'),
 
 
   # get jpegs corresponding to a blank exam

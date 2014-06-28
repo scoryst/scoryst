@@ -1,6 +1,7 @@
 from django import shortcuts, http
 from scorystapp import models, decorators
 from scorystapp.views import grade
+from django.db.models import Q
 
 
 @decorators.access_controlled
@@ -85,8 +86,8 @@ def get_blank_assessment_page_count(request, cur_course_user, assessment_id):
 
 @decorators.access_controlled
 @decorators.instructor_or_ta_required
-def get_offset_student_jpeg_with_question_number(request, cur_course_user, submission_id,
-    offset, question_number, part_number):
+def get_offset_student_jpeg_with_question_number(request, cur_course_user, 
+    submission_id, offset, question_number):
   """
   Gets the jpeg corresponding to question_number and part_number for the student
   present at 'offset' from the current student. If there is no student at that
@@ -94,14 +95,74 @@ def get_offset_student_jpeg_with_question_number(request, cur_course_user, submi
   """
   # Ensure the submission_id exists
   shortcuts.get_object_or_404(models.Submission, pk=submission_id)
-
   next_submission = grade.get_offset_student_assessment(submission_id, offset)
-  # Get the response to find which page question_number and part_number lie on
-  question_part = shortcuts.get_object_or_404(models.QuestionPart,
-    assessment=next_submission.assessment, question_number=question_number, part_number=part_number)
-  response = shortcuts.get_object_or_404(models.Response,
-    submission=next_submission, question_part=question_part)
 
-  assessment_page = shortcuts.get_object_or_404(models.SubmissionPage, submission=next_submission,
-    page_number=int(response.pages.split(',')[0]))
+  page = _get_effective_page(next_submission, question_number)
+  assessment_page = shortcuts.get_object_or_404(models.SubmissionPage,
+    submission=next_submission, page_number=page)
   return shortcuts.redirect(assessment_page.page_jpeg.url)
+
+@decorators.access_controlled
+@decorators.instructor_or_ta_required
+def get_effective_page(request, cur_course_user, submission_id, question_number):
+  """ Returns the effective page for the given question of the submission. """
+  submission = shortcuts.get_object_or_404(models.Submission, pk=submission_id)
+  page = _get_effective_page(submission, question_number)
+  return http.HttpResponse(page)
+
+
+def _get_effective_page(submission, question_number):
+  """ Gets the effective page for the given question of the submission. """
+  question_number = int(question_number)
+  page = find_page_for_question(submission, question_number, earliest=True)
+
+  if page == None:
+    # couldn't find a page for the current question; try the previous one
+    page = find_page_for_question(submission, question_number - 1,
+      earliest=False)
+
+  if page == None:
+    # couldn't find a page for the current or previous question; go to
+    # first page of submission
+    page = 1
+
+  return page
+
+
+def find_page_for_question(submission, question_number, earliest=True):
+  """
+  Finds the page number of the response for the given question in the provided
+  submission. If earliest is True, returns the earliest page that contains the
+  response. Otherwise, returns the latest page that contains the response.
+  """
+  assessment = submission.assessment
+  question_parts = assessment.questionpart_set.filter(
+    question_number=question_number)
+  
+  if earliest:
+    question_parts = question_parts.order_by('part_number')
+  else:
+    question_parts = question_parts.order_by('-part_number')
+
+  if len(question_parts) == 0:
+    return None
+
+  responses = models.Response.objects.filter(Q(submission=submission,
+    question_part__in=question_parts), ~Q(pages=None), ~Q(pages=''))
+
+  # order responses based on earliest or latest question part
+  question_part_cases = map(lambda (i, qp): 'when question_part_id=%d then %d' %
+    (qp.pk, i), enumerate(question_parts))
+  responses = responses.extra(select={'manual': 'case %s end' %
+    ' '.join(question_part_cases)}, order_by=['manual'])
+
+  if len(responses) == 0:
+    return None
+
+  pages = responses[0].pages
+  pages = pages.split(',')
+
+  if earliest:
+    return pages[0]
+  else:
+    return pages[-1]

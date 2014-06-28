@@ -14,9 +14,23 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
     var self = this;
     this.fetchPages(function(pages) {
       self.pages = pages;
-      self.setPageIndexFromResponse(self.response);
-      self.render();
-      self.delegateEvents();
+
+      function renderView() {
+        self.render();
+        self.delegateEvents();
+      }
+
+      if (!self.response.pages) {
+        // the response hasn't been mapped, so we don't know the first page to
+        // display. hence, get the effective first page
+        self.getEffectivePage(self.response, function(page) {
+          self.setCurrentPage(page);
+          renderView();
+        });
+      } else {
+        self.setPageIndexFromResponse(self.response);
+        renderView();
+      }
     });
 
     // custom events for going through info about annotations
@@ -88,8 +102,8 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
         // preload page of previous and next students
         var image = new Image();
         var questionPart = this.response.get('questionPart');
-        image.src = 'get-student-jpeg/' + i + '/' + questionPart.questionNumber +
-          '/' + questionPart.partNumber + '/';
+        image.src = 'get-student-jpeg/' + i + '/' +
+          questionPart.questionNumber + '/';
       }
     }
   },
@@ -136,22 +150,48 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
     this.preloadImages();
   },
 
+  /* Gets the effective first page to display for the given response.
+   * 'Effective' here is defined by the server. */
+  getEffectivePage: function(response, callback) {
+    var questionNumber = response.get('questionPart').questionNumber;
+    $.ajax({
+      url: 'get-effective-page/' + questionNumber + '/'
+    }).done(function(page) {
+      callback(parseInt(page, 10));
+    });
+  },
+
   setPageIndexFromResponse: function(response) {
     var oldPageIndex = this.pageIndex;
-    var firstPageStr = response.get('pages').split(',')[0];
+    var responsePages = response.get('pages');
+
+    if (!responsePages) {
+      // either student didn't map assessment or had no answer;
+      // if no page is set, default to 0. else, stay with the old page
+      if (!this.pageIndex) {
+        this.pageIndex = 0;
+      }
+      return false;
+    }
+
+    var firstPageStr = responsePages.split(',')[0];
     var firstPage = parseInt(firstPageStr, 10);
     // If we are not already showing the required page
     if (this.pages[this.pageIndex] !== firstPage) {
-      // get the index in pages of the page to be shown
-      this.pageIndex = this.pages.indexOf(firstPage);
-      if (this.pageIndex === -1) {
-        // If the page isn't in `this.pages`, set it to 0
-        // TODO: Think about this more carefully
-        this.pageIndex = 0;
-      }
+      this.setCurrentPage(firstPage);
     }
 
     return oldPageIndex !== this.pageIndex;
+  },
+
+  setCurrentPage: function(page) {
+    var index = this.pages.indexOf(page);
+    if (index === -1) {
+      // page couldn't be found; default to first page of submission
+      index = 0;
+    }
+
+    this.pageIndex = index;
   },
 
   updateAssessmentArrows: function() {
