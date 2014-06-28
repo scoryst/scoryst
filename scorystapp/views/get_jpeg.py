@@ -114,11 +114,11 @@ def get_effective_page(request, cur_course_user, submission_id, question_number)
 def _get_effective_page(submission, question_number):
   """ Gets the effective page for the given question of the submission. """
   question_number = int(question_number)
-  page = find_page_for_question(submission, question_number, earliest=True)
+  page = _find_page_for_question(submission, question_number, earliest=True)
 
   if page == None:
     # couldn't find a page for the current question; try the previous one
-    page = find_page_for_question(submission, question_number - 1,
+    page = _find_page_for_question(submission, question_number - 1,
       earliest=False)
 
   if page == None:
@@ -129,7 +129,7 @@ def _get_effective_page(submission, question_number):
   return page
 
 
-def find_page_for_question(submission, question_number, earliest=True):
+def _find_page_for_question(submission, question_number, earliest=True):
   """
   Finds the page number of the response for the given question in the provided
   submission. If earliest is True, returns the earliest page that contains the
