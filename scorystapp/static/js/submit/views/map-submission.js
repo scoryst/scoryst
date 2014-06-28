@@ -62,6 +62,8 @@ var MapSubmissionView = Backbone.View.extend({
       questionNumber: this.questionNumber,
       partNumber: this.partNumber,
       submissionPages: this.submissionPages.toJSON(),
+
+      // an empty array corresponds to no answer (see updateQuestionPart())
       noAnswer: _.isArray(this.responsePages) && this.responsePages.length === 0
     };
 

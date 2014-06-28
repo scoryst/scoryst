@@ -22,8 +22,8 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
 
       if (!self.response.pages) {
         // the response hasn't been mapped, so we don't know the first page to
-        // display. hence, get the effective first page
-        self.getEffectivePage(self.response, function(page) {
+        // display. hence, get the closest page to this response
+        self.getClosestPage(self.response, function(page) {
           self.setCurrentPage(page);
           renderView();
         });
@@ -150,12 +150,11 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
     this.preloadImages();
   },
 
-  /* Gets the effective first page to display for the given response.
-   * 'Effective' here is defined by the server. */
-  getEffectivePage: function(response, callback) {
+  /* Gets the page that is closest to the given student's response. */
+  getClosestPage: function(response, callback) {
     var questionNumber = response.get('questionPart').questionNumber;
     $.ajax({
-      url: 'get-effective-page/' + questionNumber + '/'
+      url: 'get-closest-page/' + questionNumber + '/'
     }).done(function(page) {
       callback(parseInt(page, 10));
     });

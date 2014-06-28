@@ -97,7 +97,7 @@ def get_offset_student_jpeg_with_question_number(request, cur_course_user,
   shortcuts.get_object_or_404(models.Submission, pk=submission_id)
   next_submission = grade.get_offset_student_assessment(submission_id, offset)
 
-  page = _get_effective_page(next_submission, question_number)
+  page = _get_closest_page(next_submission, question_number)
   assessment_page = shortcuts.get_object_or_404(models.SubmissionPage,
     submission=next_submission, page_number=page)
   return shortcuts.redirect(assessment_page.page_jpeg.url)
@@ -105,15 +105,25 @@ def get_offset_student_jpeg_with_question_number(request, cur_course_user,
 
 @decorators.access_controlled
 @decorators.student_required
-def get_effective_page(request, cur_course_user, submission_id, question_number):
-  """ Returns the effective page for the given question of the submission. """
+def get_closest_page(request, cur_course_user, submission_id, question_number):
+  """ Returns the closest page for the given question of the submission. """
   submission = shortcuts.get_object_or_404(models.Submission, pk=submission_id)
-  page = _get_effective_page(submission, question_number)
+  page = _get_closest_page(submission, question_number)
   return http.HttpResponse(page)
 
 
-def _get_effective_page(submission, question_number):
-  """ Gets the effective page for the given question of the submission. """
+def _get_closest_page(submission, question_number):
+  """
+  Gets the closest page for the given question of the submission. The closest
+  page is defined as follows:
+
+  - If the current question has a part one, and that part one has pages, return
+    its first page
+  - Else, consider all parts of the current question, and return the first page
+    from the first part that has pages
+  - If none of those parts have pages, take the previous question, and return
+    the last page from the last part that has pages.
+  """
   question_number = int(question_number)
   page = _find_page_for_question(submission, question_number, earliest=True)
 
