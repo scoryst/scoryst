@@ -29,10 +29,10 @@ var AnnotationView = IdempotentView.extend({
     this.$el.css('top', annotation.offsetTop - 10 + 'px');
     this.$el.css('left', annotation.offsetLeft - 10 + 'px');
 
-    this.$textarea = this.$el.find('textarea');
+    this.$textarea = this.$('textarea');
     this.$textarea.on('paste keyup', _.bind(this.saveComment, this));
     this.$textarea.on('paste keyup', _.bind(this.clearSuccess, this));
-    this.$annotationSuccess = this.$el.find('.annotation-success');
+    this.$annotationSuccess = this.$('.annotation-success');
 
     var self = this;
 
@@ -65,7 +65,7 @@ var AnnotationView = IdempotentView.extend({
   },
 
   toggleAnnotation: function(event) {
-    this.$el.find('.annotation-comment').toggle();
+    this.$('.annotation-comment').toggle();
   },
 
   saveComment: _.debounce(function(event) {
@@ -84,7 +84,7 @@ var AnnotationView = IdempotentView.extend({
         success: function() {
           self.model = newModel;
           collection.add(newModel);
-          self.successfulSave();
+          self.showSuccessfulSave();
         }
       });
       return;
@@ -92,20 +92,18 @@ var AnnotationView = IdempotentView.extend({
 
     // If the comment is valid, save new comment/annotation to the database
     else {
-      this.model.save({
-        comment: this.$textarea.val()
-      }, {
+      this.model.save({ comment: this.$textarea.val() }, {
         wait: true,
 
         success: function() {
-          self.successfulSave();
+          self.showSuccessfulSave();
         }
       });
     }
   }, 600),
 
   deleteIfBlank: function() {
-    if ($.trim(this.$textarea.val()).length == 0) {
+    if ($.trim(this.$textarea.val()).length === 0) {
       this.delete();
       return true;
     }
@@ -132,12 +130,21 @@ var AnnotationView = IdempotentView.extend({
     this.$annotationSuccess.html('');
   },
 
-  successfulSave: function() {
+  showSuccessfulSave: function() {
     this.$annotationSuccess.html(this.templates.successTemplate());
 
     var self = this;
-    _.debounce(setTimeout(function() {
+
+    function showIconAfterTimeout() {
+      setTimeout(function() {
         self.$annotationSuccess.find('.saved').hide();
-      }, self.ANNOTATION_SUCCESS_DISPLAY_DURATION), 100);
+      }, self.ANNOTATION_SUCCESS_DISPLAY_DURATION);
+    };
+
+    _.debounce(showIconAfterTimeout, 100);
+  },
+
+  removeAnnotationFrontClass: function() {
+    this.$el.removeClass('annotation-front');
   }
 });
