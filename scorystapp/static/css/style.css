@@ -812,8 +812,12 @@ input {
   margin-bottom: 15px;
 }
 
-.annotation-info-modal .modal-body {
+.grade .annotation-info-modal .modal-body {
   overflow: hidden;
+}
+
+.grade .annotation-front {
+  z-index: 300;
 }
 
 /* Login page CSS */

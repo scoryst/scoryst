@@ -5,7 +5,8 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
   template: _.template($('.annotation-info-template').html()),
 
   events: {
-    'blur textarea': 'deleteBlankAnnotations'
+    'blur textarea': 'deleteBlankAnnotations',
+    'mousedown .annotation': 'sendAnnotationToFront'
   },
 
   initialize: function(options) {
@@ -284,5 +285,15 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
         }
       }
     });
+  },
+
+  sendAnnotationToFront: function(event) {
+    // first remove the `annotation-front` class to all annotations
+    this.annotationViews.forEach(function(annotationView) {
+      annotationView.$el.removeClass('annotation-front');
+    });
+
+    var $annotation = $(event.currentTarget);
+    $annotation.addClass('annotation-front');
   }
 });
