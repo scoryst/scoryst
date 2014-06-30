@@ -70,12 +70,17 @@ var AnnotationView = IdempotentView.extend({
 
   saveComment: _.debounce(function(event) {
     var self = this;
+    var comment = $.trim(this.$textarea.val());
+    // If there is no change to the comment value, then ignore
+    if (comment === this.model.get('comment')) {
+      return;
+    }
 
     // If an empty string or all spaces, destroy the model but keep the view.
     // This is because when there is a previously saved annotation and the user
     // deletes the entire comment, the annotation is deleted in the backend but
     // the annotation view remains on the frontend.
-    if ($.trim(this.$textarea.val()).length === 0) {
+    if (comment.length === 0) {
       var collection = this.model.collection;
       var newModel = new AnnotationModel({
         assessmentPageNumber: this.model.get('assessmentPageNumber'),
@@ -95,7 +100,7 @@ var AnnotationView = IdempotentView.extend({
 
     // If the comment is valid, save new comment/annotation to the database
     else {
-      this.model.save({ comment: this.$textarea.val() }, {
+      this.model.save({ comment: comment }, {
         wait: true,
 
         success: function() {
@@ -130,6 +135,12 @@ var AnnotationView = IdempotentView.extend({
   },
 
   clearSuccess: function() {
+    // If there is no change to the comment value, then ignore
+    var comment = $.trim(this.$textarea.val());
+    if (comment === this.model.get('comment')) {
+      return;
+    }
+
     this.$annotationSuccess.html('');
   },
 
