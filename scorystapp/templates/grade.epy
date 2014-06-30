@@ -288,14 +288,10 @@
     <div class="annotation-circle"></div>
   </div>
   <div class="annotation-comment">
-    <% if (typeof(comment) !== "undefined" && comment.length > 0) { %>
-      <textarea class="form-control" placeholder="Enter a comment"><%= comment %></textarea>
-    <% } else { %>
-      <textarea class="form-control" placeholder="Enter a comment"></textarea>
-    <% } %>
+    <textarea class="form-control" placeholder="Enter a comment" {% if is_student_view %} disabled="true" {% endif %}><% if (typeof(comment) !== "undefined" && comment.length > 0) { %><%= comment %><% } %></textarea>
 
     {% if not is_student_view %}
-      <button type="button" class="btn btn-danger btn-sm delete">Delete</button>
+    <button type="button" class="btn btn-danger btn-sm delete">Delete</button>
     <button type="button" class="close"><i class="fa fa-compress"></i></button>
     <span class="annotation-success">
       <% if (typeof(comment) !== "undefined" && comment.length > 0) { %>

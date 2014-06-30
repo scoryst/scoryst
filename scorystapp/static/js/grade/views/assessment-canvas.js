@@ -2,8 +2,6 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
   CIRCLE_RADIUS: 10,  // specified in style.css as radius of annotation
   BLUR_TIME: 100,
 
-  template: _.template($('.annotation-info-template').html()),
-
   events: {
     'blur textarea': 'deleteBlankAnnotations',
     'mousedown .annotation': 'sendAnnotationToFront'
@@ -53,25 +51,27 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
       }
     });
 
-    // custom events for going through info about annotations
-    var self = this;
-    this.listenToDOM(this.$annotationInfoModal, 'show.bs.modal', function() {
-      self.$annotationInfoModal.html(self.template());
-      self.$previousAnnotationInfoButton = self.$('button.previous');
-      self.$nextAnnotationInfoButton = self.$('button.next');
+    // custom events for going through info about annotations (for instructors)
+    if (!Utils.IS_STUDENT_VIEW) {
+      var self = this;
+      this.listenToDOM(this.$annotationInfoModal, 'show.bs.modal', function() {
+        var annotationInfo = _.template($('.annotation-info-template').html());
+        self.$annotationInfoModal.html(annotationInfo);
+        self.$previousAnnotationInfoButton = self.$('button.previous');
+        self.$nextAnnotationInfoButton = self.$('button.next');
 
+        var $allAnnotationInfo = self.$('.annotation-info li');
+        $allAnnotationInfo.hide();
+        self.$currAnnotationInfo = $allAnnotationInfo.eq(0);
+        self.$currAnnotationInfo.show();
+        self.$nextAnnotationInfoButton.show();
+        self.$previousAnnotationInfoButton.hide();
 
-      var $allAnnotationInfo = self.$('.annotation-info li');
-      $allAnnotationInfo.hide();
-      self.$currAnnotationInfo = $allAnnotationInfo.eq(0);
-      self.$currAnnotationInfo.show();
-      self.$nextAnnotationInfoButton.show();
-      self.$previousAnnotationInfoButton.hide();
-
-      self.listenToDOM(self.$previousAnnotationInfoButton, 'click', self.goToPreviousAnnotationInfo);
-      self.listenToDOM(self.$nextAnnotationInfoButton, 'click', self.goToNextAnnotationInfo);
-    });
-    this.listenToDOM(this.$assessmentImage, 'click', this.createAnnotation);
+        self.listenToDOM(self.$previousAnnotationInfoButton, 'click', self.goToPreviousAnnotationInfo);
+        self.listenToDOM(self.$nextAnnotationInfoButton, 'click', self.goToNextAnnotationInfo);
+      });
+      this.listenToDOM(this.$assessmentImage, 'click', this.createAnnotation);
+    }
 
     // keep track of annotations on the page
     this.annotationViews = [];

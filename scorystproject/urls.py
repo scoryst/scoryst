@@ -231,6 +231,8 @@ urlpatterns = patterns('',
   # closest page for a response that has no pages
   url((r'^course/(?P<course_id>\d+)/grade/(?P<submission_id>\d+)/get-closest-page/'
     '(?P<question_number>\d+)/$'), 'scorystapp.views.get_jpeg.get_closest_page'),
+  url((r'^course/(?P<course_id>\d+)/assessments/view/(?P<submission_id>\d+)/get-closest-page/'
+    '(?P<question_number>\d+)/$'), 'scorystapp.views.get_jpeg.get_closest_page'),
 
 
   # get jpegs corresponding to a blank exam
