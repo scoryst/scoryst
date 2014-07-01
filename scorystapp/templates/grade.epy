@@ -288,7 +288,9 @@
     <div class="annotation-circle"></div>
   </div>
   <div class="annotation-comment">
-    <textarea class="form-control" placeholder="Enter a comment" {% if is_student_view %} disabled="true" {% endif %}><% if (typeof(comment) !== "undefined" && comment.length > 0) { %><%= comment %><% } %></textarea>
+    <textarea class="form-control" placeholder="Enter a comment" {% if is_student_view %}
+      disabled="true" {% endif %}><% if (typeof(comment) !== "undefined" &&
+      comment.length > 0) { %><%= comment %><% } %></textarea>
 
     {% if not is_student_view %}
     <button type="button" class="btn btn-danger btn-sm delete">Delete</button>
