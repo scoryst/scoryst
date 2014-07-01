@@ -147,7 +147,7 @@ def send_assessment_graded_email(request, assessment):
 
   submissions = models.Submission.objects.filter(assessment=assessment, preview=False,
     released=False, last=True)
-  graded_submissions = filter(lambda answer: answer.is_graded(), submissions)
+  graded_submissions = filter(lambda answer: answer.graded, submissions)
   course_users = []
   for submission in graded_submissions:
     course_users.append(submission.course_user)
