@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from model_utils.managers import InheritanceManager
+from django.db.models import signals
 
 
 """
@@ -226,6 +227,7 @@ class Assessment(models.Model):
       points += question_part.max_points
     return points
 
+  # TODO: See if still needed
   def get_prefetched_submissions(self):
     """
     Returns the set of exam answers corresponding to this exam. Prefetches all
@@ -233,11 +235,12 @@ class Assessment(models.Model):
     """
     return self.submission_set.filter(preview=False, last=True).prefetch_related(
       'response_set',
-      'response_set__rubrics',
+      # 'response_set__rubrics',
       'response_set__question_part',
       'response_set__submission__assessment'
     )
 
+  # TODO: See if still needed
   def get_prefetched_question_parts(self):
     """
     Returns the set of question parts corresponding to this exam. Prefetches
@@ -309,7 +312,7 @@ class QuestionPart(models.Model):
     """
     super(QuestionPart, self).save(*args, **kwargs)
     responses = models.Response.objects.filter(question_part=self)
-    [response.save() for response in responses]
+    [response.update_response() for response in responses]
 
   def __unicode__(self):
     return 'Q%d.%d (%d Point(s))' % (self.question_number, self.part_number,
@@ -325,11 +328,11 @@ class Rubric(models.Model):
   def save(self, *args, **kwargs):
     """
     When a rubric is updated, re-compute the points for each response for which
-    the rubric was selected. The easiest way to do this is to save the response.
+    the rubric was selected.
     """
     super(Rubric, self).save(*args, **kwargs)
-    responses = models.Response.objects.filter(rubrics__id=self.id)
-    [response.save() for response in responses]
+    responses = Response.objects.filter(rubrics__id=self.id)
+    [response.update_response() for response in responses]
 
   def __unicode__(self):
     return 'Q%d.%d ("%s")' % (self.question_part.question_number,
@@ -435,15 +438,14 @@ class Response(models.Model):
   points = models.FloatField(default=0)
   graded = models.BooleanField(default=False)
 
-  def save(self, *args, **kwargs):
-    """ We override the save method to compute `points` and `graded` fields """
+  def update_response(self):
+    """ Compute `points` and `graded` fields """
     old_points = self.points
     old_graded = self.graded
 
     self.points = self._get_points()
     self.graded = self._is_graded()
-    super(Response, self).save(*args, **kwargs)
-
+    self.save()
 
     self.submission.points += self.points - old_points
     # We just ungraded a response
@@ -490,6 +492,22 @@ class Response(models.Model):
     else:
       return '(unmapped)\'s Q%d.%d Answer' % (self.question_part.question_number,
         self.question_part.part_number)
+
+
+def rubrics_changed(sender, instance, action, **kwargs):
+  """
+  `rubrics` is a many to many field for response. This handler will be
+  called whenever the rubrics associated with a response change. We update
+  `points` and `graded` fields associated with the response.
+  NOTE: The above arguments are keyword arguments and can't be renamed.
+  NOTE: Even when the custom points are changed this works for now, because
+  the way serializers are implemented, a change in custom_points still triggers
+  post_clear, post_add etc. in the `rubrics` field.
+  """
+  if action == 'post_add' or action == 'post_remove' or action == 'post_clear':
+    instance.update_response()
+
+signals.m2m_changed.connect(rubrics_changed, sender=Response.rubrics.through)
 
 
 class Annotation(models.Model):

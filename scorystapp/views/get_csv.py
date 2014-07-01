@@ -41,7 +41,7 @@ def get_csv(request, cur_course_user, assessment_id):
 
   for submission in submissions:
     user = submission.course_user.user if submission.course_user else None
-    score = submission.get_points() if submission.is_graded() else 'ungraded'
+    score = submission.points if submission.graded else 'ungraded'
 
     row = {
       'Last Name': user.last_name if user else 'unmapped',

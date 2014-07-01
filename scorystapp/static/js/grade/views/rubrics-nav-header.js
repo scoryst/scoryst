@@ -7,7 +7,7 @@ var RubricsNavHeaderView = IdempotentView.extend({
     this.constructor.__super__.initialize.apply(this, arguments);
     this.rubrics = options.rubrics;
 
-    this.listenTo(this.model, 'change:isGraded change:points', this.render);
+    this.listenTo(this.model, 'change:graded change:points', this.render);
     this.listenTo(this.rubrics, 'change remove', function() {
       // points received for this answer may change when rubrics are modified,
       // so update the Response model

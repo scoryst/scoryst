@@ -52,10 +52,10 @@ var AssessmentNavView = IdempotentView.extend({
       }
 
       // compute overall assessment statistics
-      isAssessmentGraded = isAssessmentGraded && response.isGraded;
+      isAssessmentGraded = isAssessmentGraded && response.graded;
       assessmentMaxPoints += questionPart.maxPoints;
 
-      if (response.isGraded) {
+      if (response.graded) {
         assessmentPoints += response.points;
       }
     });

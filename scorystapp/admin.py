@@ -42,12 +42,11 @@ class SubmissionPageAdmin(admin.ModelAdmin):
   list_display = ['submission', 'page_number', 'is_blank']
 
 
-# TODO: Uncomment
-# class ResponseAdmin(admin.ModelAdmin):
-#   search_fields = ['submission__course_user__user__email', 'submission__course_user__course__name',
-#     'submission__course_user__user__first_name', 'submission__course_user__user__last_name',
-#     'submission__exam__name']
-#   list_display = ['submission', 'pages', 'question_part']
+class ResponseAdmin(admin.ModelAdmin):
+  search_fields = ['submission__course_user__user__email', 'submission__course_user__course__name',
+    'submission__course_user__user__first_name', 'submission__course_user__user__last_name',
+    'submission__assessment__name']
+  list_display = ['submission', 'pages', 'question_part']
 
 
 admin.site.register(models.User, UserAdmin)
@@ -61,8 +60,7 @@ admin.site.register(models.QuestionPart, QuestionPartAdmin)
 admin.site.register(models.Rubric, RubricAdmin)
 admin.site.register(models.Submission, SubmissionAdmin)
 admin.site.register(models.SubmissionPage, SubmissionPageAdmin)
-# TODO: Uncomment
-# admin.site.register(models.Response, ResponseAdmin)
+admin.site.register(models.Response, ResponseAdmin)
 admin.site.register(models.Annotation)
 admin.site.register(models.Split)
 admin.site.register(models.SplitPage)

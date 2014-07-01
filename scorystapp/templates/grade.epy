@@ -195,7 +195,7 @@
       <li <% if (responses[i].active) { %> class="active" <% } %> >
         <a href="#" data-response="<%= responses[i].id %>">
           Part <%= questionPart.partNumber %>:
-          <% if (responses[i].isGraded) { %>
+          <% if (responses[i].graded) { %>
             <%= responses[i].points %> / <%= questionPart.maxPoints %>
           <% } else { %>
             ungraded
@@ -247,7 +247,7 @@
   </h3>
 
   <span class="points">
-    <% if (isGraded) { %>
+    <% if (graded) { %>
       <%= points %>
     <% } else { %>
       -
@@ -255,7 +255,7 @@
     / <%= questionPart.maxPoints %>
   </span>
 
-  <% if (isGraded) { %>
+  <% if (graded) { %>
     <span class="grader">(Grader: <%= graderName %>)</span>
   <% } %>
 </script>
