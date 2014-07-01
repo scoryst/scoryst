@@ -302,6 +302,15 @@ class QuestionPart(models.Model):
   pages = models.CommaSeparatedIntegerField(max_length=200,
     null=True, blank=True)
 
+  def save(self, *args, **kwargs):
+    """
+    If points associated with a question_part changes, due to capping, we need to
+    recompute all of the responses' points field.
+    """
+    super(QuestionPart, self).save(*args, **kwargs)
+    responses = models.Response.objects.filter(question_part=self)
+    [response.save() for response in responses]
+
   def __unicode__(self):
     return 'Q%d.%d (%d Point(s))' % (self.question_number, self.part_number,
       self.max_points)
@@ -312,6 +321,15 @@ class Rubric(models.Model):
   question_part = models.ForeignKey(QuestionPart, db_index=True)
   description = models.CharField(max_length=200)
   points = models.FloatField()
+
+  def save(self, *args, **kwargs):
+    """
+    When a rubric is updated, re-compute the points for each response for which
+    the rubric was selected. The easiest way to do this is to save the response.
+    """
+    super(Rubric, self).save(*args, **kwargs)
+    responses = models.Response.objects.filter(rubrics__id=self.id)
+    [response.save() for response in responses]
 
   def __unicode__(self):
     return 'Q%d.%d ("%s")' % (self.question_part.question_number,
@@ -340,27 +358,14 @@ class Submission(models.Model):
   preview = models.BooleanField(default=False)
   last = models.BooleanField(default=True)
 
-  def get_points(self):
-    """ Returns the total number of points the student received on this exam. """
-    responses = self.response_set.all()
-    points = 0
-    for response in responses:
-      points += response.get_points()
-    return points
+  points = models.FloatField(default=0)
+  graded = models.BooleanField(default=False)
 
-  def get_max_points(self):
-    """ Returns the max number of points the student could receive on this exam. """
-    responses = self.response_set.all()
-    max_points = 0
-    for response in responses:
-      max_points += response.question_part.max_points
-    return max_points
-
-  def is_graded(self):
+  def _is_graded(self):
     """ Returns true if this exam is graded, or false otherwise. """
     responses = self.response_set.all()
     for response in responses:
-      if not response.is_graded():
+      if not response._is_graded():
         return False
     return True
 
@@ -370,10 +375,7 @@ class Submission(models.Model):
     responses = filter(lambda response: response.question_part.question_number
       == question_number, responses)
 
-    points = 0
-    for response in responses:
-      points += response.get_points()
-    return points
+    return sum([response.points for response in responses])
 
   def is_question_graded(self, question_number):
     """ Returns true if this exam is graded, or false otherwise. """
@@ -381,10 +383,7 @@ class Submission(models.Model):
     responses = filter(lambda response: response.question_part.question_number
       == question_number, responses)
 
-    for response in responses:
-      if not response.is_graded():
-        return False
-    return True
+    return all([response.graded for response in responses])
 
   def is_finalized(self):
     """ Returns true if there are no unmapped responses. """
@@ -433,11 +432,35 @@ class Response(models.Model):
   rubrics = models.ManyToManyField(Rubric)
   custom_points = models.FloatField(null=True, blank=True)
 
-  def is_graded(self):
+  points = models.FloatField(default=0)
+  graded = models.BooleanField(default=False)
+
+  def save(self, *args, **kwargs):
+    """ We override the save method to compute `points` and `graded` fields """
+    old_points = self.points
+    old_graded = self.graded
+
+    self.points = self._get_points()
+    self.graded = self._is_graded()
+    super(Response, self).save(*args, **kwargs)
+
+
+    self.submission.points += self.points - old_points
+    # We just ungraded a response
+    if self.submission.graded and not self.graded:
+      self.submission.graded = False
+
+    # The response was just graded, so maybe the submission is now fully graded
+    if not self.submission.graded and self.graded:
+      self.submission.graded = self.submission._is_graded()
+
+    self.submission.save()
+
+  def _is_graded(self):
     """ Returns true if this question part answer is graded, or false otherwise. """
     return self.rubrics.count() > 0 or self.custom_points is not None
 
-  def get_points(self):
+  def _get_points(self):
     """ Returns the number of points the student received for this answer. """
     # sum all rubric points
     total_points = 0

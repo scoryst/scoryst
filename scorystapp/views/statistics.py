@@ -1,5 +1,5 @@
 from django import shortcuts, http
-from scorystapp import models, decorators
+from scorystapp import models, decorators, raw_sql
 from scorystapp.views import helpers
 from scorystapp.performance import cache_helpers
 import json
@@ -43,11 +43,8 @@ def get_statistics(request, cur_course_user, assessment_id):
 @decorators.submission_released_required
 def get_histogram_for_assessment(request, cur_course_user, assessment_id):
   """ Fetches the histogram for the entire assessment """
-  assessment = shortcuts.get_object_or_404(models.Assessment, pk=assessment_id)
-  submission_set = assessment.get_prefetched_submissions()
-
-  graded_submission_scores = [submission.get_points() for submission in submission_set
-    if submission.is_graded()]
+  graded_submission_scores = models.Submission.objects.values_list(
+    'points', flat=True).filter(graded=True, assessment=assessment_id)
   histogram = _get_histogram(graded_submission_scores)
 
   return http.HttpResponse(json.dumps(histogram), mimetype='application/json')
@@ -61,8 +58,15 @@ def get_histogram_for_question(request, cur_course_user, assessment_id, question
   submission_set = assessment.get_prefetched_submissions()
 
   question_number = int(question_number)
-  graded_question_scores = [submission.get_question_points(question_number) for submission
-    in submission_set if submission.is_question_graded(question_number)]
+
+  question_parts = models.QuestionPart.objects.filter(assessment=assessment,
+    question_number=question_number)
+  num_question_parts = question_parts.count()
+
+  results = raw_sql.get_question_points_and_num_parts_graded(submission_set, question_number)
+  # results is a tuple with two element: the points, and how many parts were graded
+  graded_question_scores = [row[0] for row in results
+    if row[1] == num_question_parts]
 
   histogram = _get_histogram(graded_question_scores)
   return http.HttpResponse(json.dumps(histogram), mimetype='application/json')
@@ -87,10 +91,10 @@ def get_histogram_for_question_part(request, cur_course_user, assessment_id,
   else:
     question_part = question_parts[0]
 
-  response_set = question_part.response_set.all()
-  graded_question_part_scores = [response.get_points() for response in response_set if response.is_graded()]
+  graded_response_scores = models.Response.objects.values_list(
+   'points', flat=True).filter(graded=True, question_part=question_part)
 
-  histogram = _get_histogram(graded_question_part_scores)
+  histogram = _get_histogram(graded_response_scores)
   return http.HttpResponse(json.dumps(histogram), mimetype='application/json')
 
 
@@ -142,8 +146,8 @@ def _get_assessment_statistics(assessment):
   Calculates the median, mean, max, min and standard deviation among all the assessments
   that have been graded.
   """
-  submission_set = assessment.get_prefetched_submissions()
-  graded_submission_scores = [submission.get_points() for submission in submission_set if submission.is_graded()]
+  graded_submission_scores = models.Submission.objects.values_list(
+    'points', flat=True).filter(graded=True, assessment=assessment)
 
   return {
     'id': assessment.id,
@@ -155,18 +159,17 @@ def _get_assessment_statistics(assessment):
   }
 
 
+
 def _get_all_question_statistics(assessment):
   """
   Calculates the median, mean, max, min and standard deviation for all question_parts
   in the assessment
   """
   question_statistics = []
-  submission_set = assessment.get_prefetched_submissions()
+  submission_set = assessment.submission_set.all()
+  question_parts = models.QuestionPart.objects.filter(assessment=assessment)
 
-  question_parts = (assessment.get_prefetched_question_parts()
-    .order_by('question_number', 'part_number'))
-
-  if question_parts.count() > 0 and len(submission_set) > 0:
+  if question_parts.count() > 0 and submission_set.count() > 0:
     num_questions = question_parts[question_parts.count() - 1].question_number
 
     for question_number in range(num_questions):
@@ -182,9 +185,14 @@ def _get_question_statistics(submission_set, question_number, question_parts):
   for which this question_number has been graded.
   Also calculates the same for each part for given question
   """
-  graded_question_scores = [submission.get_question_points(question_number) for submission in submission_set
-    if submission.is_question_graded(question_number)]
-  question_parts = filter(lambda qp: qp.question_number == question_number, question_parts)
+  question_parts = question_parts.filter(question_number=question_number)
+
+
+  num_question_parts = question_parts.count()
+  results = raw_sql.get_question_points_and_num_parts_graded(submission_set, question_number)
+  # results is a tuple with two element: the points, and how many parts were graded
+  graded_question_scores = [row[0] for row in results
+    if row[1] == num_question_parts]
 
   return {
     'id': submission_set[0].assessment.id,
@@ -214,8 +222,8 @@ def _get_question_part_statistics(question_part):
   Calculates the median, mean, max, min and standard deviation among all the assessments
   for which this question_part has been graded.
   """
-  response_set = question_part.response_set.all()
-  graded_response_scores = [response.get_points() for response in response_set if response.is_graded()]
+  graded_response_scores = models.Response.objects.values_list(
+   'points', flat=True).filter(graded=True, question_part=question_part)
 
   return {
     'id': question_part.assessment.id,
