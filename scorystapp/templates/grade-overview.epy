@@ -146,21 +146,21 @@
           <td><%= questions[i].questionNumber %></td>
           <td> - </td>
           <td>
-            <% if (questions[i].isGraded) { %>
+            <% if (questions[i].graded) { %>
               <%= questions[i].points %> / <%= questions[i].maxPoints %>
             <% } else { %>
               ungraded
             <% } %>
           </td>
           <td>
-            <% if (questions[i].isGraded) { %>
+            <% if (questions[i].graded) { %>
               <%= questions[i].graders %>
             <% } else { %>
               -
             <% } %>
           </td>
           {% if not is_student %}
-            <% if (questions[i].isGraded) { %>
+            <% if (questions[i].graded) { %>
               <td><button type="button" class="btn btn-default btn-sm grade">Regrade</button></td>
             <% } else { %>
               <td><button type="button" class="btn btn-danger btn-sm grade">Grade</button></td>
@@ -176,14 +176,14 @@
           <td><%= questions[i].questionNumber %></td>
           <td><%= parts[j].partNumber %></td>
           <td>
-            <% if (parts[j].isGraded) { %>
+            <% if (parts[j].graded) { %>
               <%= parts[j].points %> / <%= parts[j].maxPoints %>
             <% } else { %>
               -
             <% } %>
           </td>
           <td>
-            <% if (parts[j].isGraded) { %>
+            <% if (parts[j].graded) { %>
               <%= parts[j].grader %>
             <% } else { %>
               -
@@ -199,7 +199,7 @@
         <td><strong>Total</strong></td>
         <td><strong>-</strong></td>
         <td><strong>
-          <% if (isGraded) { %>
+          <% if (graded) { %>
             <%= points %> / <%= maxPoints %>
           <% } else { %>
             ungraded
@@ -220,7 +220,7 @@
         <span class="graded">
           <% if (!courseUser.isMapped) { %>
             no assessment
-          <% } else if (courseUser.questionsInfo[selectedOptionValue].isGraded) { %>
+          <% } else if (courseUser.questionsInfo[selectedOptionValue].graded) { %>
             <%= courseUser.questionsInfo[selectedOptionValue].points %> /
             <%= courseUser.questionsInfo[selectedOptionValue].maxPoints %>
           <% } else { %>

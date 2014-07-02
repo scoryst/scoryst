@@ -36,7 +36,7 @@ var ResponseCollection = Backbone.Collection.extend({
   // following form:
   //
   // {
-  //   isGraded: isGraded,    // Whether the entire assessment is graded
+  //   graded: graded,    // Whether the entire assessment is graded
   //   points: points,        // points scored for the entire assessment
   //   maxPoints: maxPoints,  // maximum points for the assessment
   //   questions: questions   // an array of questions
@@ -46,7 +46,7 @@ var ResponseCollection = Backbone.Collection.extend({
   //
   // {
   //   questionNumber: questionNumber,
-  //   isGraded: true,
+  //   graded: true,
   //   graders: graders,
   //   points: points,
   //   maxPoints: maxPoints,
@@ -57,14 +57,14 @@ var ResponseCollection = Backbone.Collection.extend({
   // questionNumber.
   aggregateQuestions: function() {
     var responses = this.toJSON();
-    var isGraded = true;
+    var graded = true;
     var points = 0;
     var maxPoints = 0;
     var questions = [];
 
     var question = {
       questionNumber: 1,
-      isGraded: true,
+      graded: true,
       graders: [],
       points: 0,
       maxPoints: 0,
@@ -76,7 +76,7 @@ var ResponseCollection = Backbone.Collection.extend({
       var questionNumber = curQuestionPart.questionPart.questionNumber;
 
       var part = {
-        isGraded: curQuestionPart.isGraded,
+        graded: curQuestionPart.graded,
         partNumber: curQuestionPart.questionPart.partNumber,
         points: curQuestionPart.points,
         maxPoints: curQuestionPart.questionPart.maxPoints,
@@ -84,7 +84,7 @@ var ResponseCollection = Backbone.Collection.extend({
       };
 
       question.parts.push(part);
-      question.isGraded = question.isGraded && part.isGraded;
+      question.graded = question.graded && part.graded;
       // Aggregate points for the question
       question.points += part.points;
       question.maxPoints += part.maxPoints;
@@ -99,14 +99,14 @@ var ResponseCollection = Backbone.Collection.extend({
         responses[i + 1].questionPart.questionNumber !== questionNumber) {
         points += question.points;
         maxPoints += question.maxPoints;
-        isGraded = isGraded && question.isGraded;
+        graded = graded && question.graded;
 
         question.graders = this.joinGraders(question.graders);
         questions.push(question);
 
         question = {
           questionNumber: questionNumber + 1,
-          isGraded: true,
+          graded: true,
           graders: [],
           points: 0,
           maxPoints: 0,
@@ -116,7 +116,7 @@ var ResponseCollection = Backbone.Collection.extend({
     }
 
     return {
-      isGraded: isGraded,
+      graded: graded,
       points: points,
       maxPoints: maxPoints,
       questions: questions

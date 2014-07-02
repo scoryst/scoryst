@@ -81,7 +81,7 @@ var StudentsNavView = IdempotentView.extend({
       var curQuestion = courseUserGraded.questionsInfo[self.selectedOptionValue];
       if (!courseUserGraded.isMapped) {
         numUnmapped++;
-      } else if (curQuestion.isGraded) {
+      } else if (curQuestion.graded) {
         numGraded++;
       } else {
         numUngraded++;
@@ -143,8 +143,8 @@ var StudentsNavView = IdempotentView.extend({
     this.courseUsersGraded.forEach(function(courseUserGraded) {
       var curQuestion = courseUserGraded.questionsInfo[self.selectedOptionValue];
 
-      if ((curQuestion.isGraded && self.isGradedChecked) ||
-          (!curQuestion.isGraded && courseUserGraded.isMapped && self.isUngradedChecked) ||
+      if ((curQuestion.graded && self.isGradedChecked) ||
+          (!curQuestion.graded && courseUserGraded.isMapped && self.isUngradedChecked) ||
           (!courseUserGraded.isMapped && self.isUnmappedChecked)) {
 
         courseUsersToDisplay.push({

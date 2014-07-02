@@ -53,8 +53,8 @@ class CourseUserGradedSerializer(serializers.ModelSerializer):
   # but it might be soon enough. Discuss with Karthik and Squishy.
   def get_questions_info(self, course_user):
     """
-    0th index refers to all questions, index i refers to question i
-    Returns a list where each element is {'is_graded', 'graders'}
+    Returns info about each question for the grade overview page. 0th index
+    refers to all questions, index i refers to question i.
     """
     assessment = self.context['assessment']
     num_questions = self.context['num_questions']
@@ -74,7 +74,7 @@ class CourseUserGradedSerializer(serializers.ModelSerializer):
 
       if len(cur_question_info) == 0:
         questions_info.append({
-          'is_graded': False
+          'graded': False
         })
       else:
         cur_question_info = cur_question_info[0].copy()
@@ -83,14 +83,14 @@ class CourseUserGradedSerializer(serializers.ModelSerializer):
         questions_info.append(cur_question_info)
         submission_points += cur_question_info['points']
 
-        submission_graded = submission_graded and cur_question_info['is_graded']
+        submission_graded = submission_graded and cur_question_info['graded']
         submission_graders.extend(cur_question_info['graders'])
         submission_max_points += cur_question_info['max_points']
 
         cur_question_info['graders'] = ', '.join(cur_question_info['graders'])
 
     questions_info.insert(0, {
-      'is_graded': submission_graded,
+      'graded': submission_graded,
       'graders': ', '.join(submission_graders),
       'points': submission_points,
       'max_points': submission_max_points,

@@ -23,7 +23,7 @@ def get_question_info(submission_set, question_number,
     submission_id = row[4]
     question_info_dict[submission_id] = {
       'points': row[0],
-      'is_graded': row[1] == num_question_parts,
+      'graded': row[1] == num_question_parts,
       'max_points': row[2],
       'course_user_id': row[3],
       'submission_id': row[4],
