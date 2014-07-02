@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from scorystapp import models, raw_sql
+from scorystapp import models
 
 
 class AssessmentSerializer(serializers.ModelSerializer):
@@ -76,6 +76,7 @@ class CourseUserGradedSerializer(serializers.ModelSerializer):
         questions_info.append({
           'graded': False
         })
+        submission_graded = False
       else:
         cur_question_info = cur_question_info[0].copy()
         del cur_question_info['course_user_id']

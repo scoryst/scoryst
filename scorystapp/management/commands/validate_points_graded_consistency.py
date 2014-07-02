@@ -5,18 +5,19 @@ from scorystapp import models
 
 
 class Command(BaseCommand):
-  help = 'Ensures the `graded` and `points` fields in responses and submissions is accurate. '
+  help = ('Ensures the `graded` and `points` fields in responses and submissions is accurate. ' +
+    'If assessment_id and submission_id are not specified, validate consistency for all ' +
+    'assessments and submissions')
   option_list = BaseCommand.option_list + (
-    make_option('-a', '--assessment_id', help='Specify a specific assessment to validate'),
-    make_option('-s', '--submission_id', help='Specifies a specific submission to validate'),
-    make_option('-f', '--fix', action='store_true',
-      help='If something was inconsistent, it fixes it')
+    make_option('-a', '--assessment_id', help='Specify an assessment to validate'),
+    make_option('-s', '--submission_id', help='Specify a submission to validate'),
+    make_option('-f', '--fix', action='store_true', help='Fix inconsistencies found')
   )
 
   def handle(self, *args, **options):
-    assessment_id = options['assessment_id']
-    submission_id = options['submission_id']
-    fix =  options['fix']
+    assessment_id = options.get('assessment_id', None)
+    submission_id = options.get('submission_id', None)
+    fix = options.get('fix', None)
 
     if assessment_id:
       responses = models.Response.objects.filter(submission__assessment=assessment_id)
@@ -64,6 +65,6 @@ class Command(BaseCommand):
         print 'ERROR: submission %d is inconsistent in graded field' % submission.id
         print response
         if fix:
-          submission.graded = not submission.graded
+          submission.graded = submission._is_graded()
           submission.save()
           print 'Fixed'

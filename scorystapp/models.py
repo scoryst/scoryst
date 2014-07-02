@@ -227,7 +227,6 @@ class Assessment(models.Model):
       points += question_part.max_points
     return points
 
-  # TODO: See if still needed
   def get_prefetched_submissions(self):
     """
     Returns the set of exam answers corresponding to this exam. Prefetches all
@@ -235,12 +234,10 @@ class Assessment(models.Model):
     """
     return self.submission_set.filter(preview=False, last=True).prefetch_related(
       'response_set',
-      # 'response_set__rubrics',
       'response_set__question_part',
       'response_set__submission__assessment'
     )
 
-  # TODO: See if still needed
   def get_prefetched_question_parts(self):
     """
     Returns the set of question parts corresponding to this exam. Prefetches
@@ -248,7 +245,6 @@ class Assessment(models.Model):
     """
     return self.questionpart_set.prefetch_related(
       'response_set',
-      'response_set__rubrics',
       'response_set__question_part',
       'response_set__submission__assessment'
     )

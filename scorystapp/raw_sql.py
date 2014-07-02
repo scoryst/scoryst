@@ -2,6 +2,18 @@ from django.db import connection
 
 def get_question_info(submission_set, question_number,
     num_question_parts):
+  """
+  Performs crazy-ass raw SQL queries to get a list of `question_info` objects
+  used by the grade overview page. A `question_info` object is of the form:
+  {
+    'points': ,
+    'graded': true if the question is graded,
+    'max_points': ,
+    'course_user_id': ,
+    'submission_id': ,
+    'graders': list of graders,
+  }
+  """
   submission_ids = submission_set.values_list('id', flat=True)
 
   cursor = connection.cursor()

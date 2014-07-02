@@ -65,10 +65,25 @@ class Migration(DataMigration):
         Update the response and submission models with the correct `points` and
         `graded` fields
         """
-        for response in orm.Response.objects.all():
+        responses = orm.Response.objects.all().prefetch_related(
+            'submission',
+            'submission__assessment',
+            'question_part',
+            'rubrics',
+        )
+
+        submissions = orm.Submission.objects.all().prefetch_related(
+            'response_set',
+            'response_set__submission',
+            'response_set__submission__assessment',
+            'response_set__question_part',
+            'response_set__rubrics',
+        )
+
+        for response in responses:
             update_response(response)
 
-        for submission in orm.Submission.objects.all():
+        for submission in submissions:
             update_submission(submission)
 
     def backwards(self, orm):
