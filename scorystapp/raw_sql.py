@@ -27,6 +27,12 @@ def get_question_info(submission_set, question_number,
     " submission_id IN (%s) GROUP BY submission_id, course_user_id")
 
   submission_ids_str = map(str, submission_ids)
+
+  # In case of no submissions, submission_id IN (%s) will throw an error
+  # submission_id in 0 makes it fail gracefully
+  if len(submission_ids_str) == 0:
+    submission_ids_str = ['0']
+
   cursor.execute(query % (question_number, ','.join(submission_ids_str)))
   results = cursor.fetchall()
 
@@ -38,7 +44,6 @@ def get_question_info(submission_set, question_number,
       'graded': row[1] == num_question_parts,
       'max_points': row[2],
       'course_user_id': row[3],
-      'submission_id': row[4],
       'graders': [],
     }
 
