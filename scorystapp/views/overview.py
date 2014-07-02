@@ -1,5 +1,6 @@
 from django import shortcuts, http
-from scorystapp import models, forms, decorators, serializers, overview_serializers
+from scorystapp import models, forms, decorators, serializers, \
+  overview_serializers, raw_sql
 from scorystapp.views import helpers, grade_or_view, email_sender
 from rest_framework import decorators as rest_decorators, response
 import json
@@ -35,28 +36,33 @@ def get_students(request, cur_course_user, assessment_id):
   cur_course = cur_course_user.course
   assessment = shortcuts.get_object_or_404(models.Assessment, pk=assessment_id)
 
+
   student_course_users = models.CourseUser.objects.filter(course=cur_course.pk,
     privilege=models.CourseUser.STUDENT).order_by('user__first_name', 'user__last_name')
+  student_course_users = student_course_users.prefetch_related('user')
 
-  # TODO: not a good idea if students have a lot of assessments, but it works really well for now
-  student_course_users = student_course_users.prefetch_related(
-    'user',
-    'submission_set',
-    'submission_set__response_set',
-    'submission_set__response_set__rubrics',
-    'submission_set__response_set__question_part',
-    'submission_set__response_set__submission__assessment',
-    'submission_set__response_set__grader__user'
-  )
+  submissions = (models.Submission.objects.filter(assessment=assessment).
+    prefetch_related('course_user'))
 
   # cache num_questions here to avoid repeated db queries in the serializer
   num_questions = assessment.get_num_questions()
-  serializer = overview_serializers.CourseUserGradedSerializer(student_course_users, many=True,
-    context={
+  questions_info = {}
+
+  for question_number in range(1, num_questions + 1):
+    num_question_parts = (assessment.questionpart_set.
+      filter(question_number=question_number).count())
+    questions_info[question_number] = (raw_sql.
+      get_question_info(submissions, question_number, num_question_parts))
+
+  serializer = overview_serializers.CourseUserGradedSerializer(
+    student_course_users, many=True, context={
       'assessment': assessment,
+      'submissions': submissions,
       'num_questions': num_questions,
-      'cur_course_user': cur_course_user
+      'cur_course_user': cur_course_user,
+      'questions_info': questions_info,
     })
+
   return response.Response(serializer.data)
 
 
@@ -103,8 +109,10 @@ def get_responses(request, cur_course_user, assessment_id, course_user_id):
   responses = models.Response.objects.filter(
     submission=submission).order_by('question_part__question_number',
     'question_part__part_number')
-  serializer = serializers.ResponseSerializer(responses, many=True)
+  responses = responses.prefetch_related('question_part', 'grader',
+    'grader__user', 'question_part__assessment', 'rubrics')
 
+  serializer = serializers.ResponseSerializer(responses, many=True)
   return response.Response(serializer.data)
 
 

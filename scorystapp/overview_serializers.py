@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from scorystapp import models
+from scorystapp import models, raw_sql
 
 
 class AssessmentSerializer(serializers.ModelSerializer):
@@ -27,8 +27,9 @@ class CourseUserGradedSerializer(serializers.ModelSerializer):
     """
     Returns submission_id for the course_user if one exists, None otherwise.
     """
-    submissions = filter(lambda ea: ea.assessment == self.context['assessment'],
-      course_user.submission_set.all())
+    submissions = filter(lambda sub: sub.course_user == course_user,
+      self.context['submissions'])
+
     if len(submissions) == 0:
       return None
     else:
@@ -55,76 +56,47 @@ class CourseUserGradedSerializer(serializers.ModelSerializer):
     0th index refers to all questions, index i refers to question i
     Returns a list where each element is {'is_graded', 'graders'}
     """
-    questions_info = []
-
-    # Index 0 refers to all questions and we fill it at the end
-    questions_info.append({})
-
     assessment = self.context['assessment']
     num_questions = self.context['num_questions']
-    cur_course_user = self.context['cur_course_user']
+    submissions = self.context['submissions']
+    all_questions_info = self.context['questions_info']
 
-    submissions = filter(lambda ea: ea.assessment == self.context['assessment'],
-      course_user.submission_set.all())
+    questions_info = []
+    submission_points = 0
 
-    if len(submissions) == 0:
-      questions_info = [{
-        'is_graded': False,
-        'graders': ''
-      }]
-      return questions_info * (num_questions + 1)
-    else:
-      submission = max(submissions, key=lambda s: s.pk)
+    submission_graded = True
+    submission_graders = []
+    submission_max_points = 0
 
-    # If the submission has not been released to the students, there should be no way
-    # for the student to see his points
-    if not submission.released and cur_course_user.privilege == models.CourseUser.STUDENT:
-      return []
+    for question_number in range(1, num_questions + 1):
+      cur_question_info = filter(lambda info: info['course_user_id'] == course_user.id,
+        all_questions_info[question_number])
 
-    response_set = submission.response_set.all()
-    is_assessment_graded = True
-    assessment_graders = set()
+      if len(cur_question_info) == 0:
+        questions_info.append({
+          'is_graded': False
+        })
+      else:
+        cur_question_info = cur_question_info[0].copy()
+        del cur_question_info['course_user_id']
 
-    # loop over each question
-    for i in range(1, num_questions + 1):
-      responses = filter(lambda response: response.question_part.
-        question_number == i, response_set)
+        questions_info.append(cur_question_info)
+        submission_points += cur_question_info['points']
 
-      graders = set()
-      is_question_graded = True
-      points = 0
-      max_points = 0
+        submission_graded = submission_graded and cur_question_info['is_graded']
+        submission_graders.extend(cur_question_info['graders'])
+        submission_max_points += cur_question_info['max_points']
 
-      # Check if question is graded and find the graders
-      for answer in responses:
-        is_question_part_graded = answer.is_graded()
-        is_question_graded = is_question_graded and is_question_part_graded
+        cur_question_info['graders'] = ', '.join(cur_question_info['graders'])
 
-        points += answer.get_points()
-        max_points += answer.question_part.max_points
+    questions_info.insert(0, {
+      'is_graded': submission_graded,
+      'graders': ', '.join(submission_graders),
+      'points': submission_points,
+      'max_points': submission_max_points,
+    })
 
-        if is_question_part_graded:
-          graders.add(answer.grader.user.get_full_name())
-
-      assessment_graders |= graders
-      is_assessment_graded = is_assessment_graded and is_question_graded
-
-      questions_info.append({
-        'is_graded': is_question_graded,
-        'graders': ', '.join(graders),
-        'points': points,
-        'max_points': max_points,
-      })
-
-    # Now add information about the entire assessment
-    questions_info[0] = {
-      'is_graded': is_assessment_graded,
-      'graders': ', '.join(assessment_graders),
-      'points': submission.get_points(),
-      'max_points': submission.get_max_points(),
-    }
     return questions_info
-
 
   class Meta:
     model = models.CourseUser

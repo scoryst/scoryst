@@ -63,10 +63,8 @@ def get_histogram_for_question(request, cur_course_user, assessment_id, question
     question_number=question_number)
   num_question_parts = question_parts.count()
 
-  results = raw_sql.get_question_points_and_num_parts_graded(submission_set, question_number)
-  # results is a tuple with two element: the points, and how many parts were graded
-  graded_question_scores = [row[0] for row in results
-    if row[1] == num_question_parts]
+  graded_question_scores = raw_sql.get_graded_question_scores(submission_set,
+    question_number, num_question_parts)
 
   histogram = _get_histogram(graded_question_scores)
   return http.HttpResponse(json.dumps(histogram), mimetype='application/json')
@@ -187,12 +185,9 @@ def _get_question_statistics(submission_set, question_number, question_parts):
   """
   question_parts = question_parts.filter(question_number=question_number)
 
-
   num_question_parts = question_parts.count()
-  results = raw_sql.get_question_points_and_num_parts_graded(submission_set, question_number)
-  # results is a tuple with two element: the points, and how many parts were graded
-  graded_question_scores = [row[0] for row in results
-    if row[1] == num_question_parts]
+  graded_question_scores = raw_sql.get_graded_question_scores(submission_set,
+    question_number, num_question_parts)
 
   return {
     'id': submission_set[0].assessment.id,
