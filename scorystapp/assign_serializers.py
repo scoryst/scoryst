@@ -14,7 +14,7 @@ class CourseUserSerializer(serializers.ModelSerializer):
     """ Returns whether or not the course user is assigned to an exam answer. """
     submission = models.Submission.objects.filter(course_user=course_user,
       assessment=self.context['exam'])
-    return bool(submission)
+    return submission.count() > 0
 
   def get_tokens(self, course_user):
     """ Returns tokens used to search by typeahead. """

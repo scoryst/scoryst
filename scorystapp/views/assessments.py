@@ -157,7 +157,7 @@ def _handle_homework_form_submission(request, assessment_id, data, course):
 @decorators.access_controlled
 @decorators.instructor_or_ta_required
 def delete_assessment(request, cur_course_user, assessment_id):
-  """ Allows the instructor/TA to delete a user from the course roster. """
+  """ Allows the instructor/TA to delete an assessment. """
   cur_course = cur_course_user.course
 
   # explicitly query the course to ensure user can access this assessment
@@ -165,7 +165,7 @@ def delete_assessment(request, cur_course_user, assessment_id):
   submissions = models.Submission.objects.filter(assessment=assessment, preview=False)
 
   # Only allow editing if submissions don't exist
-  if not submissions:
+  if submissions.count() == 0:
     assessment.delete()
   else:
     pass

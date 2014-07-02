@@ -44,7 +44,7 @@ def get_statistics(request, cur_course_user, assessment_id):
 def get_histogram_for_assessment(request, cur_course_user, assessment_id):
   """ Fetches the histogram for the entire assessment """
   graded_submission_scores = models.Submission.objects.values_list(
-    'points', flat=True).filter(graded=True, assessment=assessment_id)
+    'points', flat=True).filter(graded=True, assessment=assessment_id, last=True)
   histogram = _get_histogram(graded_submission_scores)
 
   return http.HttpResponse(json.dumps(histogram), mimetype='application/json')
@@ -145,7 +145,7 @@ def _get_assessment_statistics(assessment):
   that have been graded.
   """
   graded_submission_scores = models.Submission.objects.values_list(
-    'points', flat=True).filter(graded=True, assessment=assessment)
+    'points', flat=True).filter(graded=True, assessment=assessment, last=True)
 
   return {
     'id': assessment.id,
