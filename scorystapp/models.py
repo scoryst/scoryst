@@ -307,7 +307,7 @@ class QuestionPart(models.Model):
     recompute all of the responses' points field.
     """
     super(QuestionPart, self).save(*args, **kwargs)
-    responses = models.Response.objects.filter(question_part=self)
+    responses = Response.objects.filter(question_part=self)
     [response.update_response() for response in responses]
 
   def __unicode__(self):

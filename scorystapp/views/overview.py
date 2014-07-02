@@ -41,7 +41,7 @@ def get_students(request, cur_course_user, assessment_id):
     privilege=models.CourseUser.STUDENT).order_by('user__first_name', 'user__last_name')
   student_course_users = student_course_users.prefetch_related('user')
 
-  submissions = (models.Submission.objects.filter(assessment=assessment).
+  submissions = (models.Submission.objects.filter(assessment=assessment, last=True).
     prefetch_related('course_user'))
 
   # cache num_questions here to avoid repeated db queries in the serializer
@@ -73,12 +73,25 @@ def get_self(request, cur_course_user, assessment_id):
   Used by a student to get his/her own course_user info
   """
   assessment = shortcuts.get_object_or_404(models.Assessment, pk=assessment_id)
+  submissions = models.Submission.objects.filter(assessment=assessment,
+    last=True, course_user=cur_course_user)
+
   num_questions = assessment.get_num_questions()
+  questions_info = {}
+
+  for question_number in range(1, num_questions + 1):
+    num_question_parts = (assessment.questionpart_set.
+      filter(question_number=question_number).count())
+    questions_info[question_number] = (raw_sql.
+      get_question_info(submissions, question_number, num_question_parts))
+
   serializer = overview_serializers.CourseUserGradedSerializer(cur_course_user,
     context={
       'assessment': assessment,
+      'submissions': submissions,
       'num_questions': num_questions,
-      'cur_course_user': cur_course_user
+      'cur_course_user': cur_course_user,
+      'questions_info': questions_info,
     })
   return response.Response(serializer.data)
 
@@ -96,7 +109,7 @@ def get_responses(request, cur_course_user, assessment_id, course_user_id):
     raise http.Http404
 
   submissions = models.Submission.objects.filter(assessment=assessment_id,
-    course_user=course_user_id, preview=False).order_by('-id')
+    course_user=course_user_id, preview=False, last=True).order_by('-id')
 
   if submissions.count() == 0:
     return response.Response({ 'no_mapped_assessment': True })
