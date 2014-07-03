@@ -14,7 +14,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
   url(r'^admin/jsi18n/', 'django.views.i18n.javascript_catalog'),
-  url(r'^$', 'scorystapp.views.general.landing_page'),
+  url(r'^$', 'scorystapp.views.general.root'),
   url(r'^login/$', 'scorystapp.views.auth.login'),
   url(r'^login/redirect/(?P<redirect_path>.*?enroll/(?P<token>\w+)/)$', 'scorystapp.views.auth.login'),
   url(r'^login/redirect/(?P<redirect_path>.*?)$', 'scorystapp.views.auth.login'),

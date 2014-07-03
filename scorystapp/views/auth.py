@@ -7,7 +7,7 @@ from django.contrib.auth import views
 from django.db.models import Q
 
 
-def _get_redirect_path(request, redirect_path, user):
+def get_redirect_path(request, redirect_path, user):
   """ Returns the correct redirect path, if any, from login. """
   if redirect_path:
     # redirect path is relative to root
@@ -30,7 +30,7 @@ def login(request, redirect_path=None, token=None):
   """ Allows the user to log in. """
 
   if request.user.is_authenticated():
-    return shortcuts.redirect(_get_redirect_path(request, redirect_path, request.user))
+    return shortcuts.redirect(get_redirect_path(request, redirect_path, request.user))
 
   if request.method == 'POST':
     form = forms.UserLoginForm(request.POST)
@@ -46,7 +46,7 @@ def login(request, redirect_path=None, token=None):
         redirect_path = 'enroll/%s/' % token
         del request.session['token']
 
-      return shortcuts.redirect(_get_redirect_path(request, redirect_path, user))
+      return shortcuts.redirect(get_redirect_path(request, redirect_path, user))
   else:
     form = forms.UserLoginForm()
 
