@@ -235,16 +235,30 @@ class HomeworkUploadForm(forms.Form):
 
   homework_id = forms.ChoiceField()
   homework_file = forms.FileField()
+  
+  # student to upload as; instructors only
+  student_id = forms.ChoiceField(required=False)
 
 
-  def __init__(self, homework_choices, *args, **kwargs):
+  def __init__(self, is_staff, homework_choices, student_choices, *args,
+      **kwargs):
     """ Sets up the `homework_id` choice field to hold the given choices. """
     super(HomeworkUploadForm, self).__init__(*args, **kwargs)
     self.fields['homework_id'].choices = homework_choices
 
+    if is_staff:
+      self.fields['student_id'].choices = student_choices
+      self.fields['student_id'].required = True
+
+    self.is_staff = is_staff
+
 
   def clean(self):
     """ Ensure that it's not past the submission deadline. """
+    if self.is_staff:
+      # staff have no submission deadlines
+      return self.cleaned_data
+
     data = self.cleaned_data
     homework = models.Homework.objects.get(pk=data['homework_id'])
 

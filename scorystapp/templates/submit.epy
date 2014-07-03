@@ -5,11 +5,15 @@
 <div class="container submit">
   <div class="row">
     <div class="col-xs-6">
-      <h2>Submit Homework</h2>
-      <p>
-        We'll record the submission time as soon as your upload is complete.  You may
-        resubmit before the deadline; we'll only consider your latest submission.
-      </p>
+      {% if is_staff %}
+        <h2>Submit Homework for Student</h2>
+      {% else %}
+        <h2>Submit Homework</h2>
+        <p>
+          We'll record the submission time as soon as your upload is complete.  You may
+          resubmit before the deadline; we'll only consider your latest submission.
+        </p>
+      {% endif %}
 
       <form class="form upload-exam" method="post" enctype="multipart/form-data">
         {% csrf_token %}
@@ -18,7 +22,7 @@
         <div class="form-group">
           <label for="id_homework_id">Homework</label>
 
-          {% render_field form.homework_id class="form-control" placeholder="Midterm Exam"%}
+          {% render_field form.homework_id class="form-control" %}
           <span class="error">{{form.homework_id.errors.as_text}}</span>
         </div>
 
@@ -30,6 +34,13 @@
           {% render_field form.homework_file %}
           <span class="error">{{form.homework_file.errors.as_text}}</span>
         </div>
+
+        {% if is_staff %}
+          <div class="form-group">
+            <label for="id_student">Submit as student</label>
+            {% render_field form.student_id class="form-control" %}
+          </div>
+        {% endif %}
 
         <div class="form-group">
           <button class="btn btn-primary" type="submit">Submit</button>
@@ -52,28 +63,32 @@
         </thead>
 
         <tbody>
-          {% for submission in submission_set %}
-          <tr>
-            <td>{{ submission.assessment.name }}</td>
-            <td>{{ submission.time|date:"D, M d, f A" }}</td>
-            <td><a href="{{ submission.pdf.url }}" target="_blank">View</a></td>
-            <td>
-              {% if submission.is_finalized %}
-                Yes
-              {% else %}
-                <a href="{{ submission.id }}/">No</a>
-                <a class="finalized-info-popover" data-trigger="hover" data-placement="bottom"
-                data-content="To finalize your submission, please tell us which questions are
-                answered on which pages. Click this button to do so." href="{{ submission.id }}/">
-                  <i class="fa fa-question-circle"></i>
-                </a>
-              {% endif %}
-            </td>
-            <td>
-              <a href="{{ submission.id }}/"><i class="fa fa-pencil"></i></a>
-            </td>
-          </tr>
-          {% endfor %}
+          {% if not is_staff %}
+            {% for submission in submission_set %}
+            <tr>
+              <td>{{ submission.assessment.name }}</td>
+              <td>{{ submission.time|date:"D, M d, f A" }}</td>
+              <td><a href="{{ submission.pdf.url }}" target="_blank">View</a></td>
+              <td>
+                {% if submission.is_finalized %}
+                  Yes
+                {% else %}
+                  <a href="{{ submission.id }}/">No</a>
+                  <a class="finalized-info-popover" data-trigger="hover" data-placement="bottom"
+                  data-content="To finalize your submission, please tell us which questions are
+                  answered on which pages. Click this button to do so." href="{{ submission.id }}/">
+                    <i class="fa fa-question-circle"></i>
+                  </a>
+                {% endif %}
+              </td>
+              <td>
+                <a href="{{ submission.id }}/"><i class="fa fa-pencil"></i></a>
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <!-- content inserted via underscore template -->
+          {% endif %}
         </tbody>
       </table>
     </div>
@@ -184,11 +199,46 @@
     </div>
   </div>
 </div>
+
+{% if is_staff %}
+  <script type="text/template" class="history-template">
+    <% submissions.forEach(function(submission) { %>
+    <tr>
+      <td><%= submission.assessmentName %></td>
+      <td><%= submission.time %></td>
+      <td><a href="<%= submission.pdfUrl %>" target="_blank">View</a></td>
+      <td>
+        <% if (submission.isFinalized) { %>
+          Yes
+        <% } else { %>
+          <a href="<%= submission.id %>/">No</a>
+          <a class="finalized-info-popover" data-trigger="hover"
+            data-placement="bottom" data-content="To finalize your submission,
+            please tell us which questions are answered on which pages. Click this
+            button to do so." href="<%= submission.id %>/">
+            <i class="fa fa-question-circle"></i>
+          </a>
+        <% } %>
+      </td>
+      <td>
+        <a href="<%= submission.id %>/"><i class="fa fa-pencil"></i></a>
+      </td>
+    </tr>
+    <% }); %>
+  </script>
+{% endif %}
+
 {% endblock %}
 
 {% block js %}
 <script src="/static/js/lib/modal.js"></script>
 <script src="/static/js/lib/tooltip.js"></script>
 <script src="/static/js/lib/popover.js"></script>
-<script src="/static/js/submit.js"></script>
+
+{% if is_staff %}
+  {% include 'backbone.epy' %}
+  <script src="/static/js/common/utils.js"></script>
+  <script src="/static/js/submit/models/submission.js"></script>
+  <script src="/static/js/submit/views/history.js"></script>
+{% endif %}
 {% endblock %}

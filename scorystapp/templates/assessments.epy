@@ -14,6 +14,7 @@
                 <th>Solutions PDF</th>
                 <th>Submission Deadline</th>
                 <th>Actions</th>
+                <th>Submit</th>
               </tr>
             </thead>
 
@@ -139,18 +140,18 @@
       </td>
       <td>
         <% if (isEditable) { %>
-          <a href="/course/<%=course%>/assessments/create/<%=id%>"
+          <a href="/course/<%= course %>/assessments/create/<%= id %>/"
               class="edit">
             <i class="fa fa-pencil"></i>
           </a>
 
-          <a href="/course/<%=course%>/assessments/delete/<%=id%>"
+          <a href="/course/<%= course %>/assessments/delete/<%= id %>/"
               class="delete">
             <i class="fa fa-trash-o"></i>
           </a>
         <% } else { %>
           None
-          <a class="info-popover" data-trigger="hover">
+          <a class="actions info-popover" data-trigger="hover">
             <i class="fa fa-question-circle"></i>
           </a>
         <% } %>
@@ -173,21 +174,31 @@
       </td>
       <td>
         <% if (isEditable) { %>
-          <a href="/course/<%=course%>/assessments/create/<%=id%>"
+          <a href="/course/<%= course %>/assessments/create/<%= id %>"
               class="edit">
             <i class="fa fa-pencil"></i>
           </a>
 
-          <a href="/course/<%=course%>/assessments/delete/<%=id%>"
+          <a href="/course/<%= course %>/assessments/delete/<%= id %>"
               class="delete">
             <i class="fa fa-trash-o"></i>
           </a>
         <% } else { %>
           None
-          <a class="info-popover" data-trigger="hover">
+          <a class="actions info-popover" data-trigger="hover">
             <i class="fa fa-question-circle"></i>
           </a>
         <% } %>
+      </td>
+
+      <td>
+        <a href="/course/<%= course %>/submit/">
+          Submit
+        </a>
+
+        <a class="submit info-popover" data-trigger="hover">
+          <i class="fa fa-question-circle"></i>
+        </a>
       </td>
     </tr>
   </script>

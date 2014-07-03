@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from scorystapp import models
+from django.utils import timezone
 
 
 class QuestionPartSerializer(serializers.ModelSerializer):
@@ -173,3 +174,18 @@ class AnnotationSerializer(serializers.ModelSerializer):
       raise serializers.ValidationError(
         'Annotation for invalid response page: %d' % submission_page.pk)
     return attrs
+
+
+class SubmissionSerializer(serializers.ModelSerializer):
+  assessment_name = serializers.CharField(read_only=True, source='assessment.name')
+  time = serializers.SerializerMethodField('get_time')
+  pdf_url = serializers.CharField(read_only=True, source='pdf.url')
+  is_finalized = serializers.BooleanField(read_only=True, source='is_finalized')
+
+  def get_time(self, submission):
+    return timezone.localtime(submission.time).strftime('%a, %b %d, %I:%M %p')
+
+  class Meta:
+    model = models.Submission
+    fields = ('id', 'assessment_name', 'time', 'pdf_url', 'is_finalized')
+    read_only_fields = ('id',)

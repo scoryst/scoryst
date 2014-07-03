@@ -43,11 +43,15 @@ var AssessmentTablesView = IdempotentView.extend({
 
   addPopovers: function() {
     // popover gives information when hovered about why deletion is not possible
-    var infoPopoverText = 'Once students have been assigned to an assessment, ' +
+    var actionsInfoPopoverText = 'Once students have been assigned to an assessment, ' +
       'that assessment can no longer be edited or deleted';
 
-    var $infoPopover = this.$el.find('.info-popover');
-    $infoPopover.popover({ content: infoPopoverText });
+    var $actionsInfoPopover = this.$el.find('.info-popover.actions');
+    $actionsInfoPopover.popover({ content: actionsInfoPopoverText });
+
+    var submitInfoPopoverText = 'Submit assignment for a student.';
+    var $submitInfoPopover = $('.info-popover.submit');
+    $submitInfoPopover.popover({ content: submitInfoPopoverText });
 
     // create the popover to warn deletion from roster
     this.$('.delete').popoverConfirm();

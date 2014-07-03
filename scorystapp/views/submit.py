@@ -22,23 +22,42 @@ def submit(request, cur_course_user):
 
   # (option value, option display) tuple for form select field
   homework_choices = [(hw.id, hw.name) for hw in homeworks]
+  student_choices = []
+
+  is_staff = (cur_course_user.privilege == models.CourseUser.INSTRUCTOR or
+    cur_course_user.privilege == models.CourseUser.TA)
+
+  if is_staff:
+    student_choices = (models.CourseUser.objects.filter(
+      course=cur_course_user.course, privilege=models.CourseUser.STUDENT)
+      .prefetch_related('user'))
+
+    student_choices = [(student.pk, '%s <%s>' %
+      (student.user.get_full_name(), student.user.email))
+      for student in student_choices]
 
   if request.method == 'POST':
-    form = forms.HomeworkUploadForm(homework_choices, request.POST, request.FILES)
+    form = forms.HomeworkUploadForm(is_staff, homework_choices, student_choices,
+      request.POST, request.FILES)
 
     if form.is_valid():
       homework = models.Homework.objects.get(pk=form.cleaned_data['homework_id'])
       homework_file = request.FILES['homework_file']
 
+      student = cur_course_user
+      if is_staff:
+        # staff is submitting as a certain student
+        student = models.CourseUser.objects.get(pk=form.cleaned_data['student_id'])
+
       # We have a new submission, so change `last` for previous submission to False
       last_submission = models.Submission.objects.filter(assessment=homework,
-        course_user=cur_course_user, last=True)
+        course_user=student, last=True)
       if last_submission.count() > 0:
         last_submission = last_submission[0]
         last_submission.last = False
         last_submission.save()
 
-      submission = _create_submission(homework, cur_course_user, homework_file)
+      submission = _create_submission(homework, student, homework_file)
 
       _create_empty_responses(submission)
       _create_submission_pages.delay(submission)
@@ -46,15 +65,18 @@ def submit(request, cur_course_user):
       return shortcuts.redirect('/course/%s/submit/%d/' %
         (cur_course_user.course.id, submission.pk))
   else:
-    form = forms.HomeworkUploadForm(homework_choices)
+    form = forms.HomeworkUploadForm(is_staff, homework_choices, student_choices)
 
   submission_set = models.Submission.objects.filter(course_user=
-    cur_course_user).select_related('assessment__homework').order_by('-time')
+    cur_course_user)
+  submission_set = submission_set.prefetch_related('assessment',
+    'assessment__homework').order_by('-time')
   submission_set = filter(lambda submission:
     hasattr(submission.assessment, 'homework'), submission_set)
 
   return helpers.render(request, 'submit.epy', {
     'title': 'Submit',
+    'is_staff': is_staff,
     'course': cur_course,
     'form': form,
     'submission_set': submission_set,
@@ -188,3 +210,18 @@ def update_response(request, cur_course_user, submission_id, response_id):
     serializer.save()
     return response.Response(serializer.data)
   return response.Response(serializer.errors, status=422)
+
+
+@rest_decorators.api_view(['GET'])
+@decorators.access_controlled
+@decorators.instructor_or_ta_required
+def get_submissions(request, cur_course_user, course_user_id):
+  submission_set = models.Submission.objects.filter(course_user=
+    course_user_id)
+  submission_set = submission_set.prefetch_related('assessment',
+    'assessment__homework').order_by('-time')
+  submission_set = filter(lambda submission:
+    hasattr(submission.assessment, 'homework'), submission_set)
+
+  serializer = serializers.SubmissionSerializer(submission_set, many=True)
+  return response.Response(serializer.data)
