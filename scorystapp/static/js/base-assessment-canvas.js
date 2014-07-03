@@ -52,8 +52,7 @@ var BaseAssessmentCanvasView = IdempotentView.extend({
       }
     });
 
-    // if loading the image failed, try to load it again after some time (wait 2
-    // seconds, then 4, 8, 16, 32 which is max) while showing loading icon
+    // if loading the image failed, show an error
     this.$assessmentImage.error(function() {
       this.src = self.LOADING_ICON;
     });
