@@ -30,7 +30,8 @@ var BaseAssessmentCanvasView = IdempotentView.extend({
     this.$nextPage = this.$el.find('.next-page');
     this.$assessmentImage = this.$assessmentCanvas.find('.assessment-image');
     if (this.$assessmentImage.length === 0) {
-      this.$assessmentImage = $('<img class="assessment-image" alt="Assessment" />').appendTo(this.$assessmentCanvas);
+      this.$assessmentImage = $('<img>', { class: 'assessment-image', alt: 'assessment' })
+        .appendTo(this.$assessmentCanvas);
     }
 
     this.preloadOtherStudentAssessments = options.preloadOtherStudentAssessments;
@@ -41,10 +42,9 @@ var BaseAssessmentCanvasView = IdempotentView.extend({
 
     var self = this;
 
-    // resize canvas after the image loads or canvas has not yet been resized
+    // resize canvas after the image loads
     this.$assessmentImage.load(function() {
-      if (this.src.indexOf(self.LOADING_ICON) === -1 ||
-          self.$assessmentCanvas.height() !== self.$previousPage.height()) {
+      if (self.$assessmentCanvas.height() !== self.$previousPage.height()) {
         $(window).resize();
         var canvasHeight = self.$assessmentCanvas.height();
         self.$previousPage.height(canvasHeight);
@@ -52,7 +52,7 @@ var BaseAssessmentCanvasView = IdempotentView.extend({
       }
     });
 
-    // if loading the image failed, show an error
+    // if loading the image failed, show the loading error gif
     this.$assessmentImage.error(function() {
       this.src = self.LOADING_ICON;
     });
@@ -89,8 +89,7 @@ var BaseAssessmentCanvasView = IdempotentView.extend({
   },
 
   showPage: function() {
-    // updates the assessment canvas to show the image corresponding to the current
-    // page number
+    // update canvas to show the image corresponding to the current page number
     this.$assessmentImage.attr('src', 'get-assessment-jpeg/' + this.pages[this.pageIndex] + '/');
     this.trigger('changeAssessmentPage', this.pages[this.pageIndex]);
     this.preloadImages();
@@ -111,8 +110,8 @@ var BaseAssessmentCanvasView = IdempotentView.extend({
     return this.pages[this.pageIndex];
   },
 
-  // handles the user clicking on the left arrow or using the keyboard
-  // shortcut to navigate to the previous page
+  // handles the user clicking on the left arrow or using the keyboard shortcut
+  // to navigate to the previous page
   goToPreviousPage: function() {
     if (this.pageIndex > 0) {
       this.pageIndex -= 1;
@@ -144,7 +143,7 @@ var BaseAssessmentCanvasView = IdempotentView.extend({
   },
 
   getMaxPageNumber: function() {
-    return Math.max(Math, this.pages);
+    return Math.max.apply(Math, this.pages);
   },
 
   // handles preloading images for faster navigation through different jpegs
@@ -172,10 +171,6 @@ var BaseAssessmentCanvasView = IdempotentView.extend({
     this.$nextPage.removeClass('disabled');
     this.$previousPage.removeClass('disabled');
 
-    // next, check if any need to be disabled. note that it isn't possible for
-    // arrows to "flicker" since this function is called only when the current page
-    // number has changed. thus, if either arrow should now be disabled, they
-    // would not have been disabled previously.
     if (this.pageIndex === 0) {
       this.$previousPage.addClass('disabled');
     } else if (this.pageIndex === this.pages.length - 1) {

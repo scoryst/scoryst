@@ -9,7 +9,7 @@ $(function() {
   var $partsSelect = $('.parts');
   var $pagesInput = $('.pages');
   var $saveButton = $('.save');
-  var $currentPageNum = $('.current-page-number');
+  var $curPageNum = $('.current-page-number');
 
   var $previousPage = $('.previous-page');
   var $nextPage = $('.next-page');
@@ -144,6 +144,6 @@ $(function() {
   // Makes the back button work by handling the popState event.
   $(window).bind('popstate', function() {
     assessmentCanvasView.showPage();
-    $currentPageNum.html(assessmentCanvasView.getCurPageNum());
+    $curPageNum.html(assessmentCanvasView.getCurPageNum());
   });
 });

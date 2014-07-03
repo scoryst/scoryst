@@ -44,8 +44,8 @@ var GradeAssessmentCanvasView = BaseAssessmentCanvasView.extend({
 
         var $allAnnotationInfo = self.$('.annotation-info li');
         $allAnnotationInfo.hide();
-        self.$currAnnotationInfo = $allAnnotationInfo.eq(0);
-        self.$currAnnotationInfo.show();
+        self.$curAnnotationInfo = $allAnnotationInfo.eq(0);
+        self.$curAnnotationInfo.show();
         self.$nextAnnotationInfoButton.show();
         self.$previousAnnotationInfoButton.hide();
 
@@ -130,20 +130,20 @@ var GradeAssessmentCanvasView = BaseAssessmentCanvasView.extend({
   },
 
   goToNextAnnotationInfo: function() {
-    this.$currAnnotationInfo.hide();
-    this.$currAnnotationInfo = this.$currAnnotationInfo.next();
-    this.$currAnnotationInfo.show();
-    if (this.$currAnnotationInfo.next().length === 0) {
+    this.$curAnnotationInfo.hide();
+    this.$curAnnotationInfo = this.$curAnnotationInfo.next();
+    this.$curAnnotationInfo.show();
+    if (this.$curAnnotationInfo.next().length === 0) {
       this.$nextAnnotationInfoButton.hide();
     }
     this.$previousAnnotationInfoButton.show();
   },
 
   goToPreviousAnnotationInfo: function() {
-    this.$currAnnotationInfo.hide();
-    this.$currAnnotationInfo = this.$currAnnotationInfo.prev();
-    this.$currAnnotationInfo.show();
-    if (this.$currAnnotationInfo.prev().length === 0) {
+    this.$curAnnotationInfo.hide();
+    this.$curAnnotationInfo = this.$curAnnotationInfo.prev();
+    this.$curAnnotationInfo.show();
+    if (this.$curAnnotationInfo.prev().length === 0) {
       this.$previousAnnotationInfoButton.hide();
     }
     this.$nextAnnotationInfoButton.show();
