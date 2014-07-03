@@ -1,36 +1,16 @@
 from django import shortcuts, http
-from scorystapp import decorators, forms, models, utils
-from scorystapp.views import helpers, email_sender
+from scorystapp import decorators, forms, utils
+from scorystapp.views import helpers, email_sender, general
 from scorystapp.views import course as course_view
 from django.contrib import auth
 from django.contrib.auth import views
-from django.db.models import Q
-
-
-def get_redirect_path(request, redirect_path, user):
-  """ Returns the correct redirect path, if any, from login. """
-  if redirect_path:
-    # redirect path is relative to root
-    redirect_path = '/%s' % redirect_path
-  else:
-    course_users = (models.CourseUser.objects.filter(Q(user=user),
-      Q(privilege=models.CourseUser.INSTRUCTOR) | Q(privilege=models.CourseUser.TA))
-      .order_by('-course__id'))
-    # If a user is an instructor or TA for any class, show him the course roster
-    # page of the last course (by id). Otherwise, we just show the welcome page
-    if course_users:
-      redirect_path = '/course/%d/roster/' % course_users[0].course.pk
-    else:
-      redirect_path = '/welcome/'
-
-  return redirect_path
 
 
 def login(request, redirect_path=None, token=None):
   """ Allows the user to log in. """
 
   if request.user.is_authenticated():
-    return shortcuts.redirect(get_redirect_path(request, redirect_path, request.user))
+    return shortcuts.redirect(general.get_redirect_path(request.user, redirect_path))
 
   if request.method == 'POST':
     form = forms.UserLoginForm(request.POST)
@@ -46,7 +26,7 @@ def login(request, redirect_path=None, token=None):
         redirect_path = 'enroll/%s/' % token
         del request.session['token']
 
-      return shortcuts.redirect(get_redirect_path(request, redirect_path, user))
+      return shortcuts.redirect(general.get_redirect_path(request.user, redirect_path))
   else:
     form = forms.UserLoginForm()
 
