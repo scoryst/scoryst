@@ -199,12 +199,14 @@ var AnnotationView = IdempotentView.extend({
     if (this.mathjaxIsLoaded) {
       this.renderLatex();
     } else {
+      this.waitingToLoadMathjax = true;
       this.trigger('loadMathjax', this);
     }
   },
 
   renderLatex: function() {
     this.mathjaxIsLoaded = true;
+    this.waitingToLoadMathjax = false;
     this.$latexForm.hide();
     this.$textarea.hide();
     this.$previewLatexIcon.hide();
@@ -215,5 +217,17 @@ var AnnotationView = IdempotentView.extend({
     this.$editLatexButton.show();
 
     MathJax.Hub.Queue(['Typeset', MathJax.Hub, this.$renderedLatex[0]]);
+  },
+
+  shouldRenderLatex: function() {
+    if (this.waitingToLoadMathjax) {
+      return true;
+    }
+
+    if (Utils.IS_STUDENT_VIEW && this.model.get('renderLatex')) {
+      return true;
+    }
+
+    return false;
   }
 });

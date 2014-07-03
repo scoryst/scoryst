@@ -33,7 +33,6 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
       }
     }, true);
 
-    var self = this;
     this.fetchPages(function(pages) {
       self.pages = pages;
 
@@ -241,7 +240,6 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
       self.deregisterSubview(annotationView);
     });
 
-
     var curPageNum = this.getCurPageNum();
     var shouldLoadMathjax = false;
     this.annotationViews = [];
@@ -364,28 +362,28 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
   // the `annotationView` parameter is not necessary; if it is not passed in,
   // render all of the annotation views
   loadMathjax: function(annotationView) {
-    var self = this;
-
-    function renderAnnotations() {
-      if (annotationView) {
-        annotationView.renderLatex();
-      } else {
-        self.annotationViews.forEach(function(annotationView) {
-          annotationView.renderLatex();
-        });
-      }
-    }
-
     // load Mathjax once
     if (!this.mathjaxIsLoaded) {
       this.mathjaxIsLoaded = true;
       var self = this;
       $.getScript(this.MATHJAX_LATEX_URL, function() {
         MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });
-        renderAnnotations(annotationView);
+        self.renderLatexForAnnotations(annotationView);
       });
     } else {
-      renderAnnotations(annotationView)
+      this.renderLatexForAnnotations(annotationView);
+    }
+  },
+
+  renderLatexForAnnotations: function(annotationView) {
+    if (annotationView && annotationView.shouldRenderLatex()) {
+      annotationView.renderLatex();
+    } else {
+      this.annotationViews.forEach(function(annotationView) {
+        if (annotationView.shouldRenderLatex()) {
+          annotationView.renderLatex();
+        }
+      });
     }
   }
 });
