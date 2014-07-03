@@ -35,7 +35,6 @@ var SubmissionsNavView = IdempotentView.extend({
       preloadOtherStudentAssessments: 0,
       preloadCurAssessment: 0
     });
-    this.assessmentCanvasView.render();
 
     var self = this;
 

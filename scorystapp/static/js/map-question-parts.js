@@ -14,11 +14,10 @@ $(function() {
   var $previousPage = $('.previous-page');
   var $nextPage = $('.next-page');
 
-  var examCanvasView = new ExamCanvasView({
+  var assessmentCanvasView = new AssessmentCanvasView({
     el: '.exam',
     preloadCurExam: 2
   });
-  examCanvasView.render();
 
   initTypeAhead();
   getAllQuestionParts();
@@ -135,7 +134,7 @@ $(function() {
         return false;
       }
 
-      if (parseInt(page) <= 0 || parseInt(page) > examCanvasView.getTotalNumPages()) {
+      if (parseInt(page) <= 0 || parseInt(page) > assessmentCanvasView.getMaxPageNumber()) {
         return false;
       }
     }
@@ -144,7 +143,7 @@ $(function() {
 
   // Makes the back button work by handling the popState event.
   $(window).bind('popstate', function() {
-    examCanvasView.showPage();
-    $currentPageNum.html(examCanvasView.getCurPageNum());
+    assessmentCanvasView.showPage();
+    $currentPageNum.html(assessmentCanvasView.getCurPageNum());
   });
 });

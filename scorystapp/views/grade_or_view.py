@@ -23,7 +23,7 @@ def get_assessment_pdf(request, cur_course_user, submission_id):
 @decorators.access_controlled
 @decorators.student_required
 @decorators.submission_released_required
-def get_non_blank_pages(request, cur_course_user, submission_id):
+def get_non_blank_pages(request, cur_course_user, submission_id, assessment_id=None):
   submission_pages = models.SubmissionPage.objects.filter(submission=submission_id)
   pages = sorted([page.page_number for page in submission_pages if not page.is_blank])
   return http.HttpResponse(json.dumps(pages), mimetype='application/json')
