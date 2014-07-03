@@ -165,8 +165,6 @@ urlpatterns = patterns('',
    'scorystapp.views.grade.get_previous_student'),
   url(r'^course/(?P<course_id>\d+)/grade/(?P<submission_id>\d+)/get-next-student/$',
     'scorystapp.views.grade.get_next_student'),
-  url(r'^course/(?P<course_id>\d+)/(grade|assessments/view|assessments/preview)/(?P<submission_id>\d+)/get-non-blank-pages/$',
-    'scorystapp.views.grade_or_view.get_non_blank_pages'),
 
   url(r'^course/(?P<course_id>\d+)/(grade|assessments/view|assessments/preview)/(?P<submission_id>\d+)/assessment-page/(?P<assessment_page_number>\d+)/annotation/$',
     'scorystapp.views.grade_or_view.list_annotations'),
@@ -179,6 +177,13 @@ urlpatterns = patterns('',
   # course student view assessment
   url(r'^course/(?P<course_id>\d+)/assessments/view/(?P<submission_id>\d+)/$',
     'scorystapp.views.view.view_assessment'),
+
+
+  # For the assessment canvas
+  url(r'^course/(?P<course_id>\d+)/(grade|assessments/view|assessments/preview)/(?P<submission_id>\d+)/get-non-blank-pages/$',
+    'scorystapp.views.grade_or_view.get_non_blank_pages'),
+  url(r'^course/(?P<course_id>\d+)/assessments/(?P<assessment_id>\d+)/(assign|map-question-parts)/(?P<submission_id>\d+)/get-non-blank-pages/$',
+    'scorystapp.views.grade_or_view.get_non_blank_pages'),
 
 
   # create preview assessment
@@ -209,14 +214,6 @@ urlpatterns = patterns('',
     'scorystapp.views.get_jpeg.get_assessment_jpeg_large'),
   url(r'^course/(?P<course_id>\d+)/assessments/(?P<assessment_id>\d+)/(assign|map-question-parts)/(?P<submission_id>\d+)/get-assessment-jpeg-large/(?P<page_number>\d+)/$',
     'scorystapp.views.get_jpeg.get_assessment_jpeg_large'),
-
-
-  # get number of pages for a given assessment
-  url(r'^course/(?P<course_id>\d+)/(grade|assessments/view|assessments/preview)/(?P<submission_id>\d+)/get-assessment-page-count/$',
-    'scorystapp.views.get_jpeg.get_assessment_page_count'),
-  #
-  url(r'^course/(?P<course_id>\d+)/assessments/(?P<assessment_id>\d+)/(assign|map-question-parts)/(?P<submission_id>\d+)/get-assessment-page-count/$',
-    'scorystapp.views.get_jpeg.get_assessment_page_count'),
 
 
   # get jpeg corresponding to student offset

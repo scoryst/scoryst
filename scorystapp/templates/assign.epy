@@ -70,6 +70,7 @@
   <script src="/static/js/lib/jquery.custom-scrollbar.min.js"></script>
 
   <script src="/static/js/zoom-lens.js"></script>
+  <script src="/static/js/base-assessment-canvas.js"></script>
   <script src="/static/js/assessment-canvas.js"></script>
 
   <script src="/static/js/assign/models/submission.js"></script>

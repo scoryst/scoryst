@@ -47,14 +47,14 @@ var MainView = IdempotentView.extend({
 
   renderAssessmentCanvas: function(response) {
     var shouldPreloadAssessments = !Utils.IS_STUDENT_VIEW && !Utils.IS_PREVIEW;
-    var assessmentCanvasGradeView = new AssessmentCanvasGradeView({
+    var gradeAssessmentCanvasView = new GradeAssessmentCanvasView({
       response: response,
       preloadOtherStudentAssessments: (shouldPreloadAssessments) ? 1 : 0,
       preloadCurAssessment: 1,
       el: this.$('.assessment')
     });
 
-    this.registerSubview(assessmentCanvasGradeView);
+    this.registerSubview(gradeAssessmentCanvasView);
   },
 
   renderStudentNav: function() {

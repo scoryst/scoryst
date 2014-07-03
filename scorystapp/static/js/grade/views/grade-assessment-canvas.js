@@ -1,13 +1,14 @@
-var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
+var GradeAssessmentCanvasView = BaseAssessmentCanvasView.extend({
   CIRCLE_RADIUS: 10,  // specified in style.css as radius of annotation
   BLUR_TIME: 100,
   MATHJAX_LATEX_URL: 'https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML',
 
-  events: {
-    'blur textarea': 'deleteBlankAnnotations',
-    'mousedown .annotation': 'sendAnnotationToFront',
-    'click .previous-page': 'goToPreviousPage',
-    'click .next-page': 'goToNextPage'
+  events: function() {
+    // extends the parent view's events
+    return _.extend({}, this.constructor.__super__.events, {
+      'blur textarea': 'deleteBlankAnnotations',
+      'mousedown .annotation': 'sendAnnotationToFront'
+    });
   },
 
   initialize: function(options) {
@@ -33,31 +34,8 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
       }
     }, true);
 
-    var self = this;
-    this.fetchPages(function(pages) {
-      self.pages = pages;
-
-      function renderView() {
-        self.render();
-        self.delegateEvents();
-      }
-
-      if (!self.response.pages) {
-        // the response hasn't been mapped, so we don't know the first page to
-        // display. hence, get the closest page to this response
-        self.getClosestPage(self.response, function(page) {
-          self.setCurrentPage(page);
-          renderView();
-        });
-      } else {
-        self.setPageIndexFromResponse(self.response);
-        renderView();
-      }
-    });
-
     // custom events for going through info about annotations (for instructors)
     if (!Utils.IS_STUDENT_VIEW) {
-      var self = this;
       this.listenToDOM(this.$annotationInfoModal, 'show.bs.modal', function() {
         var annotationInfo = _.template($('.annotation-info-template').html());
         self.$annotationInfoModal.html(annotationInfo);
@@ -94,6 +72,63 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
     );
   },
 
+  // this function is called from the base assessment view
+  fetchPagesCallback: function(pages) {
+    this.pages = pages;
+
+    var self = this;
+
+    function renderView() {
+      self.render();
+      self.delegateEvents();
+    }
+
+    if (!this.response.get('pages')) {
+      // the response hasn't been mapped, so we don't know the first page to
+      // display. hence, get the closest page to this response
+      this.getClosestPage(this.response, function(page) {
+        self.setCurrentPage(page);
+        renderView();
+      });
+    } else {
+      this.setPageIndexFromResponse(this.response);
+      renderView();
+    }
+  },
+
+  // this function is called from the base view
+  preloadStudentAssessments: function() {
+    if (this.preloadOtherStudentAssessments) {
+      for (var i = -this.preloadOtherStudentAssessments; i <= this.preloadOtherStudentAssessments; i++) {
+        // preload page of previous and next students
+        var image = new Image();
+        var questionPart = this.response.get('questionPart');
+        image.src = 'get-student-jpeg/' + i + '/' +
+          questionPart.questionNumber + '/';
+      }
+    }
+  },
+
+  // gets the page that is closest to the given student's response
+  getClosestPage: function(response, callback) {
+    var questionNumber = response.get('questionPart').questionNumber;
+    $.ajax({
+      url: 'get-closest-page/' + questionNumber + '/'
+    }).done(function(page) {
+      callback(parseInt(page, 10));
+    });
+  },
+
+  setCurrentPage: function(page) {
+    var index = this.pages.indexOf(page);
+    if (index === -1) {
+      // page couldn't be found; default to first page of submission
+      index = 0;
+    }
+
+    this.pageIndex = index;
+  },
+
   goToNextAnnotationInfo: function() {
     this.$currAnnotationInfo.hide();
     this.$currAnnotationInfo = this.$currAnnotationInfo.next();
@@ -114,80 +149,13 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
     this.$nextAnnotationInfoButton.show();
   },
 
-  // handles preloading images for faster navigation through different jpegs
-  preloadImages: function() {
-    if (this.preloadCurAssessment) {
-      for (var i = -this.preloadCurAssessment; i <= this.preloadCurAssessment; i++) {
-        // preload pages before and after, corresponding to the current student
-        if (this.pageIndex + i < this.pages.length - 1 && this.pageIndex + i > 0) {
-          var pageToPreload = this.pages[this.pageIndex + i];
-          var image = new Image();
-          image.src = 'get-assessment-jpeg/' + pageToPreload + '/';
-        }
-      }
-    }
-
-    if (this.preloadOtherStudentAssessments) {
-      for (var i = -this.preloadOtherStudentAssessments; i <= this.preloadOtherStudentAssessments; i++) {
-        // preload page of previous and next students
-        var image = new Image();
-        var questionPart = this.response.get('questionPart');
-        image.src = 'get-student-jpeg/' + i + '/' +
-          questionPart.questionNumber + '/';
-      }
-    }
-  },
-
-  // handles the user clicking on the left arrow or using the keyboard
-  // shortcut to navigate to the previous page
-  goToPreviousPage: function() {
-    if (this.pageIndex > 0) {
-      this.pageIndex -= 1;
-      this.trigger('changeAssessmentPage', this.pages[this.pageIndex]);
-      this.updateAssessmentArrows();
-      this.showPage();
-    }
-  },
-
-  // handles the user clicking on the right arrow or using the keyboard
-  // shortcut to navigate to the next page
-  goToNextPage: function() {
-    if (this.pageIndex < this.pages.length - 1) {
-      this.pageIndex += 1;
-      this.trigger('changeAssessmentPage', this.pages[this.pageIndex]);
-      this.updateAssessmentArrows();
-      this.showPage();
-    }
-  },
-
-  fetchPages: function(callback) {
-    $.ajax({
-      url: 'get-non-blank-pages/'
-    }).done(function(pages) {
-      callback(pages);
-    });
-  },
-
   getCurPageNum: function() {
     return this.pages[this.pageIndex];
   },
 
   showPage: function() {
-    // updates the assessment canvas to show the image corresponding to the current
-    // page number
-    this.$assessmentImage.attr('src', 'get-assessment-jpeg/' + this.pages[this.pageIndex] + '/');
+    this.constructor.__super__.showPage.apply(this, arguments);
     this.renderAnnotations();
-    this.preloadImages();
-  },
-
-  /* Gets the page that is closest to the given student's response. */
-  getClosestPage: function(response, callback) {
-    var questionNumber = response.get('questionPart').questionNumber;
-    $.ajax({
-      url: 'get-closest-page/' + questionNumber + '/'
-    }).done(function(page) {
-      callback(parseInt(page, 10));
-    });
   },
 
   setPageIndexFromResponse: function(response) {
@@ -205,33 +173,12 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
 
     var firstPageStr = responsePages.split(',')[0];
     var firstPage = parseInt(firstPageStr, 10);
-    // If we are not already showing the required page
+    // if we are not already showing the required page
     if (this.pages[this.pageIndex] !== firstPage) {
       this.setCurrentPage(firstPage);
     }
 
     return oldPageIndex !== this.pageIndex;
-  },
-
-  setCurrentPage: function(page) {
-    var index = this.pages.indexOf(page);
-    if (index === -1) {
-      // page couldn't be found; default to first page of submission
-      index = 0;
-    }
-
-    this.pageIndex = index;
-  },
-
-  updateAssessmentArrows: function() {
-    this.$nextPage.removeClass('disabled');
-    this.$previousPage.removeClass('disabled');
-
-    if (this.pageIndex === 0) {
-      this.$previousPage.addClass('disabled');
-    } else if (this.pageIndex === this.pages.length - 1) {
-      this.$nextPage.addClass('disabled');
-    }
   },
 
   renderAnnotations: function() {
@@ -240,7 +187,6 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
     this.annotationViews.forEach(function(annotationView) {
       self.deregisterSubview(annotationView);
     });
-
 
     var curPageNum = this.getCurPageNum();
     var shouldLoadMathjax = false;
@@ -379,7 +325,6 @@ var AssessmentCanvasGradeView = AssessmentCanvasView.extend({
     // load Mathjax once
     if (!this.mathjaxIsLoaded) {
       this.mathjaxIsLoaded = true;
-      var self = this;
       $.getScript(this.MATHJAX_LATEX_URL, function() {
         MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });
         renderAnnotations(annotationView);

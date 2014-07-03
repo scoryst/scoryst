@@ -341,7 +341,7 @@
 <script src="/static/js/common/mediator.js"></script>
 <script src="/static/js/common/utils.js"></script>
 
-<script src="/static/js/assessment-canvas.js"></script>
+<script src="/static/js/base-assessment-canvas.js"></script>
 <script src="/static/js/zoom-lens.js"></script>
 <script src="/static/js/grade/models/response.js"></script>
 <script src="/static/js/grade/models/rubric.js"></script>
@@ -352,7 +352,7 @@
 <script src="/static/js/grade/views/rubrics-nav-header.js"></script>
 <script src="/static/js/grade/views/rubrics-nav.js"></script>
 <script src="/static/js/grade/views/assessment-nav.js"></script>
-<script src="/static/js/grade/views/assessment-canvas.js"></script>
+<script src="/static/js/grade/views/grade-assessment-canvas.js"></script>
 <script src="/static/js/grade/views/annotation.js"></script>
 <script src="/static/js/grade/views/student-nav.js"></script>
 <script src="/static/js/grade/views/main.js"></script>

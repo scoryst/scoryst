@@ -86,7 +86,7 @@ def get_blank_assessment_page_count(request, cur_course_user, assessment_id):
 
 @decorators.access_controlled
 @decorators.instructor_or_ta_required
-def get_offset_student_jpeg_with_question_number(request, cur_course_user, 
+def get_offset_student_jpeg_with_question_number(request, cur_course_user,
     submission_id, offset, question_number):
   """
   Gets the jpeg corresponding to question_number and part_number for the student
@@ -149,7 +149,7 @@ def _find_page_for_question(submission, question_number, earliest=True):
   assessment = submission.assessment
   question_parts = assessment.questionpart_set.filter(
     question_number=question_number)
-  
+
   if earliest:
     question_parts = question_parts.order_by('part_number')
   else:
