@@ -4,20 +4,25 @@
   </div>
 
   <div class="assessment-canvas">
-    <div>
-      <button type="button" class="btn btn-sm btn-link enable-zoom">
-        Enable Zoom <i class="fa fa-search-plus"></i>
-      </button>
-      <button type="button" class="btn btn-sm btn-link disable-zoom">
-        Disable Zoom <i class="fa fa-search-minus"></i>
-      </button>
-    </div>
+    {% if is_student_view or is_grade_page %}
+    <canvas class="freeform-annotations-canvas"> </canvas>
+    {% endif %}
 
-    {% if is_grade_page or is_preview %}
-    <div class="annotation-link">
-      <button type="button" class="btn btn-sm btn-link" data-toggle="modal" data-target=".annotation-info-modal">
-        How to Annotate <i class="fa fa-info-circle"></i>
+    {% if is_grade_page %}
+    <div class="btn-group toolbar">
+      <button type="button" class="btn btn-default enable-zoom" data-toggle="tooltip" data-placement="top" title="Zoom">
+        <i class="fa fa-search"></i>
       </button>
+      <button type="button" class="btn btn-default set-freeform-annotations" data-toggle="tooltip" data-placement="top" title="Draw">
+        <i class="fa fa-pencil"></i>
+      </button>
+      <button type="button" class="btn btn-default set-erase" data-toggle="tooltip" data-placement="top" title="Erase">
+        <i class="fa fa-eraser"></i>
+      </button>
+      <button type="button" class="btn btn-default set-text-annotations" data-toggle="tooltip" data-placement="top" title="Add Text">
+        <i class="fa fa-file-text"></i>
+      </button>
+      <button type="button" class="btn btn-default view-help" data-toggle="modal" data-target=".annotation-info-modal" data-toggle="tooltip" data-placement="top" title="Help"><i class="fa fa-question"></i></button>
     </div>
     <div class="modal fade annotation-info-modal" tabindex="-1" role="dialog" aria-hidden="true">
       <!-- The annotation gifs are dynamically inserted -->
@@ -51,6 +56,12 @@
         </div>
       </div>
     </script>
+    {% else %}
+    <div class="btn-group toolbar">
+      <button type="button" class="btn btn-default enable-zoom" data-toggle="tooltip" data-placement="top" title="Zoom">
+        <i class="fa fa-search"></i>
+      </button>
+    </div>
     {% endif %}
 
     <div class="zoom-lens">

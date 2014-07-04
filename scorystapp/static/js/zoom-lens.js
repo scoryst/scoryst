@@ -4,34 +4,30 @@ var ZoomLensView = IdempotentView.extend({
   ZOOM_LENS_OFFSET_FROM_MOUSE: 20,
 
   events: {
-    'click .enable-zoom': 'enableZoom',
-    'click .disable-zoom': 'disableZoom',
-    'mouseenter .assessment-image': 'showZoomLens',
-    'mouseleave .assessment-image': 'hideZoomLens',
-    'mousemove .assessment-image': 'moveZoomLens'
+    'click .enable-zoom': 'toggleZoom',
+    'mouseenter .freeform-annotations-canvas': 'showZoomLens',
+    'mouseleave .freeform-annotations-canvas': 'hideZoomLens',
+    'mousemove .freeform-annotations-canvas': 'moveZoomLens'
   },
 
   initialize: function(options) {
     this.constructor.__super__.initialize.apply(this, arguments);
 
-    this.$enableZoomButton = this.$el.find('.enable-zoom');
-    this.$disableZoomButton = this.$el.find('.disable-zoom');
     this.$zoomLens = this.$el.find('.zoom-lens');
-
     this.curPageNum = options.curPageNum;
-    if (localStorage && localStorage.zoomLensEnabled === 'true') {
-      this.zoomLensEnabled = true;
-      // This is needed if the user refreshes the page. this.zoomLensEnabled might be true
-      // but by default the button shows 'Enable Zoom'. This accounts for this edge case.
-      this.$enableZoomButton.hide();
-      this.$disableZoomButton.show();
-    } else {
-      this.zoomLensEnabled = false;
-    }
-
     this.createdImage = false;
     this.image = new Image();
     this.loadImage();
+
+    if (localStorage && localStorage.zoomLensEnabled === 'true') {
+      console.log('zoom lens is initially enabled');
+      // This is needed if the user refreshes the page. this.zoomLensEnabled might be true
+      // but by default the button shows 'Enable Zoom'. This accounts for this edge case.
+      this.enableZoom();
+      this.$('.enable-zoom').addClass('active');
+    } else {
+      this.zoomLensEnabled = false;
+    }
   },
 
   loadImage: function() {
@@ -49,6 +45,14 @@ var ZoomLensView = IdempotentView.extend({
     }
   },
 
+  toggleZoom: function() {
+    if (this.zoomLensEnabled) {
+      this.disableZoom();
+    } else {
+      this.enableZoom();
+    }
+  },
+
   enableZoom: function() {
     if (localStorage) {
       localStorage.zoomLensEnabled = true;
@@ -58,8 +62,6 @@ var ZoomLensView = IdempotentView.extend({
     this.loadImage();
 
     this.$el.addClass('zoom-enabled');
-    this.$enableZoomButton.toggle();
-    this.$disableZoomButton.toggle();
   },
 
   disableZoom: function() {
@@ -69,8 +71,6 @@ var ZoomLensView = IdempotentView.extend({
 
     this.zoomLensEnabled = false;
     this.$el.removeClass('zoom-enabled');
-    this.$enableZoomButton.toggle();
-    this.$disableZoomButton.toggle();
   },
 
   showZoomLens: function() {

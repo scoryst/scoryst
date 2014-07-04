@@ -346,6 +346,7 @@
 <script src="/static/js/grade/models/response.js"></script>
 <script src="/static/js/grade/models/rubric.js"></script>
 <script src="/static/js/grade/models/annotation.js"></script>
+<script src="/static/js/grade/models/freeform-annotation.js"></script>
 
 <script src="/static/js/grade/views/rubric.js"></script>
 <script src="/static/js/grade/views/custom-points.js"></script>
@@ -353,6 +354,7 @@
 <script src="/static/js/grade/views/rubrics-nav.js"></script>
 <script src="/static/js/grade/views/assessment-nav.js"></script>
 <script src="/static/js/grade/views/grade-assessment-canvas.js"></script>
+<script src="/static/js/grade/views/freeform-canvas.js"></script>
 <script src="/static/js/grade/views/annotation.js"></script>
 <script src="/static/js/grade/views/student-nav.js"></script>
 <script src="/static/js/grade/views/main.js"></script>

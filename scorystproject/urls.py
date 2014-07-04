@@ -171,6 +171,12 @@ urlpatterns = patterns('',
     'scorystapp.views.grade_or_view.list_annotations'),
   url(r'^course/(?P<course_id>\d+)/(grade|assessments/view|assessments/preview)/(?P<submission_id>\d+)/assessment-page/(?P<assessment_page_number>\d+)/annotation/(?P<annotation_id>\d+)/$',
     'scorystapp.views.grade_or_view.manage_annotation'),
+  url(r'^course/(?P<course_id>\d+)/(grade|assessments/view|assessments/preview)/(?P<submission_id>\d+)/assessment-page/(?P<assessment_page_number>\d+)/get-freeform-annotation/$',
+    'scorystapp.views.grade_or_view.get_freeform_annotation'),
+  url(r'^course/(?P<course_id>\d+)/(grade|assessments/view|assessments/preview)/(?P<submission_id>\d+)/assessment-page/(?P<assessment_page_number>\d+)/has-freeform-annotation/$',
+    'scorystapp.views.grade_or_view.has_freeform_annotation'),
+  url(r'^course/(?P<course_id>\d+)/(grade|assessments/view|assessments/preview)/(?P<submission_id>\d+)/assessment-page/(?P<assessment_page_number>\d+)/save-freeform-annotation/$',
+    'scorystapp.views.grade_or_view.save_freeform_annotation'),
 
   # Update the `SplitPage`s as uploaded and (possibly) blank
   url(r'^update-split-page-state/$', 'scorystapp.views.upload.update_split_page_state'),

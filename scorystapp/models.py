@@ -507,7 +507,7 @@ signals.m2m_changed.connect(rubrics_changed, sender=Response.rubrics.through)
 
 
 class Annotation(models.Model):
-  """ Represents an annotation for a student's exam answer page. """
+  """ Represents an annotation for a student's `SubmissionPage`. """
   submission_page = models.ForeignKey(SubmissionPage, db_index=True)
 
   # One of the rubric and comment fields should not be null
@@ -518,6 +518,16 @@ class Annotation(models.Model):
   offset_left = models.FloatField()
 
   render_latex = models.BooleanField(default=False)
+
+
+class FreeformAnnotation(models.Model):
+  """ Represents the freeform annotations for an entire `SubmissionPage` """
+  def generate_remote_image_name(instance, filename):
+    """ Generates a name of the form freeform-annotation-png/<random_string><timestamp>.png """
+    return utils.generate_timestamped_random_name('freeform-annotation-png', 'png')
+
+  submission_page = models.ForeignKey(SubmissionPage, db_index=True)
+  annotation_image = models.ImageField(upload_to=generate_remote_image_name, blank=True)
 
 
 """

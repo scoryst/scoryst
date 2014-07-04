@@ -68,6 +68,7 @@
   <script src="/static/js/common/utils.js"></script>
 
   <script src="/static/js/lib/jquery.custom-scrollbar.min.js"></script>
+  <script src="/static/js/lib/tooltip.js"></script>  <!-- For assessment canvas -->
 
   <script src="/static/js/zoom-lens.js"></script>
   <script src="/static/js/base-assessment-canvas.js"></script>

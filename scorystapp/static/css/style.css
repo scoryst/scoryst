@@ -281,15 +281,21 @@ input {
   width: 100%;
 }
 
-.previous-page, .next-page {
+.assessment-canvas .toolbar {
+  position: absolute;
+}
+
+.assessment .previous-page, .assessment .next-page {
   cursor: pointer;
   position: relative;
   margin-top: 1px;
 }
 
-.previous-page i, .next-page i {
+.assessment .previous-page i, .assessment .next-page i {
   position: absolute;
   top: 50%;
+  left: 50%;
+  font-size: 40px;
 
   transform: translate(-50%, -50%);
   -webkit-transform: translate(-50%, -50%);
@@ -298,25 +304,20 @@ input {
   -ms-transform: translate(-50%, -50%);
 }
 
-.previous-page i, .next-page i {
-  left: 50%;
-  font-size: 40px;
-}
-
-.previous-page:hover, .next-page:hover {
+.assessment .previous-page:hover, .assessment .next-page:hover {
   background: #f6f6f6;
 }
 
-.previous-page.disabled, .next-page.disabled {
+.assessment .previous-page.disabled, .assessment .next-page.disabled {
   visibility: hidden;
 }
 
-.previous-page {
+.assessment .previous-page {
   float: left;
   width: 5%;
 }
 
-.next-page {
+.assessment .next-page {
   float: left;
   width: 5%;
 }
@@ -357,14 +358,6 @@ input {
 
 .assessment-canvas.zoom-enabled {
   cursor: crosshair;
-}
-
-.assessment-canvas .disable-zoom {
-  display: none;
-}
-
-.assessment-canvas .disable-zoom, .assessment-canvas .enable-zoom {
-  position: absolute;
 }
 
 /* CSS for grade page */
@@ -795,11 +788,6 @@ input {
   resize: vertical;
 }
 
-.grade .annotation-link {
-  position: absolute;
-  right: 50px;
-}
-
 .annotation-info {
   list-style: none;
   padding: 0;
@@ -864,6 +852,21 @@ input {
 
 .grade .annotation .preview:hover, .grade .annotation .back-to-edit:hover {
   cursor: pointer;
+}
+
+/* CSS for the freeform annotations canvas */
+.grade .freeform-annotations-canvas {
+  position: absolute;
+  width: 675px;
+  height: 873px;
+}
+
+.grade .freeform-annotations-canvas.drawing {
+  cursor: url(/static/img/pencil.png), auto;
+}
+
+.grade .freeform-annotations-canvas.erasing {
+  cursor: url(/static/img/eraser.png), auto;
 }
 
 /* Login page CSS */

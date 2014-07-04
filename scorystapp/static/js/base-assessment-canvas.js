@@ -19,7 +19,7 @@ var BaseAssessmentCanvasView = IdempotentView.extend({
 
   events: {
     'click .previous-page': 'goToPreviousPage',
-    'click .next-page': 'goToNextPage',
+    'click .next-page': 'goToNextPage'
   },
 
   initialize: function(options) {
@@ -59,6 +59,10 @@ var BaseAssessmentCanvasView = IdempotentView.extend({
 
     // events from other elements
     this.listenToDOM($(window), 'keydown', this.handleShortcuts);
+
+    // initialize tooltips
+    $('.enable-zoom').tooltip();
+    $('.disable-zoom').tooltip();
   },
 
   render: function() {
@@ -96,14 +100,14 @@ var BaseAssessmentCanvasView = IdempotentView.extend({
   },
 
   createZoomLens: function() {
-    var zoomLensView = new ZoomLensView({
+    this.zoomLensView = new ZoomLensView({
       curPageNum: this.getCurPageNum(),
       el: '.assessment-canvas'
     });
-    this.registerSubview(zoomLensView);
+    this.registerSubview(this.zoomLensView);
     // zoom lens should know when the assessment page changes, so that it will load
     // the correct page
-    zoomLensView.listenTo(this, 'changeAssessmentPage', zoomLensView.changeAssessmentPage);
+    this.zoomLensView.listenTo(this, 'changeAssessmentPage', this.zoomLensView.changeAssessmentPage);
   },
 
   getCurPageNum: function() {
