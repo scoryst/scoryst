@@ -49,7 +49,11 @@
     </div>
 
     <div class="col-xs-6">
-      <h2>History</h2>
+      {% if is_staff %}
+        <h2>Student Submission History</h2>
+      {% else %}
+        <h2>Submission History</h2>
+      {% endif %}
 
       <table class="table table-striped table-condensed">
         <thead>
@@ -234,6 +238,7 @@
 <script src="/static/js/lib/modal.js"></script>
 <script src="/static/js/lib/tooltip.js"></script>
 <script src="/static/js/lib/popover.js"></script>
+<script src="/static/js/submit/submit.js"></script>
 
 {% if is_staff %}
   {% include 'backbone.epy' %}

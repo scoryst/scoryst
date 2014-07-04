@@ -236,7 +236,7 @@ class HomeworkUploadForm(forms.Form):
   homework_id = forms.ChoiceField()
   homework_file = forms.FileField()
   
-  # student to upload as; instructors only
+  # student to upload as; this is an instructors-only field
   student_id = forms.ChoiceField(required=False)
 
 

@@ -2,7 +2,7 @@ $(function() {
   $('.finalized-info-popover').popover();
 
   var pdfInfoPopoverText = 'Not sure how to create a PDF? ' +
-    'Just follow the instructions given below.';
+    'Just follow the instructions below.';
 
   var $pdfInfoPopover = $('.pdf-info-popover');
   $pdfInfoPopover.popover({ content: pdfInfoPopoverText });

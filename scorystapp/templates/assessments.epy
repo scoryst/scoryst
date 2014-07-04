@@ -14,7 +14,6 @@
                 <th>Solutions PDF</th>
                 <th>Submission Deadline</th>
                 <th>Actions</th>
-                <th>Submit</th>
               </tr>
             </thead>
 
@@ -151,7 +150,7 @@
           </a>
         <% } else { %>
           None
-          <a class="actions info-popover" data-trigger="hover">
+          <a class="info-popover" data-trigger="hover">
             <i class="fa fa-question-circle"></i>
           </a>
         <% } %>
@@ -185,20 +184,10 @@
           </a>
         <% } else { %>
           None
-          <a class="actions info-popover" data-trigger="hover">
+          <a class="info-popover" data-trigger="hover">
             <i class="fa fa-question-circle"></i>
           </a>
         <% } %>
-      </td>
-
-      <td>
-        <a href="/course/<%= course %>/submit/">
-          Submit
-        </a>
-
-        <a class="submit info-popover" data-trigger="hover">
-          <i class="fa fa-question-circle"></i>
-        </a>
       </td>
     </tr>
   </script>
