@@ -235,7 +235,7 @@ class HomeworkUploadForm(forms.Form):
 
   homework_id = forms.ChoiceField()
   homework_file = forms.FileField()
-  
+
   # student to upload as; this is an instructors-only field
   student_id = forms.ChoiceField(required=False)
 
@@ -285,8 +285,10 @@ def _validate_pdf_file(pdf_file, max_size):
     max_size_in_mb = max_size / float(1024 * 1024)
     user_size_in_mb = pdf_file.size / float(1024 * 1024)
 
-    raise forms.ValidationError('Max size allowed is %d MB but file size is %d MB' %
-      (max_size_in_mb, user_size_in_mb))
+    error_message = ('Max size allowed is %d MB but file size is %d MB. '
+      % (max_size_in_mb, user_size_in_mb))
+    error_message += 'You may try http://smallpdf.com/compress-pdf to compress the pdf size.'
+    raise forms.ValidationError(error_message)
 
   try:
     py_pdf_file = PyPDF2.PdfFileReader(pdf_file)
