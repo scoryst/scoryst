@@ -1,5 +1,6 @@
 $(function() {
   $('.finalized-info-popover').popover();
+  var fileSizeExceededTemplate = _.template($('.file-size-exceeded-template').html());
 
   var pdfInfoPopoverText = 'Not sure how to create a PDF? ' +
     'Just follow the instructions below.';
@@ -23,22 +24,21 @@ $(function() {
     var $uploadForm = $('.upload-exam');
     // In MB
     var MAX_FILE_SIZE = 40;
+    var BYTES_IN_MB = 1024 * 1024;
 
-    // When the form is submitted, check the file size
-    // If the file size > MAX_FILE_SIZE, prevent the submission and display
-    // an appropriate error message
+    // When the form is submitted, check the file size. If the file size is
+    // bigger than MAX_FILE_SIZE, prevent the submission and display an error
     $uploadForm.submit(function(event) {
       var $homeworkFile = $('#id_homework_file');
-      var file_size = $homeworkFile[0].files[0].size / 1024 / 1024;
+      var fileSize = $homeworkFile[0].files[0].size / BYTES_IN_MB;
       // Round up to nearest hundredth for display purposes
-      file_size = Math.ceil(file_size * 100) / 100;
+      fileSize = Math.ceil(fileSize * 100) / 100;
 
-      if (file_size > MAX_FILE_SIZE) {
-        var error = 'Max size allowed is ' + MAX_FILE_SIZE + ' MB but file size is '
-          + file_size + ' MB. ';
-        error += 'You may try <a href="http://smallpdf.com/compress-pdf" target="_blank">' +
-          'this link</a> to compress the pdf size.';
-        $homeworkFile.next('.error').html(error);
+      if (fileSize > MAX_FILE_SIZE) {
+        $homeworkFile.next('.error').html(fileSizeExceededTemplate({
+          MAX_FILE_SIZE: MAX_FILE_SIZE,
+          fileSize: fileSize
+        }));
         event.preventDefault();
       }
     });

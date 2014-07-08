@@ -232,9 +232,16 @@
   </script>
 {% endif %}
 
+<script type="text/template" class="file-size-exceeded-template">
+  Max size allowed is <%= MAX_FILE_SIZE %> MB but file size is <%= fileSize %> MB.
+  You may try <a href="http://smallpdf.com/compress-pdf" target="_blank"> this link </a>
+  to compress the pdf size.
+</script>
+
 {% endblock %}
 
 {% block js %}
+{% include 'underscore.epy' %}
 <script src="/static/js/lib/modal.js"></script>
 <script src="/static/js/lib/tooltip.js"></script>
 <script src="/static/js/lib/popover.js"></script>

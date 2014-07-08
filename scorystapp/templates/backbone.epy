@@ -1,3 +1,2 @@
-<script src="/static/js/lib/underscore.min.js"></script>
-<script src="/static/js/interpolate-underscore.js"></script>
+{% include 'underscore.epy' %}
 <script src="/static/js/lib/backbone.min.js"></script>

@@ -281,12 +281,13 @@ class HomeworkUploadForm(forms.Form):
 
 def _validate_pdf_file(pdf_file, max_size):
   """ Validates the pdf_file and ensures it is less than max_size (which is in bytes). """
+  BYTES_IN_MB = 1024 * 1024
   if pdf_file.size > max_size:
-    max_size_in_mb = max_size / float(1024 * 1024)
-    user_size_in_mb = pdf_file.size / float(1024 * 1024)
+    max_size_in_mb = max_size / float(BYTES_IN_MB)
+    user_size_in_mb = pdf_file.size / float(BYTES_IN_MB)
 
-    error_message = ('Max size allowed is %d MB but file size is %d MB. '
-      % (max_size_in_mb, user_size_in_mb))
+    error_message = ('Max size allowed is %d MB but file size is %d MB. ' %
+      (max_size_in_mb, user_size_in_mb))
     error_message += 'You may try http://smallpdf.com/compress-pdf to compress the pdf size.'
     raise forms.ValidationError(error_message)
 
