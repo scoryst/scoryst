@@ -122,7 +122,7 @@ var GradeAssessmentCanvasView = BaseAssessmentCanvasView.extend({
   render: function() {
     this.constructor.__super__.render.apply(this, arguments);
 
-    // set the toolbar
+    // set the toolbar with `localStorage` settings
     if (localStorage && localStorage.lastChosenToolbarOption) {
       switch (localStorage.lastChosenToolbarOption) {
         case this.FREEFORM_ANNOTATION_SET:
@@ -138,6 +138,18 @@ var GradeAssessmentCanvasView = BaseAssessmentCanvasView.extend({
           this.textAnnotationsMode = true;
           break;
       }
+    }
+
+    // by default the text annotation option is set; check if that's the case
+    var noActive = true;
+    this.$('.toolbar button').each(function(i, button) {
+      if ($(button).hasClass('active')) {
+        noActive = false;
+      }
+    });
+    if (noActive) {
+      this.$setTextAnnotations.addClass('active');
+      this.textAnnotationsMode = true;
     }
   },
 
