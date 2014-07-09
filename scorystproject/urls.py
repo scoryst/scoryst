@@ -173,8 +173,6 @@ urlpatterns = patterns('',
     'scorystapp.views.grade_or_view.manage_annotation'),
   url(r'^course/(?P<course_id>\d+)/(grade|assessments/view|assessments/preview)/(?P<submission_id>\d+)/assessment-page/(?P<assessment_page_number>\d+)/get-freeform-annotation/$',
     'scorystapp.views.grade_or_view.get_freeform_annotation'),
-  url(r'^course/(?P<course_id>\d+)/(grade|assessments/view|assessments/preview)/(?P<submission_id>\d+)/assessment-page/(?P<assessment_page_number>\d+)/has-freeform-annotation/$',
-    'scorystapp.views.grade_or_view.has_freeform_annotation'),
   url(r'^course/(?P<course_id>\d+)/(grade|assessments/view|assessments/preview)/(?P<submission_id>\d+)/assessment-page/(?P<assessment_page_number>\d+)/save-freeform-annotation/$',
     'scorystapp.views.grade_or_view.save_freeform_annotation'),
 

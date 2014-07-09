@@ -5,24 +5,32 @@
 
   <div class="assessment-canvas">
     {% if is_student_view or is_grade_page %}
-    <canvas class="freeform-annotations-canvas"> </canvas>
+    <canvas class="freeform-annotations-canvas"></canvas>
     {% endif %}
 
     {% if is_grade_page %}
     <div class="btn-group toolbar">
-      <button type="button" class="btn btn-default enable-zoom" data-toggle="tooltip" data-placement="top" title="Zoom">
+      <button type="button" class="btn btn-default enable-zoom" data-toggle="tooltip"
+        data-placement="top" title="Zoom">
         <i class="fa fa-search"></i>
       </button>
-      <button type="button" class="btn btn-default set-freeform-annotations" data-toggle="tooltip" data-placement="top" title="Draw">
+      <button type="button" class="btn btn-default set-freeform-annotations" data-toggle="tooltip"
+        data-placement="top" title="Draw">
         <i class="fa fa-pencil"></i>
       </button>
-      <button type="button" class="btn btn-default set-erase" data-toggle="tooltip" data-placement="top" title="Erase">
+      <button type="button" class="btn btn-default set-erase" data-toggle="tooltip"
+        data-placement="top" title="Erase">
         <i class="fa fa-eraser"></i>
       </button>
-      <button type="button" class="btn btn-default set-text-annotations" data-toggle="tooltip" data-placement="top" title="Add Text">
+      <button type="button" class="btn btn-default set-text-annotations" data-toggle="tooltip"
+        data-placement="top" title="Write">
         <i class="fa fa-file-text"></i>
       </button>
-      <button type="button" class="btn btn-default view-help" data-toggle="modal" data-target=".annotation-info-modal" data-toggle="tooltip" data-placement="top" title="Help"><i class="fa fa-question"></i></button>
+      <!-- TODO: Add the help button back in after updating the content. -->
+      <!-- <button type="button" class="btn btn-default view-help" data-toggle="modal"
+        data-target=".annotation-info-modal" data-toggle="tooltip" data-placement="top" title="Help">
+        <i class="fa fa-question"></i>
+      </button> -->
     </div>
     <div class="modal fade annotation-info-modal" tabindex="-1" role="dialog" aria-hidden="true">
       <!-- The annotation gifs are dynamically inserted -->
@@ -58,7 +66,8 @@
     </script>
     {% else %}
     <div class="btn-group toolbar">
-      <button type="button" class="btn btn-default enable-zoom" data-toggle="tooltip" data-placement="top" title="Zoom">
+      <button type="button" class="btn btn-default enable-zoom" data-toggle="tooltip"
+        data-placement="top" title="Zoom">
         <i class="fa fa-search"></i>
       </button>
     </div>

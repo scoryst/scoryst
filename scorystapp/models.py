@@ -526,7 +526,7 @@ class FreeformAnnotation(models.Model):
     """ Generates a name of the form freeform-annotation-png/<random_string><timestamp>.png """
     return utils.generate_timestamped_random_name('freeform-annotation-png', 'png')
 
-  submission_page = models.ForeignKey(SubmissionPage, db_index=True)
+  submission_page = models.OneToOneField(SubmissionPage, db_index=True)
   annotation_image = models.ImageField(upload_to=generate_remote_image_name, blank=True)
 
 

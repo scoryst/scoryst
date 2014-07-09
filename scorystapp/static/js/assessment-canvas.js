@@ -29,7 +29,6 @@ var AssessmentCanvasView = BaseAssessmentCanvasView.extend({
   handleZoomClick: function(event) {
     var $zoomLensButton = $(event.currentTarget);
 
-    // if the clicked toolbar option is already action, remove active class
     if ($zoomLensButton.hasClass('active')) {
       $zoomLensButton.removeClass('active');
       this.zoomLensView.disableZoom();

@@ -3,9 +3,8 @@ from django import shortcuts, http
 from django.conf import settings
 from django.core.files import base, storage
 from scorystapp import models, decorators, serializers
-import json
+import json, requests
 from rest_framework import decorators as rest_decorators, response as rest_framework_response
-import urllib
 
 
 @decorators.access_controlled
@@ -214,27 +213,8 @@ def get_freeform_annotation(request, cur_course_user, submission_id, assessment_
   submission_page = shortcuts.get_object_or_404(models.SubmissionPage,
     submission=submission_id, page_number=int(assessment_page_number))
   annotation = shortcuts.get_object_or_404(models.FreeformAnnotation, submission_page=submission_page)
-  image = urllib.urlopen(annotation.annotation_image.url)
-  return http.HttpResponse(image, content_type='image/png')
-
-
-@decorators.access_controlled
-@decorators.student_required
-@decorators.submission_released_required
-def has_freeform_annotation(request, cur_course_user, submission_id, assessment_page_number):
-  """
-  Returns True if there is one freeform annotation for the specified submission
-  page. Returns False if there is none. Returns a 500 server error if the count is
-  greater than 1.
-  """
-  submission_page = shortcuts.get_object_or_404(models.SubmissionPage,
-    submission=submission_id, page_number=int(assessment_page_number))
-  annotation = models.FreeformAnnotation.objects.filter(submission_page=submission_page)
-
-  if annotation.count() > 1:
-    return http.HttpResponse(500)  # should only have one freeform annotation / page
-
-  return http.HttpResponse(annotation.count() == 1)
+  image = requests.get(annotation.annotation_image.url, stream=True)
+  return http.StreamingHttpResponse(image, content_type='image/png')
 
 
 @decorators.access_controlled
@@ -243,27 +223,29 @@ def has_freeform_annotation(request, cur_course_user, submission_id, assessment_
 def save_freeform_annotation(request, cur_course_user, submission_id, assessment_page_number):
   """ Save the freeform annotation image for the specified submission page. """
   if request.method != 'POST':
-    return http.HttpResponse(status=403)
+    return http.HttpResponse(status=404)
 
   submission_page = shortcuts.get_object_or_404(models.SubmissionPage,
     submission=submission_id, page_number=int(assessment_page_number))
-  annotation = models.FreeformAnnotation.objects.filter(submission_page=submission_page)
-  if annotation.count() > 1:
-    return http.HttpResponse(500)  # should only have one freeform annotation / page
-
   folder_name = 'freeform-annotation-png'
 
-  if annotation.count() == 0:  # no freeform annotation exists for the page yet
-    annotation = models.FreeformAnnotation(submission_page=submission_page)
-  else:
-    annotation = annotation[0]
+  try:  # If there is a `FreeformAnnotation` for the given `SubmissionPage`
+    annotation = submission_page.freeformannotation
     old_url = annotation.annotation_image.url
-    # Get path starting from the folder (.e. remove the domain from the URL
+    # Get path starting from the folder i.e. remove the domain from the URL
     storage.default_storage.delete(old_url[old_url.index(folder_name):])
+  except models.FreeformAnnotation.DoesNotExist:
+    annotation = models.FreeformAnnotation(submission_page=submission_page)
 
   # The image is encoded as a B64 string. Decode it, and save it.
-  img = base.ContentFile(base64.b64decode(request.POST['annotation_image']), 'tmp')
+  b64_img = request.POST['annotation_image']
+  header = 'data:image/png;base64,'
+  try:
+    img = base.ContentFile(base64.b64decode(b64_img[len(header):]), 'tmp')
+  except TypeError:
+    return http.HttpResponse(status=422)
+
   annotation.annotation_image.save(folder_name, img)
   annotation.save()
 
-  return http.HttpResponse(status=200)
+  return http.HttpResponse(status=204)

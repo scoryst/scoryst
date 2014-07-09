@@ -285,6 +285,16 @@ input {
   position: absolute;
 }
 
+.assessment-canvas .toolbar .btn-default:focus {
+  background-color: #fff;
+  border-color: #cccccc;
+}
+
+.assessment-canvas .toolbar .btn-default.active:focus {
+  background-color: #ebebeb;
+  border-color: #adadad;
+}
+
 .assessment .previous-page, .assessment .next-page {
   cursor: pointer;
   position: relative;
