@@ -1,13 +1,20 @@
 // TODO: browserify
+// The `ZoomLensView` is responsible for the enabling/disabling zoom button and
+// for showing/hiding the zoom lens.
 var ZoomLensView = IdempotentView.extend({
   ZOOM_LENS_RADIUS: 200,
   ZOOM_LENS_OFFSET_FROM_MOUSE: 20,
 
   events: {
     'click .enable-zoom': 'toggleZoom',
+    // These 3 events are for an assessment canvas with freeform annotations
     'mouseenter .freeform-annotations-canvas': 'showZoomLens',
     'mouseleave .freeform-annotations-canvas': 'hideZoomLens',
-    'mousemove .freeform-annotations-canvas': 'moveZoomLens'
+    'mousemove .freeform-annotations-canvas': 'moveZoomLens',
+    // These 3 events are for an assessment canvas without freeform annotations
+    'mouseenter .assessment-image': 'showZoomLens',
+    'mouseleave .assessment-image': 'hideZoomLens',
+    'mousemove .assessment-image': 'moveZoomLens'
   },
 
   initialize: function(options) {
@@ -20,7 +27,6 @@ var ZoomLensView = IdempotentView.extend({
     this.loadImage();
 
     if (localStorage && localStorage.zoomLensEnabled === 'true') {
-      console.log('zoom lens is initially enabled');
       // This is needed if the user refreshes the page. this.zoomLensEnabled might be true
       // but by default the button shows 'Enable Zoom'. This accounts for this edge case.
       this.enableZoom();

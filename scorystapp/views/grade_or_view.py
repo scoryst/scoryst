@@ -258,8 +258,10 @@ def save_freeform_annotation(request, cur_course_user, submission_id, assessment
   else:
     annotation = annotation[0]
     old_url = annotation.annotation_image.url
-    storage.default_storage.delete(old_url[old_url.index(folder_name):])  # Get path starting from the folder
+    # Get path starting from the folder (.e. remove the domain from the URL
+    storage.default_storage.delete(old_url[old_url.index(folder_name):])
 
+  # The image is encoded as a B64 string. Decode it, and save it.
   img = base.ContentFile(base64.b64decode(request.POST['annotation_image']), 'tmp')
   annotation.annotation_image.save(folder_name, img)
   annotation.save()

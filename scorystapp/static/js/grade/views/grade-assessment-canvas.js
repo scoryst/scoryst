@@ -2,6 +2,7 @@ var GradeAssessmentCanvasView = BaseAssessmentCanvasView.extend({
   CIRCLE_RADIUS: 10,  // specified in style.css as radius of annotation
   BLUR_TIME: 100,
   MATHJAX_LATEX_URL: 'https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML',
+  // the following constants are used for `localStorage.lastChosenToolbarOption`
   FREEFORM_ANNOTATION_SET: 'freeform-annotation-set',
   ERASE_SET: 'erase-set',
   TEXT_ANNOTATION_SET: 'text-annotations-set',
@@ -68,7 +69,6 @@ var GradeAssessmentCanvasView = BaseAssessmentCanvasView.extend({
         self.listenToDOM(self.$previousAnnotationInfoButton, 'click', self.goToPreviousAnnotationInfo);
         self.listenToDOM(self.$nextAnnotationInfoButton, 'click', self.goToNextAnnotationInfo);
       });
-      this.listenToDOM(this.$assessmentImage, 'click', this.createAnnotation);
       this.listenToDOM(this.$freeformAnnotationsCanvas, 'click', this.createAnnotation);
     }
 

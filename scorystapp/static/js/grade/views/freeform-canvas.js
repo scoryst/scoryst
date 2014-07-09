@@ -15,10 +15,16 @@ var FreeformCanvasView = IdempotentView.extend({
 
   initialize: function(options) {
     this.assessmentPageNumber = options.assessmentPageNumber;
+
+    // true if the correct toolbar option is selected
     this.canDraw = false;
     this.canErase = false;
+
+    // true if the user's mouse is pressed and user has permissions to either
+    // draw or erase
     this.isAnnotating = false;
-    this.isErasing = false;
+
+    // true if the view is waiting for a freeform annotation image to save
     this.isSaving = false;
   },
 
@@ -33,6 +39,7 @@ var FreeformCanvasView = IdempotentView.extend({
     this.$el[0].width = this.CANVAS_WIDTH;
     this.$el[0].height = this.CANVAS_HEIGHT;
 
+    // if there is a previous freeform annotation for the page, display it
     var self = this;
     $.ajax({
       url: window.location.href + 'assessment-page/' + pageNumber +
