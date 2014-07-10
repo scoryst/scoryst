@@ -1,4 +1,4 @@
-import base64
+import base64, imghdr
 from django import shortcuts, http
 from django.conf import settings
 from django.core.files import base, storage
@@ -233,7 +233,7 @@ def save_freeform_annotation(request, cur_course_user, submission_id, assessment
     annotation = submission_page.freeformannotation
   except models.FreeformAnnotation.DoesNotExist:
     annotation = models.FreeformAnnotation(submission_page=submission_page)
-  else:  # If there is an annotation for the given `SubmissionPage`, delete old image from S2
+  else:  # If there is an annotation for the given `SubmissionPage`, delete old image from S3
     old_url = annotation.annotation_image.url
     # Get path starting from the folder i.e. remove the domain from the URL
     storage.default_storage.delete(old_url[old_url.index(folder_name):])
@@ -241,11 +241,21 @@ def save_freeform_annotation(request, cur_course_user, submission_id, assessment
   # The image is encoded as a B64 string. Decode it, and save it.
   b64_img = request.POST['annotation_image']
   header = 'data:image/png;base64,'
+
+  # The header must be in the b64_image
+  if b64_img[0:len(header)] != header:
+    return http.HttpResponse(status=422)
+
   try:
-    img = base.ContentFile(base64.b64decode(b64_img[len(header):]), 'tmp')
+    img_bytestream = base64.b64decode(b64_img[len(header):])
   except TypeError:
     return http.HttpResponse(status=422)
 
+  # Must be a PNG image
+  if imghdr.what(None, img_bytestream) != 'png':
+    return http.HttpResponse(status=422)
+
+  img = base.ContentFile(img_bytestream, 'tmp')
   annotation.annotation_image.save(folder_name, img)
   annotation.save()
 
