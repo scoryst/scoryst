@@ -1,0 +1,42 @@
+#!/usr/bin/env python
+import sys
+import os
+
+# make scorystapp files accessible
+directory = os.path.join(os.path.dirname(__file__), '..')
+sys.path.append(os.path.abspath(directory))
+
+from django.core import management
+from scorystproject import settings as scoryst_settings
+from boto.s3 import connection as s3
+from boto import utils
+import subprocess
+
+
+def main(backup_time):
+  # set up django environment
+  management.setup_environ(scoryst_settings)
+  from django.conf import settings
+
+  connection = s3.S3Connection(settings.AWS_S3_ACCESS_KEY_ID,
+    settings.AWS_S3_SECRET_ACCESS_KEY)
+  bucket = connection.get_bucket(settings.AWS_PRODUCTION_BACKUPS_BUCKET_NAME)
+
+  key = bucket.get_key('postgres-backup-%s.dump' % backup_time)
+
+  # Fetch backup from S3. Macs can't handle ':' in file names, so we replace them.
+  temp_file_name = '/tmp/backup-%s.dump' % backup_time.replace(':', '-')
+  print 'Fetching file %s to %s' % (key.name, temp_file_name)
+  key.get_contents_to_filename(temp_file_name)
+
+  # restore backup
+  print 'Restoring backup...'
+  print subprocess.check_output(['psql', '-f', temp_file_name, 'postgres'])
+
+
+if __name__ == '__main__':
+  if len(sys.argv) != 2:
+    print 'Usage: get_backup MM-DD-YYYY-HH:MM'
+    print 'As of July 2014, MM is expected to be either 30 or 00'
+  else:
+    main(sys.argv[1])
