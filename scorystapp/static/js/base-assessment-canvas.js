@@ -60,7 +60,6 @@ var BaseAssessmentCanvasView = IdempotentView.extend({
     // events from other elements
     this.listenToDOM($(window), 'keydown', this.handleShortcuts);
 
-    // initialize tooltips
     $('.enable-zoom').tooltip();
     $('.disable-zoom').tooltip();
   },

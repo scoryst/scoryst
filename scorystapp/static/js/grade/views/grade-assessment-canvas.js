@@ -34,7 +34,7 @@ var GradeAssessmentCanvasView = BaseAssessmentCanvasView.extend({
     this.$setTextAnnotations = this.$('.set-text-annotations');
     this.$setErase = this.$('.set-erase');
     this.$freeformAnnotationsCanvas = this.$('.freeform-annotations-canvas');
-    this.$toolbarItems = this.$('.toolbar button');
+    this.$toolbarButtons = this.$('.toolbar button');
 
     this.textAnnotationsMode = false;
 
@@ -142,7 +142,7 @@ var GradeAssessmentCanvasView = BaseAssessmentCanvasView.extend({
     }
 
     // by default the text annotation option is set; check if that's the case
-    if (!this.$('.toolbar button').hasClass('active')) {
+    if (!this.$toolbarButtons.hasClass('active')) {
       this.$setTextAnnotations.addClass('active');
       this.textAnnotationsMode = true;
     }
@@ -409,21 +409,19 @@ var GradeAssessmentCanvasView = BaseAssessmentCanvasView.extend({
     }
   },
 
-  // updates the toolbar UI, updates functionality, and if `localStorage` exists
-  // then sets `localStorage.lastChosenToolbarOption`
+  // updates the toolbar UI and actions that the user can do (e.g. text annotations),
+  // and if `localStorage` exists, sets `localStorage.lastChosenToolbarOption`
   handleToolbarClick: function(event) {
     var $toolbarOption = $(event.currentTarget);
-    if (localStorage) {
-      localStorage.lastChosenToolbarOption = this.NONE_SET;
-    }
+    var lastChosenToolbarOption = this.NONE_SET;
 
     // update the toolbar active class: if the toolbar option clicked is not
     // active, set as active and remove active class from other options; if it
     // is active, set as inactive
     if ($toolbarOption.hasClass('active')) {
-      this.$toolbarItems.removeClass('active');
+      this.$toolbarButtons.removeClass('active');
     } else {
-      this.$toolbarItems.removeClass('active');
+      this.$toolbarButtons.removeClass('active');
       $toolbarOption.addClass('active');
     }
 
@@ -438,27 +436,27 @@ var GradeAssessmentCanvasView = BaseAssessmentCanvasView.extend({
     var eraseIsEnabled = this.$setErase.hasClass('active');
     if (eraseIsEnabled) {
       this.freeformCanvasView.enableErase();
-      if (localStorage) {
-        localStorage.lastChosenToolbarOption = this.ERASE_SET;
-      }
+      lastChosenToolbarOption = this.ERASE_SET;
     } else {
       this.freeformCanvasView.disableErase();
     }
 
     var textAnnotationsIsEnabled = this.$setTextAnnotations.hasClass('active');
     this.textAnnotationsMode = textAnnotationsIsEnabled;
-    if (localStorage && textAnnotationsIsEnabled) {
-      localStorage.lastChosenToolbarOption = this.TEXT_ANNOTATION_SET;
+    if (textAnnotationsIsEnabled) {
+      lastChosenToolbarOption = this.TEXT_ANNOTATION_SET;
     }
 
     var freeformAnnotationsIsEnabled = this.$setFreeformAnnotations.hasClass('active');
     if (freeformAnnotationsIsEnabled) {
       this.freeformCanvasView.enableDraw();
-      if (localStorage) {
-        localStorage.lastChosenToolbarOption = this.FREEFORM_ANNOTATION_SET;
-      }
+      lastChosenToolbarOption = this.FREEFORM_ANNOTATION_SET;
     } else {
       this.freeformCanvasView.disableDraw();
+    }
+
+    if (localStorage) {
+      localStorage.lastChosenToolbarOption = lastChosenToolbarOption;
     }
   }
 });

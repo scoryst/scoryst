@@ -17,6 +17,8 @@ var FreeformCanvasView = IdempotentView.extend({
 
   initialize: function(options) {
     this.assessmentPageNumber = options.assessmentPageNumber;
+    this.oldTimeoutId = null;
+    this.endAnnotatingBound = _.bind(this.endAnnotating, this);
 
     // true if the correct toolbar option is selected
     this.canDraw = false;
@@ -31,11 +33,9 @@ var FreeformCanvasView = IdempotentView.extend({
 
   render: function(pageNumber) {
     this.assessmentPageNumber = pageNumber;
-    this.context = this.$el[0].getContext('2d');
-
-    this.drawingGlobalCompositeOperation = this.context.globalCompositeOperation;
-
     this.canvas = this.$el[0];
+    this.context = this.canvas.getContext('2d');
+    this.drawingGlobalCompositeOperation = this.context.globalCompositeOperation;
 
     this.$el.prop('width', this.CANVAS_WIDTH);
     this.$el.prop('height', this.CANVAS_HEIGHT);
@@ -92,23 +92,22 @@ var FreeformCanvasView = IdempotentView.extend({
       // only one freeform annotation image can be saved to the backend at a time.
       // if there is a freeform annotation currently saving, wait to try again
       if (this.isSaving) {
-        // at any point, there only one annotation save is going to try again
-        if (this.oldTimeoutId) {
-          clearTimeout(this.oldTimeoutId);
-        }
-        this.oldTimeoutId = setTimeout(_.bind(this.endAnnotating, this), this.TRY_SAVING_TIMEOUT);
+        // at any point, there can only be one future call of `endAnnotating`
+        clearTimeout(this.oldTimeoutId);
+        this.oldTimeoutId = setTimeout(this.endAnnotatingBound, this.TRY_SAVING_TIMEOUT);
         return;
       }
 
       this.isSaving = true;
 
       // Save the drawing
-      var dataURL = this.$el[0].toDataURL();
+      var dataURL = this.canvas.toDataURL();
       var self = this;
       $.ajax({
         type: 'POST',
         url: window.location.href + 'assessment-page/' +
              this.assessmentPageNumber + '/save-freeform-annotation/',
+        // The middleware for changing to underscores doesn't change this
         data: 'annotation_image=' + encodeURIComponent(dataURL) +
           '&csrfmiddlewaretoken=' + encodeURIComponent(Utils.CSRF_TOKEN)
       }).done(function() {

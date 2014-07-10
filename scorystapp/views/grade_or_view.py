@@ -229,13 +229,14 @@ def save_freeform_annotation(request, cur_course_user, submission_id, assessment
     submission=submission_id, page_number=int(assessment_page_number))
   folder_name = 'freeform-annotation-png'
 
-  try:  # If there is a `FreeformAnnotation` for the given `SubmissionPage`
+  try:
     annotation = submission_page.freeformannotation
+  except models.FreeformAnnotation.DoesNotExist:
+    annotation = models.FreeformAnnotation(submission_page=submission_page)
+  else:  # If there is an annotation for the given `SubmissionPage`, delete old image from S2
     old_url = annotation.annotation_image.url
     # Get path starting from the folder i.e. remove the domain from the URL
     storage.default_storage.delete(old_url[old_url.index(folder_name):])
-  except models.FreeformAnnotation.DoesNotExist:
-    annotation = models.FreeformAnnotation(submission_page=submission_page)
 
   # The image is encoded as a B64 string. Decode it, and save it.
   b64_img = request.POST['annotation_image']
