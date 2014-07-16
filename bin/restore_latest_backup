@@ -3,4 +3,4 @@ import restore_specific_backup
 
 
 if __name__ == '__main__':
-  restore_specific_backup.main(0)
+  restore_specific_backup.restore_backup(0)
