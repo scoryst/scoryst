@@ -243,6 +243,10 @@
 
 {% endblock %}
 
+{% block css %}
+  <link rel="stylesheet" href="/static/css/lib/perfect-scrollbar.css" />
+{% endblock %}
+
 {% block js %}
   {% include 'backbone.epy' %}
 
@@ -250,7 +254,8 @@
     <script src="/static/js/lib/tooltip.js"></script>
     <script src="/static/js/lib/popover.js"></script>
     <script src="/static/js/popover-confirm.js"></script>
-    <script src="/static/js/lib/jquery.custom-scrollbar.min.js"></script>
+    <script src="/static/js/lib/jquery.mousewheel.js"></script>
+    <script src="/static/js/lib/perfect-scrollbar.js"></script>
   {% endif %}
 
   <script src="/static/js/common/mediator.js"></script>
@@ -274,8 +279,4 @@
     <script src="/static/js/grade-overview/views/main.js"></script>
   {% endif %}
 
-{% endblock %}
-
-{% block css %}
-  <link rel="stylesheet" href="/static/css/lib/jquery.custom-scrollbar.css" />
 {% endblock %}

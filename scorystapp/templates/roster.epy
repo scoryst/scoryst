@@ -132,11 +132,17 @@
 </script>
 {% endblock %}
 
+{% block css %}
+<link rel="stylesheet" href="/static/css/lib/perfect-scrollbar.css" />
+{% endblock %}
+
 {% block js %}
 {% include 'backbone.epy' %}
 <script src="/static/js/lib/tooltip.js"></script>
 <script src="/static/js/lib/popover.js"></script>
 <script src="/static/js/lib/jquery.tablesorter.min.js"></script>
+<script src="/static/js/lib/jquery.mousewheel.js"></script>
+<script src="/static/js/lib/perfect-scrollbar.js"></script>
 
 <script src="/static/js/common/views/idempotent.js"></script>
 <script src="/static/js/popover-confirm.js"></script>
@@ -144,9 +150,4 @@
 <script src="/static/js/roster/course-user-model.js"></script>
 <script src="/static/js/roster/views/main.js"></script>
 <script src="/static/js/roster/views/table-row.js"></script>
-<script src="/static/js/lib/jquery.custom-scrollbar.min.js"></script>
-{% endblock %}
-
-{% block css %}
-    <link rel="stylesheet" href="/static/css/lib/jquery.custom-scrollbar.css" />
 {% endblock %}

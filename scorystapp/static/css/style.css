@@ -916,6 +916,8 @@ input {
 
 .roster .roster-scroll {
   height: 400px;   /* Minimum max-height. Changed in roster.js. */
+  position: relative;
+  overflow: hidden;
 }
 
 .roster .overview {
@@ -1100,17 +1102,24 @@ input {
   display: none;
 }
 
-/* A div created by custom scrollbar js. */
-.grade-overview .overview {
-  width: 100%;
+.grade-overview .students-scroll {
+  position: relative;
+  overflow: hidden;
+  padding-right: 15px;
 }
 
 .grade-overview .popover {
-  width:300px;
+  width: 300px;
 }
 
 .grade-overview .success, .grade-overview .error {
   display: none;
+}
+
+/* Perfect scrollbar */
+.grade-overview .ps-container .ps-scrollbar-y-rail,
+.course-roster .ps-container .ps-scrollbar-y-rail {
+  opacity: 0.6;
 }
 
 /* Assessments page */

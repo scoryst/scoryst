@@ -37,13 +37,13 @@ var MainView = IdempotentView.extend({
       parseInt($('.container.roster').css('margin-bottom'), 10);
     if (height >= this.$el.height()) {
       this.$el.css({'height': height + 'px'});
-      $('.roster-scroll').customScrollbar();
+      this.$el.perfectScrollbar({ suppressScrollX: true });
     }
   },
 
   addTableSorting: function() {
     // Enable sorting
-    $('table').tablesorter({
+    this.$('table').tablesorter({
       headers: {
         // assign the fifth column (we start counting zero)
         4: {
@@ -57,11 +57,11 @@ var MainView = IdempotentView.extend({
       // instructor/TA/student.
       textExtraction: function(cell) {
         if (cell.innerHTML == 'Instructor') {
-          return 0;
+          return '0';
         } else if (cell.innerHTML == 'TA') {
-          return 1;
+          return '1';
         } if (cell.innerHTML == 'Student') {
-          return 2;
+          return '2';
         }
 
         return cell.innerHTML;
