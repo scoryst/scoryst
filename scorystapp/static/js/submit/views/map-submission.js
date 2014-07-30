@@ -187,6 +187,16 @@ var MapSubmissionView = Backbone.View.extend({
     } else {
       this.$('.no-answer').prop('checked', false);
       this.response.save({ pages: this.responsePages.join(',') });
+
+      // goes to the next question/part, if there is one
+      var activeLi = this.$navLis.filter(function(i, li) {
+        return $(li).hasClass('active');
+      });
+
+      var $nextLi = $(activeLi).next();
+      if ($nextLi) {
+        $nextLi.click();
+      }
     }
 
     this.showSuccessIfDone();

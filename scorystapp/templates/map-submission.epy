@@ -8,8 +8,7 @@
       <p><strong>Submission time</strong>: {{ submission.time|date:"D, M d, f A" }}.</p>
 
       <p>
-        Select a question below, and pick which pages on the right contain
-        the answer. This is required to finalize your submission for this assignment.
+        For each question/part, pick the page on the right where your answer begins. This is required to finalize your submission for this assignment.
       </p>
 
       <ul class="nav nav-pills question-part-nav">
