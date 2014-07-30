@@ -12,7 +12,7 @@ var GradeAssessmentCanvasView = BaseAssessmentCanvasView.extend({
     // extends the parent view's events
     return _.extend({}, this.constructor.__super__.events, {
       'blur textarea': 'deleteBlankAnnotations',
-      'mousedown .annotation': 'sendAnnotationToFront',
+      'mousedown .annotation': 'handleSendAnnotationToFrontEvent',
       'click .enable-zoom': 'handleToolbarClick',
       'click .set-freeform-annotations': 'handleToolbarClick',
       'click .set-erase': 'handleToolbarClick',
@@ -342,6 +342,7 @@ var GradeAssessmentCanvasView = BaseAssessmentCanvasView.extend({
     this.$el.children('.assessment-canvas').prepend($annotation);
     $annotation.find('textarea').focus();
     this.registerSubview(annotationView);
+    this.sendAnnotationToFront($annotation);
 
     // listen if any of the annotation views loads mathjax (should only be
     // loaded once)
@@ -375,14 +376,18 @@ var GradeAssessmentCanvasView = BaseAssessmentCanvasView.extend({
     });
   },
 
-  sendAnnotationToFront: function(event) {
+  sendAnnotationToFront: function($annotation) {
     // first remove the `annotation-front` class to all annotations
     this.annotationViews.forEach(function(annotationView) {
       annotationView.removeAnnotationFrontClass();
     });
 
-    var $annotation = $(event.currentTarget);
     $annotation.addClass('annotation-front');
+  },
+
+  handleSendAnnotationToFrontEvent: function(event) {
+    var $annotation = $(event.currentTarget);
+    this.sendAnnotationToFront($annotation);
   },
 
   // the `annotationView` parameter is not necessary; if it is not passed in,
