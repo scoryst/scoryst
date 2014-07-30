@@ -2,19 +2,18 @@
 // The `ZoomLensView` is responsible for the enabling/disabling zoom button and
 // for showing/hiding the zoom lens.
 var ZoomLensView = IdempotentView.extend({
-  ZOOM_LENS_RADIUS: 200,
   ZOOM_LENS_OFFSET_FROM_MOUSE: 20,
 
   events: {
     'click .enable-zoom': 'toggleZoom',
-    // These 3 events are for an assessment canvas with freeform annotations
+    'mouseleave .zoom-lens': 'hideZoomLens',
+    'mousemove .zoom-lens': 'moveZoomLens',
+
+    // This event is for an assessment canvas with freeform annotations
     'mouseenter .freeform-annotations-canvas': 'showZoomLens',
-    'mouseleave .freeform-annotations-canvas': 'hideZoomLens',
-    'mousemove .freeform-annotations-canvas': 'moveZoomLens',
-    // These 3 events are for an assessment canvas without freeform annotations
-    'mouseenter .assessment-image': 'showZoomLens',
-    'mouseleave .assessment-image': 'hideZoomLens',
-    'mousemove .assessment-image': 'moveZoomLens'
+
+    // This event is for an assessment canvas without freeform annotations
+    'mouseenter .assessment-image': 'showZoomLens'
   },
 
   initialize: function(options) {
@@ -43,6 +42,7 @@ var ZoomLensView = IdempotentView.extend({
       // dynamically create the image tag
       if (!this.createdImage) {
         this.createdImage = true;
+        $('img[alt="Enlarged Exam"]').remove();
         this.$zoomImage = $('<img alt="Enlarged Exam" />').appendTo(this.$el.find('.zoom-lens'));
       }
 
@@ -94,24 +94,18 @@ var ZoomLensView = IdempotentView.extend({
       return;
     }
 
-    var x = event.offsetX;
-    var y = event.offsetY;
-
-    if (!x || !y) {
-      // Firefox doesn't support offsetX/offsetY; compute it manually.
-      // pageX/Y is where the user's mouse is. offset.left/offset.top
-      // are the absolute location of the assessment image element
-      var offset = $(event.currentTarget).offset();
-      x = event.pageX - offset.left;
-      y = event.pageY - offset.top;
-    }
+    var offset = this.$zoomLens.offset();
+    x = event.pageX - offset.left;
+    y = event.pageY - offset.top;
 
     // Get the offset top and left of the large image
-    var offsetTop = -(y * this.image.naturalHeight / this.$el.height()) + this.ZOOM_LENS_RADIUS;
-    var offsetLeft = -(x * this.image.naturalWidth / this.$el.width()) + this.ZOOM_LENS_RADIUS;
+    var $assessmentCanvas = $('.assessment-canvas');
+    this.$zoomLens.height($assessmentCanvas.height());
+    this.$zoomLens.width($assessmentCanvas.width());
 
-    this.$zoomLens.css('top', y + this.ZOOM_LENS_OFFSET_FROM_MOUSE);
-    this.$zoomLens.css('left', x + this.ZOOM_LENS_OFFSET_FROM_MOUSE);
+    var offsetLeft = -x / this.$zoomLens.width() * this.image.naturalWidth;
+    var offsetTop = -y / this.$zoomLens.height() * this.image.naturalHeight;
+
     this.$zoomImage.css('top', offsetTop);
     this.$zoomImage.css('left', offsetLeft);
   },

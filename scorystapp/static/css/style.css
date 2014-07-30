@@ -283,6 +283,7 @@ input {
 
 .assessment-canvas .toolbar {
   position: absolute;
+  z-index: 400;
 }
 
 .assessment-canvas .toolbar .btn-default:focus {
@@ -338,20 +339,10 @@ input {
   background: #fff;
   z-index: 300;
   position: absolute;
-  top: 0;
-  left: 0;
 
   overflow: hidden;
-  width: 400px;
-  height: 400px;
-
-  border: 1px solid #999;
-  border-radius: 200px;
-  -webkit-border-radius: 200px;
-  -moz-border-radius: 200px;
-  -ms-border-radius: 200px;
-  -o-border-radius: 200px;
-  -khtml-border-radius: 200px;
+  width: 675px;
+  height: 873px;
 
   box-shadow: 0 0 3px #999;
   -webkit-box-shadow: 0 0 3px #999;

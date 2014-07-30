@@ -74,7 +74,7 @@ var AnnotationView = IdempotentView.extend({
     return this;
   },
 
-  toggleAnnotation: function(event) {
+  toggleAnnotation: function() {
     this.$('.annotation-comment').toggle();
     this.$('.annotation-hidden').toggle();
   },
