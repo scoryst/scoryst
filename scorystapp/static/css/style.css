@@ -402,6 +402,11 @@ input {
   font-family: Monaco, Menlo, 'Lucida Console', 'Lucida Sans Unicode', 'Courier New', Courier, Monospace;
   padding: 4px 4px 2px 4px;
   border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -khtml-border-radius: 5px;
+  -o-border-radius: 5px;
   background-color: #ecf0f1;
   margin-right: 2px;
 }
@@ -768,6 +773,11 @@ input {
   background-color: #ecf0f1;
   padding: 10px;
   border-radius: 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -ms-border-radius: 10px;
+  -khtml-border-radius: 10px;
+  -o-border-radius: 10px;
   width: 250px;
   margin-left: 10px;
 }
@@ -860,8 +870,38 @@ input {
   margin-top: -3px;
 }
 
-.grade .annotation .preview:hover, .grade .annotation .back-to-edit:hover {
+.grade .annotation .preview:hover, .grade .annotation .back-to-edit:hover,
+.grade .annotation .annotation-hidden:hover {
   cursor: pointer;
+}
+
+.grade .annotation .annotation-hidden {
+  position: absolute;
+  margin-left: 10px;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -khtml-border-radius: 5px;
+  -o-border-radius: 5px;
+  height: 15px;
+  padding: 7px 5px 2px 5px;
+  top: 25px;
+  background-color: #ecf0f1;
+}
+
+.grade .annotation .ellipsis {
+  background-color: #FAFA05;
+  line-height: 3px;
+  padding: 0 1px;
+  height: 10px;
+  margin-top: -5px;
+  border-radius: 2px;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+  -ms-border-radius: 2px;
+  -khtml-border-radius: 2px;
+  -o-border-radius: 2px;
 }
 
 /* CSS for the freeform annotations canvas */
@@ -974,6 +1014,11 @@ input {
   margin-left: 4px;
   width: 120px;
   border-radius: 2px;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+  -ms-border-radius: 2px;
+  -khtml-border-radius: 2px;
+  -o-border-radius: 2px;
   overflow: hidden;
   background: #fafafa url(/static/img/down-arrow.gif) no-repeat 95% 50%;
 }
@@ -1450,6 +1495,11 @@ body.landing-page {
   background-image: none;
   border: 1px solid #cccccc;
   border-radius: 4px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  -ms-border-radius: 4px;
+  -khtml-border-radius: 4px;
+  -o-border-radius: 4px;
   -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
   -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
   -o-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);

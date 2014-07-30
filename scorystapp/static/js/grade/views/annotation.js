@@ -11,6 +11,7 @@ var AnnotationView = IdempotentView.extend({
   events: {
     'click .annotation-circle-container': 'toggleAnnotation',
     'click .close': 'toggleAnnotation',
+    'click .annotation-hidden': 'toggleAnnotation',
     'click .delete': 'delete',
     'change .latex-checkbox': 'toggleLatexRendering',
     'click .back-to-edit': 'showTextarea',
@@ -75,6 +76,7 @@ var AnnotationView = IdempotentView.extend({
 
   toggleAnnotation: function(event) {
     this.$('.annotation-comment').toggle();
+    this.$('.annotation-hidden').toggle();
   },
 
   saveComment: _.debounce(function(event) {

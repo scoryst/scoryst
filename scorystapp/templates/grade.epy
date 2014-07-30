@@ -321,6 +321,9 @@
     </span>
     {% endif %}
   </div>
+  <div class="initially-hide annotation-hidden">
+    <div class="ellipsis">...</div>
+  </div>
 </script>
 
 <script type="text/template" class="annotation-success-template">
