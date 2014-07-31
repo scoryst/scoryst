@@ -85,6 +85,16 @@ var MapSubmissionView = Backbone.View.extend({
     this.$partNumberHeader = this.$('.part-number');
 
     this.highlightCurrentQuestionPartTokens();
+
+    var self = this;
+    this.responses.forEach(function(response) {
+      if (response.get('pages') !== null) {
+        var $navLi = self.$('li[data-question-number=' + response.get('questionNumber') +
+          '][data-part-number=' + response.get('partNumber') + ']');
+        $navLi.find('.fa-check').show();
+      }
+    });
+
     this.showSuccessIfDone();
     window.resizeNav();
   },
@@ -144,15 +154,6 @@ var MapSubmissionView = Backbone.View.extend({
       // update the Question/Part heading with the correct numbers
       this.$questionNumberHeader.html(this.questionNumber);
       this.$partNumberHeader.html(this.partNumber);
-
-      // gives warning if moving to another question when no pages have been chosen
-      // for the current question/part
-      var $oldLi = this.$('.nav-pills li.active');
-      if (!this.responsePages) {
-        $oldLi.find('.fa-exclamation-triangle').show();
-      } else {
-        $oldLi.find('.fa-exclamation-triangle').hide();
-      }
     }
 
     // get response that corresponds to the new question part and re-render
@@ -231,6 +232,13 @@ var MapSubmissionView = Backbone.View.extend({
 
     this.responsePages = _.sortBy(this.responsePages);
 
+    var $oldLi = this.$('.nav-pills li.active');
+    if (this.responsePages.length === 0) {
+      $oldLi.find('.fa-check').hide();
+    } else {
+      $oldLi.find('.fa-check').show();
+    }
+
     if (this.responsePages.length === 0) {
       // null signifies no pages selected
       this.response.save({ pages: null });
@@ -268,15 +276,19 @@ var MapSubmissionView = Backbone.View.extend({
       }
     });
 
+    var $oldLi = this.$('.nav-pills li.active');
+
     if ($checkbox.is(':checked')) {
       this.responsePages = [];
       // empty string signifies no answer
       this.response.save({ pages: '' });
+      $oldLi.find('.fa-check').show();
       this.goToNextQuestion();
     } else {
       // null signifies no pages selected
       this.responsePages = null;
       this.response.save({ pages: null });
+      $oldLi.find('.fa-check').hide();
     }
 
     this.showSuccessIfDone();

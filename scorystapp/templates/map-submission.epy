@@ -16,7 +16,7 @@
         <li data-question-number="{{qp.question_number}}"
           data-part-number="{{qp.part_number}}">
             <a href="#">
-              Question {{qp.question_number}}, Part {{qp.part_number}} <i class="fa fa-exclamation-triangle initially-hide"></i>
+              Question {{qp.question_number}}, Part {{qp.part_number}} <i class="fa fa-check"></i>
             </a>
         </li>
       {% endfor %}
