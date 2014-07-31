@@ -1705,6 +1705,10 @@ body.landing-page {
   padding: 10px;
 }
 
+.map-submission .btn-danger {
+  margin: 0 11px 5px 364px;
+}
+
 /* CSS for the feedback form. */
 .feedback {
   width: 220px;

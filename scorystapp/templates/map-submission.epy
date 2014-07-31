@@ -69,6 +69,10 @@
     I did not answer this question.
   </label>
 
+  <button class="btn btn-danger btn-xs unmap-question-part">
+    Unmap question <span class="question-number">1</span>, part<span class="part-number">1</span>
+  </button>
+
   <div>
     <% submissionPages.forEach(function(page, index) { %>
       <% if (index % 4 === 0) { %><div class="clearfix"><% } %>

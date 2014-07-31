@@ -16,6 +16,7 @@ var MapSubmissionView = Backbone.View.extend({
     'click .select-pages .page': 'selectPage',
     'click .zoom': 'showZoomedImage',
     'change [type="checkbox"]': 'setNoAnswer',
+    'click .unmap-question-part': 'unmapQuestionPart'
   },
 
   initialize: function(options) {
@@ -292,6 +293,31 @@ var MapSubmissionView = Backbone.View.extend({
     }
 
     this.showSuccessIfDone();
+  },
+
+  unmapQuestionPart: function() {
+    var $checkbox = this.$('.no-answer');
+    var $tokens = this.$('.mapped-token');
+    if ($checkbox.is(':checked')) {
+      $checkbox.prop('checked', false);
+    } else {
+      var self = this;
+      $tokens.each(function() {
+        var $token = $(this);
+        var tokenQuestionNumber = parseInt($token.attr('data-question-number'), 10);
+        var tokenPartNumber = parseInt($token.attr('data-part-number'), 10);
+
+        if (self.questionNumber === tokenQuestionNumber &&
+            self.partNumber === tokenPartNumber) {
+          $token.remove();
+        }
+      });
+    }
+
+    var $oldLi = this.$('.nav-pills li.active');
+    $oldLi.find('.fa-check').hide();
+
+    this.response.save({ pages: null });
   }
 });
 
