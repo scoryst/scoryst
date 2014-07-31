@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from scorystapp import models
 from django.utils import timezone
+from django.db.models import Q
 
 
 class QuestionPartSerializer(serializers.ModelSerializer):
@@ -116,11 +117,20 @@ class SubmissionPageSerializer(serializers.ModelSerializer):
   page_jpeg_url = serializers.CharField(source='page_jpeg.url', read_only=True)
   page_jpeg_small_url = serializers.CharField(source='page_jpeg_small.url',
     read_only=True)
+  responses = serializers.SerializerMethodField('get_responses')
+
+  def get_responses(self, submission_page):
+    pn = submission_page.page_number
+    responses = models.Response.objects.filter(submission=submission_page.submission).filter(
+      Q(pages__startswith='%d,' % pn) | Q(pages__endswith=',%d' % pn) | Q(pages__contains=',%d,' % pn) | Q(pages__exact='%d' % pn))
+    qp_nums = [{'question_num': r.question_part.question_number, 'part_num': r.question_part.part_number} for r in responses]
+    qp_nums = sorted(qp_nums, key=lambda qpn: (qpn['question_num'], qpn['part_num']))
+    return qp_nums
 
   class Meta:
     model = models.SubmissionPage
     fields = ('id', 'page_number', 'page_jpeg_url', 'page_jpeg_small_url',
-      'submission')
+      'submission', 'responses')
     read_only_fields = ('id', 'page_number', 'submission')
 
 

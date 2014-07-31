@@ -1675,6 +1675,37 @@ body.landing-page {
   line-height: 40px;
 }
 
+.map-submission .mapped-token-container {
+  position: absolute;
+  top: 0px;
+  margin: 4px;
+}
+
+.map-submission .mapped-token {
+  background-color: #eee;
+  color: #0061B5;
+  padding: 2px;
+  border-radius: 5px;
+  font-size: 13px;
+  opacity: 0.6;
+  float: left;
+  margin: 0 2px;
+}
+
+.map-submission .mapped-token.active {
+  color: #fff;
+  background: #0061B5;
+}
+
+.map-submission .fa-exclamation-triangle {
+  display: none;
+}
+
+.map-submission .nav > li > a {
+  padding: 10px;
+}
+
+/* CSS for the feedback form. */
 .feedback {
   width: 220px;
   background-color: #222;
