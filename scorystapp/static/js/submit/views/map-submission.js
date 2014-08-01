@@ -8,9 +8,7 @@ var MapSubmissionView = Backbone.View.extend({
   ESCAPE_KEY: 27,
   templates: {
     selectPagesTemplate: _.template($('.select-pages-template').html()),
-    mappedTokenTemplate: _.template($('.mapped-token-template').html()),
-    mappedMessageTemplate: _.template($('.mapped-message-template').html()),
-    noMappingTemplate: _.template($('.no-mapping-template').html())
+    mappedTokenTemplate: _.template($('.mapped-token-template').html())
   },
 
   events: {
@@ -91,10 +89,11 @@ var MapSubmissionView = Backbone.View.extend({
 
     var self = this;
     this.responses.forEach(function(response) {
-      if (response.get('pages') !== null) {
+      var page = self.getPageFromResponse(response);
+      if (page !== null) {
         var $navLi = self.$('li[data-question-number=' + response.get('questionNumber') +
           '][data-part-number=' + response.get('partNumber') + ']');
-        $navLi.find('.fa-check').show();
+        self.updateMappedPageNumber($navLi, page);
       }
     });
 
@@ -165,14 +164,11 @@ var MapSubmissionView = Backbone.View.extend({
     this.response = this.findResponseForQuestionPart(this.questionNumber, this.partNumber);
 
     // keep track of pages that contain the response
-    var responsePage = this.response.get('pages');
+    var responsePage = this.getPageFromResponse(this.response);
     if (responsePage === "") {
       responsePage = [];
     } else if (responsePage !== null) {
-      responsePage = responsePage.split(',').map(function(page) {
-        return parseInt(page, 10);
-      });
-      responsePage = [Math.min.apply(null, responsePage)];
+      responsePage = [responsePage];
     }
 
     this.responsePage = responsePage;
@@ -180,6 +176,17 @@ var MapSubmissionView = Backbone.View.extend({
     this.$navLis.removeClass('active');
     $li.addClass('active');
     this.highlightCurrentQuestionPartTokens();
+  },
+
+  getPageFromResponse: function(response) {
+    var pageToReturn = response.get('pages');
+    if (!pageToReturn) {
+      return pageToReturn;
+    }
+    pageToReturn = pageToReturn.split(',').map(function(page) {
+      return parseInt(page, 10);
+    });
+    return Math.min.apply(null, pageToReturn);
   },
 
   showZoomedImage: function(event) {
@@ -238,17 +245,10 @@ var MapSubmissionView = Backbone.View.extend({
       setTimeout(function() {
         $imageContainer.removeClass('just-selected');
       }, 200);
-
-      // add the success message
-      this.$('.mapped-message').html(this.templates.mappedMessageTemplate({
-        questionNum: this.questionNumber,
-        partNum: this.partNumber,
-        pageNum: pageNumber
-      }));
     }
 
     var $oldLi = this.$('.nav-pills li.active');
-    $oldLi.find('.fa-check').show();
+    this.updateMappedPageNumber($oldLi, pageNumber);
 
     this.$('.no-answer').prop('checked', false);
     this.response.save({ pages: this.responsePage.join(',') });
@@ -287,20 +287,14 @@ var MapSubmissionView = Backbone.View.extend({
       this.responsePage = [];
       // empty string signifies no answer
       this.response.save({ pages: '' });
-      $oldLi.find('.fa-check').show();
-
-      this.$('.mapped-message').html(this.templates.noMappingTemplate({
-        questionNum: this.questionNumber,
-        partNum: this.partNumber
-      }));
+      this.updateMappedPageNumber($oldLi, '');
 
       this.goToNextQuestion();
     } else {
       // null signifies no pages selected
       this.responsePage = null;
       this.response.save({ pages: null });
-      $oldLi.find('.fa-check').hide();
-      this.$('.mapped-message').html('');
+      this.updateMappedPageNumber($oldLi, null);
     }
 
     this.showSuccessIfDone();
@@ -310,12 +304,19 @@ var MapSubmissionView = Backbone.View.extend({
     $(event.currentTarget).remove();
 
     var $oldLi = this.$('.nav-pills li.active');
-    $oldLi.find('.fa-check').hide();
-
-    this.$('.mapped-message').html('');
-
     this.response.save({ pages: null });
+    this.updateMappedPageNumber($oldLi, null);
     this.showSuccessIfDone();
+  },
+
+  updateMappedPageNumber: function($navLi, page) {
+    if (page === null) {
+      $navLi.find('.mapped-page-number').html('');
+    } else if (page.length === 0) {
+      $navLi.find('.mapped-page-number').html('(&mdash;)');
+    } else {
+      $navLi.find('.mapped-page-number').html('(pg' + page + ')');
+    }
   }
 });
 

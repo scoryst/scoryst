@@ -1683,7 +1683,7 @@ body.landing-page {
 
 .map-submission .mapped-token {
   background-color: #eee;
-  color: #017524;
+  color: #0061B5;
   padding: 3px;
   border-radius: 5px;
   font-size: 13px;
@@ -1694,10 +1694,10 @@ body.landing-page {
 
 .map-submission .mapped-token.active {
   color: #fff;
-  background: #017524;
+  background: #0061B5;
 }
 
-.map-submission .fa-check, .map-submission .remove-button {
+.map-submission .fa-check {
   display: none;
   margin-right: 2px;
 }
@@ -1711,8 +1711,8 @@ body.landing-page {
 }
 
 .map-submission .image-container.just-selected {
-  border-color: #14963B;
-  box-shadow: 0 0 10px #14963B;
+  border-color: #2980b9;
+  box-shadow: 0 0 10px #2980b9;
 }
 
 .map-submission .mapped-token.active:hover {
@@ -1721,6 +1721,10 @@ body.landing-page {
 
 .map-submission .mapped-message {
   color: #14963B;
+}
+
+.map-submission .mapped-page-number {
+  font-size: 10px;
 }
 
 /* CSS for the feedback form. */

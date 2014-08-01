@@ -12,7 +12,7 @@
         <li data-question-number="{{qp.question_number}}"
           data-part-number="{{qp.part_number}}">
             <a href="#">
-              Question {{qp.question_number}}, Part {{qp.part_number}} <i class="fa fa-check"></i>
+              Question {{qp.question_number}}, Part {{qp.part_number}} <span class="mapped-page-number"></span>
             </a>
         </li>
       {% endfor %}
@@ -102,14 +102,6 @@
     </strong>
     <i class="fa fa-times remove-button"></i>
   </div>
-</script>
-
-<script type="text/template" class="mapped-message-template">
-  <strong>Question <%=questionNum%>, Part <%=partNum%></strong> was mapped to <strong>Page <%=pageNum%></strong>.
-</script>
-
-<script type="text/template" class="no-mapping-template">
-  <strong>Question <%=questionNum%>, Part <%=partNum%></strong> was not answered.
 </script>
 
 {% endblock %}
