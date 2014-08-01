@@ -7,10 +7,6 @@
       <h2>Map Submission</h2>
       <p><strong>Submission time</strong>: {{ submission.time|date:"D, M d, f A" }}.</p>
 
-      <p>
-        For each question/part, click on the <strong>first</strong> page of your answer.
-      </p>
-
       <ul class="nav nav-pills question-part-nav">
       {% for qp in question_parts %}
         <li data-question-number="{{qp.question_number}}"
@@ -57,7 +53,8 @@
 <script type="text/template" class="select-pages-template">
   <h2>Question <span class="question-number"><%= questionNumber %></span>, Part <span class="part-number"><%= partNumber %></span></h2>
   <p>
-    Zoom into any page by clicking the magnifying glass in the bottom left.
+    For each question/part, click on the <strong>first</strong> page of your answer.
+    <span class="mapped-message"></span>
   </p>
 
   <label>
@@ -68,10 +65,6 @@
     <% } %>
     I did not answer this question.
   </label>
-
-  <button class="btn btn-danger btn-xs unmap-question-part">
-    Unmap question <span class="question-number">1</span>, part<span class="part-number">1</span>
-  </button>
 
   <div>
     <% submissionPages.forEach(function(page, index) { %>
@@ -87,7 +80,10 @@
             data-page-number="<%= page.pageNumber %>" />
           <div class="mapped-token-container">
           <% page.responses.forEach(function(response) { %>
-            <div class="mapped-token" data-question-number="<%=response.questionNum%>" data-part-number="<%=response.partNum%>">Q<%=response.questionNum%>P<%=response.partNum%></div>
+            <div class="mapped-token" data-question-number="<%=response.questionNum%>" data-part-number="<%=response.partNum%>">
+              <strong>Q<%=response.questionNum%>P<%=response.partNum%></strong>
+              <i class="fa fa-times remove-button"></i>
+            </div>
           <% }); %>
           </div>
         </div>
@@ -101,9 +97,21 @@
 
 <script type="text/template" class="mapped-token-template">
   <div class="mapped-token" data-question-number="<%=questionNum%>" data-part-number="<%=partNum%>">
-    Q<%=questionNum%>P<%=partNum%>
+    <strong>
+      Q<%=questionNum%>P<%=partNum%>
+    </strong>
+    <i class="fa fa-times remove-button"></i>
   </div>
 </script>
+
+<script type="text/template" class="mapped-message-template">
+  <strong>Question <%=questionNum%>, Part <%=partNum%></strong> was mapped to <strong>Page <%=pageNum%></strong>.
+</script>
+
+<script type="text/template" class="no-mapping-template">
+  <strong>Question <%=questionNum%>, Part <%=partNum%></strong> was not answered.
+</script>
+
 {% endblock %}
 
 {% block js %}

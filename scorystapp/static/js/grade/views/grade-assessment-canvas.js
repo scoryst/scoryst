@@ -377,7 +377,7 @@ var GradeAssessmentCanvasView = BaseAssessmentCanvasView.extend({
   },
 
   sendAnnotationToFront: function($annotation) {
-    // first remove the `annotation-front` class to all annotations
+    // first remove the `annotation-front` class from all annotations
     this.annotationViews.forEach(function(annotationView) {
       annotationView.removeAnnotationFrontClass();
     });

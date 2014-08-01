@@ -120,11 +120,12 @@ class SubmissionPageSerializer(serializers.ModelSerializer):
   responses = serializers.SerializerMethodField('get_responses')
 
   def get_responses(self, submission_page):
-    pn = submission_page.page_number
+    part_num = submission_page.page_number
     responses = models.Response.objects.filter(submission=submission_page.submission).filter(
-      Q(pages__startswith='%d,' % pn) | Q(pages__endswith=',%d' % pn) | Q(pages__contains=',%d,' % pn) | Q(pages__exact='%d' % pn))
+      Q(pages__startswith='%d,' % part_num) | Q(pages__endswith=',%d' % part_num) |
+      Q(pages__contains=',%d,' % part_num) | Q(pages__exact='%d' % part_num)).order_by(
+      'question_part__question_number', 'question_part__part_number')
     qp_nums = [{'question_num': r.question_part.question_number, 'part_num': r.question_part.part_number} for r in responses]
-    qp_nums = sorted(qp_nums, key=lambda qpn: (qpn['question_num'], qpn['part_num']))
     return qp_nums
 
   class Meta:

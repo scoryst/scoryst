@@ -1,14 +1,16 @@
 // This view handles the student mapping/submission.
 //
-// To help understand the code, note there are three states for `responsePages`:
-// 1) responsePages === null, meaning the student hasn't selected anything
-// 2) responsePages is an empty array, meaning the student has no answer
-// 3) responsePages is an array of integers representing the selected pages
+// To help understand the code, note there are three states for `responsePage`:
+// 1) responsePage === null, meaning the student hasn't selected anything
+// 2) responsePage is an empty array, meaning the student has no answer
+// 3) responsePage is an array of one integer representing the selected page
 var MapSubmissionView = Backbone.View.extend({
   ESCAPE_KEY: 27,
   templates: {
     selectPagesTemplate: _.template($('.select-pages-template').html()),
-    mappedTokenTemplate: _.template($('.mapped-token-template').html())
+    mappedTokenTemplate: _.template($('.mapped-token-template').html()),
+    mappedMessageTemplate: _.template($('.mapped-message-template').html()),
+    noMappingTemplate: _.template($('.no-mapping-template').html())
   },
 
   events: {
@@ -16,7 +18,7 @@ var MapSubmissionView = Backbone.View.extend({
     'click .select-pages .page': 'selectPage',
     'click .zoom': 'showZoomedImage',
     'change [type="checkbox"]': 'setNoAnswer',
-    'click .unmap-question-part': 'unmapQuestionPart'
+    'click .mapped-token.active': 'unmapQuestionPart'
   },
 
   initialize: function(options) {
@@ -78,7 +80,7 @@ var MapSubmissionView = Backbone.View.extend({
       submissionPages: this.submissionPages.toJSON(),
 
       // an empty array corresponds to no answer (see updateQuestionPart())
-      noAnswer: _.isArray(this.responsePages) && this.responsePages.length === 0
+      noAnswer: _.isArray(this.responsePage) && this.responsePage.length === 0
     };
 
     this.$selectPages.html(this.templates.selectPagesTemplate(templateData));
@@ -103,6 +105,7 @@ var MapSubmissionView = Backbone.View.extend({
   highlightCurrentQuestionPartTokens: function() {
     var $tokens = this.$('.mapped-token');
     $tokens.removeClass('active');
+    $tokens.find('.remove-button').hide();
 
     var self = this;
     $tokens.each(function() {
@@ -114,12 +117,13 @@ var MapSubmissionView = Backbone.View.extend({
       if (self.questionNumber === tokenQuestionNumber &&
           self.partNumber === tokenPartNumber) {
         $token.addClass('active');
+        $token.find('.remove-button').show();
       }
     });
 
-    // updates the checkbox
-    if (!$tokens.hasClass('active') && this.responsePages
-        && this.responsePages.length === 0) {
+    // updates the "I did not answer this question" checkbox
+    if (!$tokens.hasClass('active') && this.responsePage
+        && this.responsePage.length === 0) {
       this.$('.no-answer').prop('checked', true);
     } else {
       this.$('.no-answer').prop('checked', false);
@@ -161,16 +165,17 @@ var MapSubmissionView = Backbone.View.extend({
     this.response = this.findResponseForQuestionPart(this.questionNumber, this.partNumber);
 
     // keep track of pages that contain the response
-    var responsePages = this.response.get('pages');
-    if (responsePages === "") {
-      responsePages = [];
-    } else if (responsePages !== null) {
-      responsePages = responsePages.split(',').map(function(page) {
+    var responsePage = this.response.get('pages');
+    if (responsePage === "") {
+      responsePage = [];
+    } else if (responsePage !== null) {
+      responsePage = responsePage.split(',').map(function(page) {
         return parseInt(page, 10);
       });
+      responsePage = [Math.min.apply(null, responsePage)];
     }
 
-    this.responsePages = responsePages;
+    this.responsePage = responsePage;
 
     this.$navLis.removeClass('active');
     $li.addClass('active');
@@ -214,42 +219,41 @@ var MapSubmissionView = Backbone.View.extend({
     var selectorStr = '.mapped-token[data-question-number=' + this.questionNumber +
       '][data-part-number=' + this.partNumber + ']';
     var $token = $container.find(selectorStr);
-    if ($token.length > 0) {  // deselect page
-      var index = this.responsePages.indexOf(pageNumber);
-      this.responsePages.splice(index, 1);
-      $token.remove();
+    if ($token.length > 0) {  // if the page already has the token, do nothing
+      return;
     } else {  // select page
-      if (this.responsePages === null) {
-        this.responsePages = [];
-      }
+      this.responsePage = [pageNumber];
 
-      this.responsePages.push(pageNumber);
+      this.$(selectorStr).remove();
+
       var newToken = this.templates.mappedTokenTemplate({
         questionNum: this.questionNumber,
         partNum: this.partNumber
       });
       $container.find('.mapped-token-container').append(newToken);
-    }
 
-    this.responsePages = _.sortBy(this.responsePages);
+      // add the border glow
+      var $imageContainer = $page.parent('.image-container');
+      $imageContainer.addClass('just-selected');
+      setTimeout(function() {
+        $imageContainer.removeClass('just-selected');
+      }, 200);
+
+      // add the success message
+      this.$('.mapped-message').html(this.templates.mappedMessageTemplate({
+        questionNum: this.questionNumber,
+        partNum: this.partNumber,
+        pageNum: pageNumber
+      }));
+    }
 
     var $oldLi = this.$('.nav-pills li.active');
-    if (this.responsePages.length === 0) {
-      $oldLi.find('.fa-check').hide();
-    } else {
-      $oldLi.find('.fa-check').show();
-    }
+    $oldLi.find('.fa-check').show();
 
-    if (this.responsePages.length === 0) {
-      // null signifies no pages selected
-      this.response.save({ pages: null });
-    } else {
-      this.$('.no-answer').prop('checked', false);
-      this.response.save({ pages: this.responsePages.join(',') });
+    this.$('.no-answer').prop('checked', false);
+    this.response.save({ pages: this.responsePage.join(',') });
 
-      this.goToNextQuestion();
-    }
-
+    this.goToNextQuestion();
     this.showSuccessIfDone();
   },
 
@@ -280,44 +284,38 @@ var MapSubmissionView = Backbone.View.extend({
     var $oldLi = this.$('.nav-pills li.active');
 
     if ($checkbox.is(':checked')) {
-      this.responsePages = [];
+      this.responsePage = [];
       // empty string signifies no answer
       this.response.save({ pages: '' });
       $oldLi.find('.fa-check').show();
+
+      this.$('.mapped-message').html(this.templates.noMappingTemplate({
+        questionNum: this.questionNumber,
+        partNum: this.partNumber
+      }));
+
       this.goToNextQuestion();
     } else {
       // null signifies no pages selected
-      this.responsePages = null;
+      this.responsePage = null;
       this.response.save({ pages: null });
       $oldLi.find('.fa-check').hide();
+      this.$('.mapped-message').html('');
     }
 
     this.showSuccessIfDone();
   },
 
-  unmapQuestionPart: function() {
-    var $checkbox = this.$('.no-answer');
-    var $tokens = this.$('.mapped-token');
-    if ($checkbox.is(':checked')) {
-      $checkbox.prop('checked', false);
-    } else {
-      var self = this;
-      $tokens.each(function() {
-        var $token = $(this);
-        var tokenQuestionNumber = parseInt($token.attr('data-question-number'), 10);
-        var tokenPartNumber = parseInt($token.attr('data-part-number'), 10);
-
-        if (self.questionNumber === tokenQuestionNumber &&
-            self.partNumber === tokenPartNumber) {
-          $token.remove();
-        }
-      });
-    }
+  unmapQuestionPart: function(event) {
+    $(event.currentTarget).remove();
 
     var $oldLi = this.$('.nav-pills li.active');
     $oldLi.find('.fa-check').hide();
 
+    this.$('.mapped-message').html('');
+
     this.response.save({ pages: null });
+    this.showSuccessIfDone();
   }
 });
 

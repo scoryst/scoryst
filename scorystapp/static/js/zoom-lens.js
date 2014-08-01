@@ -42,8 +42,9 @@ var ZoomLensView = IdempotentView.extend({
       // dynamically create the image tag
       if (!this.createdImage) {
         this.createdImage = true;
-        $('img[alt="Enlarged Exam"]').remove();
-        this.$zoomImage = $('<img alt="Enlarged Exam" />').appendTo(this.$el.find('.zoom-lens'));
+        $('img.enlarged-exam').remove();
+        this.$zoomImage = $('<img class="enlarged-exam" alt="Enlarged Exam" />').appendTo(
+                            this.$el.find('.zoom-lens'));
       }
 
       this.$zoomImage.attr('src', imageSource);

@@ -1683,22 +1683,23 @@ body.landing-page {
 
 .map-submission .mapped-token {
   background-color: #eee;
-  color: #0061B5;
-  padding: 2px;
+  color: #017524;
+  padding: 3px;
   border-radius: 5px;
   font-size: 13px;
   opacity: 0.6;
   float: left;
-  margin: 0 2px;
+  margin: 0 1px;
 }
 
 .map-submission .mapped-token.active {
   color: #fff;
-  background: #0061B5;
+  background: #017524;
 }
 
-.map-submission .fa-check {
+.map-submission .fa-check, .map-submission .remove-button {
   display: none;
+  margin-right: 2px;
 }
 
 .map-submission .nav > li > a {
@@ -1707,6 +1708,19 @@ body.landing-page {
 
 .map-submission .btn-danger {
   margin: 0 11px 5px 364px;
+}
+
+.map-submission .image-container.just-selected {
+  border-color: #14963B;
+  box-shadow: 0 0 10px #14963B;
+}
+
+.map-submission .mapped-token.active:hover {
+  cursor: pointer;
+}
+
+.map-submission .mapped-message {
+  color: #14963B;
 }
 
 /* CSS for the feedback form. */
