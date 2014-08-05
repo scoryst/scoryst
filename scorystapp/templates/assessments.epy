@@ -56,6 +56,8 @@
           <a href="../.." class="btn btn-danger create-new-assessment">
             <i class="fa fa-times"></i> Disable editing</a>
           <h2>Edit an assessment</h2>
+          <p class="alert alert-warning initially-hide partially-editable-exam">Because this exam has uploads, not all fields can be modified.</p>
+          <p class="alert alert-warning initially-hide partially-editable-homework">Because this homework has submissions, not all fields can be modified.</p>
         {% else %}
           <h2>Create an Assessment</h2>
         {% endif %}
@@ -144,18 +146,17 @@
         <%= pageCount %>
       </td>
       <td>
-        <% if (isEditable) { %>
           <a href="/course/<%= course %>/assessments/create/<%= id %>/"
               class="edit">
             <i class="fa fa-pencil"></i>
           </a>
 
+        <% if (isFullyEditable) { %>
           <a href="/course/<%= course %>/assessments/delete/<%= id %>/"
               class="delete">
             <i class="fa fa-trash-o"></i>
           </a>
         <% } else { %>
-          None
           <a class="info-popover" data-trigger="hover">
             <i class="fa fa-question-circle"></i>
           </a>
@@ -178,18 +179,17 @@
         <%= submissionDeadline %>
       </td>
       <td>
-        <% if (isEditable) { %>
           <a href="/course/<%= course %>/assessments/create/<%= id %>"
               class="edit">
             <i class="fa fa-pencil"></i>
           </a>
 
+        <% if (isFullyEditable) { %>
           <a href="/course/<%= course %>/assessments/delete/<%= id %>"
               class="delete">
             <i class="fa fa-trash-o"></i>
           </a>
         <% } else { %>
-          None
           <a class="info-popover" data-trigger="hover">
             <i class="fa fa-question-circle"></i>
           </a>

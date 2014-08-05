@@ -6,7 +6,7 @@ from scorystapp import models
 class AssessmentSerializer(serializers.ModelSerializer):
   is_exam = serializers.SerializerMethodField('get_is_exam')
   solutions_pdf = serializers.SerializerMethodField('get_solutions_pdf')
-  is_editable = serializers.SerializerMethodField('get_is_editable')
+  is_fully_editable = serializers.SerializerMethodField('get_is_fully_editable')
 
   # Only valid if the assessment is an exam (else None)
   page_count = serializers.SerializerMethodField('get_page_count')
@@ -52,14 +52,14 @@ class AssessmentSerializer(serializers.ModelSerializer):
       return local_time.strftime('%m/%d/%Y %I:%M %p')
     return None
 
-  def get_is_editable(self, assessment):
-    """ Editing an assessment is only possible if there are no submissions. """
+  def get_is_fully_editable(self, assessment):
+    """ Editing all fields of an assessment is only possible if there are no submissions. """
     return models.Submission.objects.filter(assessment=assessment).count() == 0
 
   class Meta:
     model = models.Assessment
     fields = ('id', 'name', 'course', 'is_exam', 'page_count', 'solutions_pdf',
-              'submission_deadline', 'exam_pdf', 'is_editable', 'grade_down')
+              'submission_deadline', 'exam_pdf', 'is_fully_editable', 'grade_down')
     read_only_fields = ('id', 'name', 'course', 'grade_down')
 
 

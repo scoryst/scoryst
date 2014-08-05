@@ -163,7 +163,11 @@ class AssessmentUploadForm(forms.Form):
   assessment_type = forms.ChoiceField(choices=ASSESSMENT_TYPES,
     widget=forms.RadioSelect(renderer=HorizontalRadioRenderer), initial=HOMEWORK_TYPE)
   name = forms.CharField(max_length=40)
-  grade_type = forms.ChoiceField(choices=GRADE_TYPES,
+
+  # For the following fields that have `required=False` but are required in
+  # certain cases, validation is done either in the `clean` functions below
+  # or in the view
+  grade_type = forms.ChoiceField(choices=GRADE_TYPES, required=False,
     widget=forms.RadioSelect(renderer=HorizontalRadioRenderer), initial=GRADE_DOWN_TYPE)
 
   exam_file = forms.FileField(required=False)
@@ -171,6 +175,7 @@ class AssessmentUploadForm(forms.Form):
 
   submission_deadline = forms.DateTimeField(required=False, input_formats=['%m/%d/%Y %I:%M %p'])
 
+  # The question part information is passed as stringified JSON
   question_part_points = forms.CharField()
 
   def clean(self):

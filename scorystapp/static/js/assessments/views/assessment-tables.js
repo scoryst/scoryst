@@ -43,8 +43,8 @@ var AssessmentTablesView = IdempotentView.extend({
 
   addPopovers: function() {
     // popover gives information when hovered about why deletion is not possible
-    var infoPopoverText = 'Once students have been assigned to an assessment, ' +
-      'that assessment can no longer be edited or deleted';
+    var infoPopoverText = 'If an assessment has student uploads, it cannot ' +
+      'be deleted';
 
     var $infoPopover = this.$el.find('.info-popover');
     $infoPopover.popover({ content: infoPopoverText });

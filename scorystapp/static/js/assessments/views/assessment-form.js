@@ -43,6 +43,8 @@ var AssessmentFormView = IdempotentView.extend({
 
     // if editing an assessment, populate the fields with the saved values
     if (this.assessment) {
+      this.isFullyEditable = this.assessment.get('isFullyEditable');
+
       this.questionParts = new QuestionPartCollection();
       var self = this;
       this.questionParts.fetch({
@@ -63,6 +65,10 @@ var AssessmentFormView = IdempotentView.extend({
           self.$('.pages').each(function(i, points) {
             $(points).on('keydown', _.bind(_.debounce(self.validatePages, 500), self));
           });
+
+          if (!self.isFullyEditable) {
+            self.showPartialEditing();
+          }
         }
       });
     } else {
@@ -245,7 +251,9 @@ var AssessmentFormView = IdempotentView.extend({
 
       if (submissionDeadlineIsValid) {
         this.$('.submission-error').hide();
-      } else {
+      }
+      // having a past submission deadline is okay if there are already submissions
+      else if (this.isFullyEditable) {
         this.$('.submission-error').show();
         passedValidation = false;
       }
@@ -388,7 +396,6 @@ var AssessmentFormView = IdempotentView.extend({
 
     // select correct grade up/down option; change to grade down (up is default)
     if (!this.assessment.get('gradeDown')) {
-      console.log(this.assessment);
       this.$('#id_grade_type_1').prop('checked', true);
     }
 
@@ -477,5 +484,16 @@ var AssessmentFormView = IdempotentView.extend({
     $viewUploadFieldLink = $(event.currentTarget);
     $viewUploadFieldLink.parent().hide();
     $viewUploadFieldLink.parent().siblings('input').show();
+  },
+
+  showPartialEditing: function() {
+    this.$numQuestionsField.attr('disabled', true);
+    this.$('.num-parts').attr('disabled', true);
+    this.$('.assessment-type').attr('disabled', true);
+    if (this.isExam) {
+      this.$('.partially-editable-exam').show();
+    } else {
+      this.$('.partially-editable-homework').show();
+    }
   }
 });
