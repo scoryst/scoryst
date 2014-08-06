@@ -224,11 +224,9 @@ var AssessmentFormView = IdempotentView.extend({
         this.$('.exam-file-error').show();
         passedValidation = false;
       }
-    }
-
-    // if homework, validate that a submission deadline is entered and that it
-    // is in the future
-    else {
+    } else {
+      // if homework, validate that a submission deadline is entered and that it
+      // is in the future
       var submissionDeadlineIsValid = true;
       var submissionString = this.$('#id_submission_deadline').val();
 
@@ -249,11 +247,10 @@ var AssessmentFormView = IdempotentView.extend({
         }
       }
 
-      if (submissionDeadlineIsValid) {
-        this.$('.submission-error').hide();
-      }
       // having a past submission deadline is okay if there are already submissions
-      else if (this.isFullyEditable) {
+      if (submissionDeadlineIsValid || !this.isFullyEditable) {
+        this.$('.submission-error').hide();
+      } else {
         this.$('.submission-error').show();
         passedValidation = false;
       }

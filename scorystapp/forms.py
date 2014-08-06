@@ -165,14 +165,17 @@ class AssessmentUploadForm(forms.Form):
   name = forms.CharField(max_length=40)
 
   # For the following fields that have `required=False` but are required in
-  # certain cases, validation is done either in the `clean` functions below
-  # or in the view
+  # certain cases (explained more below), validation is done either in the
+  # `clean` functions below or in the view
+  # `grade_type` is not required if the assessment is not fully editable
   grade_type = forms.ChoiceField(choices=GRADE_TYPES, required=False,
     widget=forms.RadioSelect(renderer=HorizontalRadioRenderer), initial=GRADE_DOWN_TYPE)
 
+  # The `exam_file` is not required if the assessment is being edited
   exam_file = forms.FileField(required=False)
+  # The  `solutions_file` is never required
   solutions_file = forms.FileField(required=False)
-
+  # The `submission_deadline` is required only if the assessment is a homework
   submission_deadline = forms.DateTimeField(required=False, input_formats=['%m/%d/%Y %I:%M %p'])
 
   # The question part information is passed as stringified JSON

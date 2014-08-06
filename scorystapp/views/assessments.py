@@ -209,7 +209,7 @@ def _handle_full_exam_edit(request, data, course, exam_id=None):
         points=correct_answer_rubric_points)
       new_rubric.save()
 
-  _handle_partial_exam_edit(request, exam.id, data, course, exam_id != None)
+  _handle_partial_exam_edit(request, exam.id, data, course, False)
 
 
 def _handle_full_homework_edit(request, data, course, homework_id=None):
@@ -244,7 +244,7 @@ def _handle_full_homework_edit(request, data, course, homework_id=None):
         points=correct_answer_rubric_points)
       new_rubric.save()
 
-  _handle_partial_homework_edit(request, homework.id, data, course, homework_id != None)
+  _handle_partial_homework_edit(request, homework.id, data, course, False)
 
 
 @decorators.access_controlled
