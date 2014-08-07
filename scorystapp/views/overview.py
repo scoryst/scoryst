@@ -131,7 +131,7 @@ def get_responses(request, cur_course_user, assessment_id, course_user_id):
 
 
 @decorators.access_controlled
-@decorators.instructor_required
+@decorators.instructor_or_ta_required
 def release_grades(request, cur_course_user, assessment_id):
   """
   Releases grades to all students to whom grades for the assessment have not been
