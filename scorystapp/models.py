@@ -594,6 +594,9 @@ class SplitPage(models.Model):
   is_uploaded = models.BooleanField(default=False)
   is_blank = models.BooleanField(default=False)
   begins_submission = models.BooleanField(default=False)
+  # True if the split has questions answered on every page, and False if there
+  # are blank pages in between every page
+  is_single = models.BooleanField(default=False)
 
   # Upload URLs are taken care of by upload.py, however upload_to is required
   # so we specify none

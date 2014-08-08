@@ -23,7 +23,7 @@
         <div class="form-group">
           <label for="id_exam_id">Exam</label>
 
-          {% render_field form.exam_id class="form-control" placeholder="Midterm Exam"%}
+          {% render_field form.exam_id class="form-control" placeholder="Midterm Exam" %}
           <span class="error">{{form.exam_id.errors.as_text}}</span>
         </div>
 
@@ -32,6 +32,13 @@
           {% render_field form.exam_file %}
           <span class="error">{{form.exam_file.errors.as_text}}</span>
         </div>
+
+          <div class="form-group">
+            {% render_field form.single_or_double %}
+            <a class="info-popover" data-trigger="hover">
+              <i class="fa fa-question-circle"></i>
+            </a>
+          </div>
 
         <div class="form-group">
           <button class="btn btn-primary" type="submit">Upload</button>
@@ -76,5 +83,8 @@
 
 {% block js %}
 {% include 'backbone.epy' %}
+<script src="/static/js/lib/tooltip.js"></script>
+<script src="/static/js/lib/popover.js"></script>
+<script src="/static/js/popover-confirm.js"></script>
 <script src="/static/js/upload.js"></script>
 {% endblock %}

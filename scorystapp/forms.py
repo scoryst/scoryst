@@ -219,8 +219,17 @@ class ExamsUploadForm(forms.Form):
   # 100MB max PDF size, as multiple exams can be uploaded
   MAX_ALLOWABLE_PDF_SIZE = 1024 * 1024 * 100
 
+  SINGLE_SIDED_TYPE = 'single'
+  DOUBLE_SIDED_TYPE = 'double'
+  EXAM_UPLOAD_TYPES = (
+      (SINGLE_SIDED_TYPE, 'Questions are on every page'),
+      (DOUBLE_SIDED_TYPE, 'Questions are on every other page'),
+  )
+
   exam_id = forms.ChoiceField()
   exam_file = forms.FileField()
+  single_or_double = forms.ChoiceField(choices=EXAM_UPLOAD_TYPES,
+    widget=forms.RadioSelect(renderer=HorizontalRadioRenderer), initial=DOUBLE_SIDED_TYPE)
 
 
   def __init__(self, exam_choices, *args, **kwargs):

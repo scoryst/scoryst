@@ -35,10 +35,11 @@ def upload(request, cur_course_user):
     form = forms.ExamsUploadForm(exam_choices, request.POST, request.FILES)
     if form.is_valid():
       exam = shortcuts.get_object_or_404(models.Exam, pk=form.cleaned_data['exam_id'], course=cur_course)
+      is_single = form.cleaned_data['single_or_double'] == 'single'
 
       # Breaks the pdf into jpegs and uploads them to S3 after creating `SplitPage` objects
       name_prefix = exam.name.replace(' ', '') + utils.generate_random_string(5)
-      _upload_and_split(exam, request.FILES['exam_file'], name_prefix)
+      _upload_and_split(exam, request.FILES['exam_file'], name_prefix, is_single)
 
       # redirect back to the upload page, which will show upload progress
       return shortcuts.redirect('/course/%s/upload/' % (cur_course_user.course.id,))
@@ -67,7 +68,7 @@ def get_split_pages(request, cur_course_user, exam_id):
   })
 
 
-def _upload_and_split(exam, handle, name_prefix):
+def _upload_and_split(exam, handle, name_prefix, is_single):
   """
   Uploads the PDF file specified by handle. Creates a temporary
   file with the given name prefix, and starts an asynchronous split and
@@ -79,11 +80,11 @@ def _upload_and_split(exam, handle, name_prefix):
   temp_pdf.write(handle.read())
   temp_pdf.flush()
 
-  _upload_and_split_task.delay(exam, temp_pdf_name)
+  _upload_and_split_task.delay(exam, temp_pdf_name, is_single)
 
 
 @celery.task
-def _upload_and_split_task(exam, temp_pdf_name):
+def _upload_and_split_task(exam, temp_pdf_name, is_single):
   """
   Creates a 'Split' object and uploads the giant PDF file. Converts the PDF
   into JPEGs and uploads them to S3 (courtesy of the converter worker).
@@ -96,14 +97,13 @@ def _upload_and_split_task(exam, temp_pdf_name):
   split.pdf.save('split-pdf', files.File(entire_pdf_file))
   split.save()
 
-  # assume each page has questions on one side and nothing on the other
-  num_pages_per_exam = exam.page_count * 2
+  num_pages_per_exam = exam.page_count if is_single else exam.page_count * 2
 
   os.remove(temp_pdf_name)
-  _create_and_upload_split_pages(split, num_pages, num_pages_per_exam)
+  _create_and_upload_split_pages(split, num_pages, num_pages_per_exam, is_single)
 
 
-def _create_and_upload_split_pages(split, num_pages, num_pages_per_exam):
+def _create_and_upload_split_pages(split, num_pages, num_pages_per_exam, is_single):
   """
   For each page in the pdf, create a `SplitPage` and associated a JPEG with it.
   Runs the PDF -> JPEG converter worker for all pages, uploading the
@@ -124,7 +124,7 @@ def _create_and_upload_split_pages(split, num_pages, num_pages_per_exam):
       # We make a guess for `begins_submission` by assuming all the exams
       # uploaded have the correct number of pages
       split_page = models.SplitPage(split=split, page_number=page + 1,
-      begins_submission=(page % num_pages_per_exam == 0))
+      begins_submission=(page % num_pages_per_exam == 0), is_single=is_single)
 
       jpeg_name = '%s.jpeg' % jpeg_prefixes[page - offset]
       jpeg_field = file_fields.ImageFieldFile(instance=None,

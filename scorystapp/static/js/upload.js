@@ -32,8 +32,12 @@ var UploadView = Backbone.View.extend({
       self.refreshTimeout = setTimeout(_.bind(self.render, self),
         self.REFRESH_DURATION);
     });
-  }
 
+    var infoPopoverText = '"Questions are on every other page" means there is ' +
+    'a blank page/scratch paper between each page.';
+    var $infoPopover = this.$('.info-popover');
+    $infoPopover.popover({ content: infoPopoverText, placement: 'top' });
+  }
   // TODO: set exam; immediately call render
 });
 

@@ -66,7 +66,7 @@ def finish_and_create_submissions(request, cur_course_user, exam_id):
       if submission:
         submission.page_count = num_pages_in_exam
         submission.save()
-        _create_responses(question_parts, submission)
+        _create_responses(question_parts, submission, split_page.is_single)
 
       num_pages_in_exam = 0
       # `page_count` will be set later
@@ -94,18 +94,17 @@ def finish_and_create_submissions(request, cur_course_user, exam_id):
   if submission:
     submission.page_count = num_pages_in_exam
     submission.save()
-    _create_responses(question_parts, submission)
+    _create_responses(question_parts, submission, split_page.is_single)
 
   _upload_pdf_for_submissions.delay(pdf_info_list)
 
   # Delete all splits since we have taken care of them
-  # Commented out for now for testing
-  # models.Split.objects.filter(exam=exam).delete()
+  models.Split.objects.filter(exam=exam).delete()
   return shortcuts.redirect('/course/%d/assessments/%d/assign/'
     % (cur_course_user.course.pk, int(exam_id)))
 
 
-def _create_responses(question_parts, submission):
+def _create_responses(question_parts, submission, is_single):
   """
   Creates `Response` models for this `submission` and sets
   the correct answer pages for it
@@ -116,15 +115,21 @@ def _create_responses(question_parts, submission):
     for page in question_part.pages.split(','):
       page = int(page)
 
-      # When the PDF of the exam was uploaded, we assumed it had no blank
-      # pages whereas there were blank pages during upload. Hence, the 2x - 1
-      if 2 * page - 1 <= submission.page_count:
-        answer_pages = answer_pages + str(2 * page - 1) + ','
-      elif answer_pages == '':
-        # If the page is out of bounds, and we have no pages associated
-        # with this question part, the last page is our best guess.
-        answer_pages = str(submission.page_count) + ','
-        break
+      if is_single:
+        if page < submission.page_count:
+          answer_pages = answer_pages + str(page) + ','
+        elif answer_pages == '':
+          answer_pages = str(submission.page_count) + ','
+      else:
+        # When the PDF of the exam was uploaded, we assumed it had no blank
+        # pages whereas there were blank pages during upload. Hence, the 2x - 1
+        if 2 * page - 1 <= submission.page_count:
+          answer_pages = answer_pages + str(2 * page - 1) + ','
+        elif answer_pages == '':
+          # If the page is out of bounds, and we have no pages associated
+          # with this question part, the last page is our best guess.
+          answer_pages = str(submission.page_count) + ','
+          break
 
     # remove the trailing comma (,) from the end of answer_pages
     answer_pages = answer_pages[:-1]
