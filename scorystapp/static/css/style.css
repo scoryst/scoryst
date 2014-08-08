@@ -1248,6 +1248,10 @@ input {
   width: 50%;
 }
 
+.upload hr {
+  margin: 40px 0;
+}
+
 /* About page. */
 .about h3 {
   font-size: 22px;

@@ -6,6 +6,7 @@
   <div class="row">
     <div class="col-xs-6">
       <h2>Upload Student Exams</h2>
+      {% if has_exams %}
       <ol class="track-progress">
         <li class="active">
           <span>1.</span> Upload
@@ -36,12 +37,24 @@
           <button class="btn btn-primary" type="submit">Upload</button>
         </div>
       </form>
+      {% else %}
+      <p>Before uploading student exams, you must <a href="/course/{{course.pk}}/assessments">create an exam on Scoryst.</a></p>
+      {% endif %}
     </div>
 
 
     <div class="col-xs-6">
-      <h2>Progress</h2>
+      <h2>Upload Progress</h2>
       <div class="upload-progress"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <hr>
+    <div class="col-xs-6">
+      <h2>Upload Student Homework</h2>
+      <p>You may manually submit an assignment for a student <a
+          href="/course/{{course.pk}}/submit">by following this link</a>.</p>
     </div>
   </div>
 </div>

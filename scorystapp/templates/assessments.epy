@@ -25,11 +25,6 @@
           <p>There are no homework assignments.</p>
         {% endif %}
 
-        <p class="section-separator">
-          You may manually submit an assignment for a student on the <a
-          href="/course/{{course.pk}}/submit">submit page</a>.
-        </p>
-
         <h2>Exams</h2>
         {% if exams_exist %}
           <table class="table table-striped table-condensed exam-table">

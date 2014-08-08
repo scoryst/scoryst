@@ -49,6 +49,7 @@ def upload(request, cur_course_user):
     'title': 'Upload',
     'course': cur_course,
     'form': form,
+    'has_exams': len(exam_choices) > 0
   })
 
 
