@@ -47,7 +47,7 @@ def roster(request, cur_course_user):
         course_user.save()
         course_users.append(course_user)
 
-      email_sender.send_added_to_course_email(request, course_users)
+      email_sender.send_added_to_course_email(request, course_users, True)
       return shortcuts.redirect(request.path)
   else:
     form = forms.AddPeopleForm()
