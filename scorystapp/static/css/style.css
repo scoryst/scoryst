@@ -5,10 +5,13 @@ html {
 body {
   margin: 0;
   padding: 0 0 50px 0;
-  font-family: Roboto, 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, Sans-serif;
   font-size: 15px;
   position: relative;
   min-height: 100%;
+}
+
+body, h1, h3, h4, h5, h6 {
+  font-family: Roboto, 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, Sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -377,7 +380,7 @@ input {
   cursor: pointer;
 }
 
-.grade .well, .assessment .well {
+.grade .well, .assessment .well, .help .well {
   box-shadow: none;
   border: none;
   border-box-shadow: none;
@@ -666,7 +669,7 @@ input {
   margin-right: 1px;
 }
 
-.grade .assessment-nav a {
+.grade .assessment-nav a, .help .help-nav a {
   display: block;
   height: 28px;
   line-height: 28px;
@@ -677,21 +680,22 @@ input {
   font-size: 14px;
 }
 
-.grade .assessment-nav a:hover, .grade .assessment-nav .active a {
+.grade .assessment-nav a:hover, .grade .assessment-nav .active a,
+.help .help-nav a:hover, .help .help-nav .active a {
   background-color: white;
 }
 
-.grade .assessment-nav .active a {
+.grade .assessment-nav .active a, .help .help-nav .active a {
   border-left: 3px solid #2980b9;
   color: #2980b9;
 }
 
 /* Don't want Exam Navigation to have hover properties. */
-.grade .assessment-nav > a {
+.grade .assessment-nav > a, .help .help-nav > a {
   padding-left: 0;
 }
 
-.grade .assessment-nav > a:hover {
+.grade .assessment-nav > a:hover, .help .help-nav > a:hover {
   color: #2c3e50;
   background-color: inherit;
   border-left: 3px solid transparent;
@@ -1807,4 +1811,53 @@ body.landing-page {
   padding-left: 10px;
   margin: 0;
   width: 100%;
+}
+
+/* CSS for the Help page. */
+.help .panel-group {
+  margin-bottom: 15px;
+}
+
+.help .panel-body {
+  padding-bottom: 5px;
+}
+
+.help .help-nav {
+  margin: 0 50px;
+  width: 270px;
+}
+
+.help .help-nav a {
+  font-size: 16px;
+}
+
+.help h3 {
+  font-size: 20px;
+}
+
+.help h2.student-help {
+  margin-top: 50px;
+}
+
+.help .instructor-title, .help .student-title {
+  font-family: 'Josefin Sans', 'Helvetica Neue', 'Trebuchet MS', Helvetica, Arial, Sans-serif;
+  font-size: 20px;
+}
+
+.help .student-title {
+  margin-top: 15px;
+}
+
+.help .help-nav ul {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+.help .container {
+  margin-left: 40px;
+}
+
+.help .alert {
+  display: none;
 }

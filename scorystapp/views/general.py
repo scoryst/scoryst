@@ -57,3 +57,9 @@ def get_initial_path(user, redirect_path=None):
       redirect_path = '/welcome/'
 
   return redirect_path
+
+
+def help(request):
+  return helpers.render(request, 'help.epy', {
+    'title': 'Help',
+  })

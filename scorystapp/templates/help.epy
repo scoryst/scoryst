@@ -1,0 +1,594 @@
+{% load compress %}
+{% load custom_tags %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf8" />
+    <title>Scoryst</title>
+
+    {% compress css %}
+    <link rel="stylesheet" href="/static/css/lib/normalize.css" />
+    <link rel="stylesheet" href="/static/css/lib/bootstrap.css" />
+    <link rel="stylesheet" href="/static/css/lib/font-awesome.css" />
+    <link rel="stylesheet" href="/static/css/style.css" />
+    {% endcompress %}
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400|Josefin+Sans:600|Quicksand:400" />
+  </head>
+  <body class="help">
+    <div class="main">
+      <header>
+        <div class="exact-container clearfix">
+          <h1>
+            <a href="/">
+              <i class="fa fa-magic"></i>
+              Scoryst
+            </a>
+          </h1>
+        </div>
+      </header>
+
+      <div class="container content">
+        <div class="row">
+          <div class="col-xs-4 help-nav well">
+            <ul>
+              <li class="instructor-title">INSTRUCTOR HELP</li>
+              <li data-target="instructor-getting-started" class="active"><a href="#">Getting Started</a></li>
+              <li data-target="instructor-roster"><a href="#">Roster</a></li>
+              <li data-target="instructor-set-up"><a href="#">Set-Up</a></li>
+              <li data-target="instructor-grading"><a href="#">Grading</a></li>
+              <li data-target="instructor-releasing-grades"><a href="#">Releasing Grades</a></li>
+              <li class="student-title">STUDENT HELP</li>
+              <li data-target="student-getting-started"><a href="#">Getting Started</a></li>
+              <li data-target="student-submitting"><a href="#">Submitting</a></li>
+              <li data-target="student-viewing-grades"><a href="#">Viewing Grades</a></li>
+              <li data-target="student-statistics"><a href="#">Statistics</a></li>
+            </ul>
+          </div>
+
+          <div class="col-xs-8">
+            <h2>Instructor Help</h2>
+            <div class="alert alert-warning alert-dismissible" role="alert">
+              <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+              If you haven't already, you may want to watch this (3:42) intro video: <a href="http://youtu.be/2jykHl1gs7I">http://youtu.be/2jykHl1gs7I</a>.
+            </div>
+
+            <div class="summary">
+              <h4>Instructor FAQs</h4>
+              <div class="well">
+                <a class="to-scroll" href="#instructor-get-started">How do I get started using Scoryst?</a><br/>
+                <a class="to-scroll" href="#instructor-create-course">How do I create a course on Scoryst?</a><br/>
+                <a class="to-scroll" href="#instructor-add-people">How do I add students/TAs/instructors to my course?</a><br/>
+                <a class="to-scroll" href="#instructor-vs-ta">What’s the difference between a TA and an instructor?</a><br/>
+                <a class="to-scroll" href="#instructor-create-homework">How do I create a homework on Scoryst?</a><br/>
+                <a class="to-scroll" href="#instructor-allow-homework">How do I allow students to submit their homework?</a><br/>
+                <a class="to-scroll" href="#instructor-allow-late">Can I allow a student to submit homework past the deadline?</a><br/>
+                <a class="to-scroll" href="#instructor-submit-homework">How can I submit homework for my students?</a><br/>
+                <a class="to-scroll" href="#instructor-create-exams">How do I create an exam on Scoryst?</a><br/>
+                <a class="to-scroll" href="#instructor-upload-exams">How do I upload exams to Scoryst?</a><br/>
+                <a class="to-scroll" href="#instructor-begin-grading">How do I begin grading?</a><br/>
+                <a class="to-scroll" href="#instructor-see-ungraded">How do I see which students have not yet been graded?</a><br/>
+                <a class="to-scroll" href="#instructor-page-not-loading">I’m grading and one of the student’s pages won’t load. What should I do?</a><br/>
+                <a class="to-scroll" href="#instructor-release-grades">How do I release grades so that students can see their score?</a><br/>
+                <a class="to-scroll" href="#instructor-release-grades-what">What happens when I click "Release Grades"?</a><br/>
+                <a class="to-scroll" href="#instructor-release-grades-more">What happens if I click "Release Grades" more than once?</a><br/>
+                <a class="to-scroll" href="#instructor-change-score">If I change a student’s score, do I need to release grades again?</a><br/>
+              </div>
+            </div>
+
+            <h3 class="instructor-getting-started">Getting Started</h3>
+            <div class="panel-group">
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#instructor-get-started">
+                      How do I get started using Scoryst?
+                    </a>
+                  </h4>
+                </div>
+                <div id="instructor-get-started" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <p>You may want to watch the brief introductory video below.</p>
+
+                    <iframe width="420" height="315" src="//www.youtube-nocookie.com/embed/2jykHl1gs7I?rel=0" frameborder="0" allowfullscreen></iframe>
+                    <br />
+
+                    <p>
+                      First, contact us at <a href="mailto:hello@scoryst.com">hello@scoryst.com</a> so we can set you up with a course. Next, <a class="to-scroll" href="#instructor-add-people"> add people to your course</a>. Then, <a class="to-scroll" href="#instructor-create-homework">create a homework</a> on Scoryst so that students can <a class="to-scroll" href="#instructor-allow-homework">submit their homework</a>, or <a class="to-scroll" href="#instructor-create-exam">create an exam</a> on Scoryst and <a class="to-scroll" href="#instructor-upload-exams">upload student exams</a>.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#instructor-create-course">
+                      How do I create a course on Scoryst?
+                    </a>
+                  </h4>
+                </div>
+                <div id="instructor-create-course" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <p>
+                      If you already have a Scoryst account and have been an instructor in the past, you are able to create a new course. Simply click "New Course" in the navigation bar and then fill out the form.
+                    </p>
+                    <p>
+                      If you were not an instructor on Scoryst in the past, or you do not have an account, contact us at <a href="mailto:hello@scoryst.com">hello@scoryst.com</a>, and we’ll promptly set you up.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <h3 class="instructor-roster">Roster</h3>
+            <div class="panel-group">
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#instructor-add-people">
+                      How do I add students/TAs/instructors to my course?
+                    </a>
+                  </h4>
+                </div>
+                <div id="instructor-add-people" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <p>
+                      First, click "Roster" in the navigation bar. Once on the Roster page, there are two ways to add people. The first is to share the appropriate link to students and TAs.
+                    </p>
+                    <p>
+                      The second option is to manually add people to the course. To do so, first click on "add people manually" under the "ENROLL LINK" section. In the form that appears, type out the names of people to add.
+                    </p>
+                    <img src="/static/img/help/add-people.png" alt="Add People" height="400">
+                  </div>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#instructor-vs-ta">
+                      What’s the difference between a TA and an instructor?
+                    </a>
+                  </h4>
+                </div>
+                <div id="instructor-vs-ta" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <p>
+                      An instructor has full control over all aspects of the course. A TA can do all of the actions an instructor can do except deleting people from a course.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <h3 class="instructor-set-up">Set-Up</h3>
+            <div class="panel-group">
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#instructor-create-homework">
+                      How do I create a homework on Scoryst?
+                    </a>
+                  </h4>
+                </div>
+                <div id="instructor-create-homework" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <p>
+                      To create a homework, click "Create" in the navigation bar. Then, fill out the form on the right. Be sure to choose "Homework" as the "Type". Once the form has been submitted, you should be able to see the homework appear on the left.
+                    </p>
+                    <img src="/static/img/help/create-homework.png" width="700" alt="Create Homework">
+                  </div>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#instructor-allow-homework">
+                      How do I allow students to submit their homework?
+                    </a>
+                  </h4>
+                </div>
+                <div id="instructor-allow-homework" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <p>
+                      You first need to <a class="to-scroll" href="#instructor-create-homework">create a homework</a> and make sure that the students are <a class="to-scroll" href="#instructor-add-people">added to the roster</a>. Then, instruct them to log on to Scoryst, and they will be able to submit their homework.
+                    </p>
+                    <p>
+                      You can give students more explicit instructions about how to submit their homework by looking at our answer <a class="to-scroll" href="#student-submit-homework">here</a>.
+                  </div>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#instructor-allow-late">
+                      Can I allow a student to submit homework past the deadline?
+                    </a>
+                  </h4>
+                </div>
+                <div id="instructor-allow-late" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <p>
+                      Students cannot submit homework past the submission deadline. However, there may be special cases where the student’s homework should be accepted past the deadline. In these cases, you can <a class="to-scroll" href="#instructor-submit-homework">submit homework for the student</a>, since instructors can submit past the submission deadline.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#instructor-submit-homework">
+                      How can I submit homework for my students?
+                    </a>
+                  </h4>
+                </div>
+                <div id="instructor-submit-homework" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <p>
+                      You first need to <a class="to-scroll" href="#instructor-create-homework">create a homework</a> and make sure that the students are added to the roster. Then, click "Upload" in the navigation bar and follow the instructions under "UPLOAD STUDENT HOMEWORK".
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#instructor-create-exam">
+                      How do I create an exam on Scoryst?
+                    </a>
+                  </h4>
+                </div>
+                <div id="instructor-create-exam" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <p>
+                      To create an exam, click "Create" in the navigation bar. Then, fill out the form on the right. Be sure to choose "Exam" as the "Type". Once the form has been submitted, you should be able to see the exam appear on the table on the left. Also, an "Upload" tab will appear in the navigation bar.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#instructor-upload-exams">
+                      How do I upload exams to Scoryst?
+                    </a>
+                  </h4>
+                </div>
+                <div id="instructor-upload-exams" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <p>
+                      First, <a class="to-scroll" href="#instructor-create-exam">create an exam</a> on Scoryst.
+                    </p>
+                    <p>
+                      To upload exams, click "Upload" in the navigation bar. You will want the exams to be scanned in PDF format. PDFs should be 300 (or 200) DPI and Black & White. A single PDF can contain multiple student exams. Also, you can upload multiple PDFs to Scoryst without waiting for previous uploads to complete.
+                    </p>
+                    <p>
+                      Once uploading is complete, there are two additional steps. The next step is to ensure that the first page of every exam is marked. The final step is to assign exams to students using the typeahead assignment.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <h3 class="instructor-grading">Grading</h3>
+            <div class="panel-group">
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#instructor-begin-grading">
+                      How do I begin grading?
+                    </a>
+                  </h4>
+                </div>
+                <div id="instructor-begin-grading" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <p>
+                      You may want to watch this brief (2:20) tutorial on how to grade:
+                    </p>
+                    <iframe width="420" height="315" src="//www.youtube-nocookie.com/embed/bRYkjykqMKs?rel=0" frameborder="0" allowfullscreen></iframe>
+
+                    <p>
+                      Click "Grade" in the navigation bar. On the left hand, you can choose the student to begin grading. Then on the right hand, click "Grade" to be taken to the main grading interface.
+                    </p>
+                    <p>
+                      Once you’re on the main grading interface, you can:
+                      <ol>
+                        <li>Add/delete/edit rubrics by clicking on the pencil icon next to Rubrics.</li>
+                        <li>Grade by clicking on 1 or more rubrics.</li>
+                        <li>Add a comment by clicking on the page.</li>
+                        <li>Move to a different question by clicking in the Assessment navigation.</li>
+                        <li>Go to next/previous student by clicking the buttons. You'll stay on the same question.</li>
+                      </ol>
+
+                      Some other features:
+                      <ol start="6">
+                        <li>Minimize the Assessment navigation by clicking the minus icon.</li>
+                        <li>Click "Enable Zoom" to use the magnifying glass.</li>
+                        <li>Click "Open entire PDF" located below Rubrics to see the original PDF.</li>
+                        <li>Click "View keyboard shortcuts" for useful shortcuts info.</li>
+                      </ol>
+                    </p>
+                    <img src="/static/img/help/grading-interface.png" alt="Grading Interface" width="700">
+                  </div>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#instructor-see-ungraded">
+                      How do I see which students have not yet been graded?
+                    </a>
+                  </h4>
+                </div>
+                <div id="instructor-see-ungraded" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <p>
+                      Click "Grade" in the navigation bar. On the left hand, you can choose the appropriate checkmarks so that only you can only see the ungraded students.
+                    </p>
+                    <p>
+                      You can also apply these checkmarks to a certain question by using the "Filter by:" option.
+                    </p>
+                    <img src="/static/img/help/student-checkmark-filter.png" alt="Checkmark Filter" height="80">
+                  </div>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#instructor-page-not-loading">
+                      I’m grading and one of the student’s pages won’t load. What should I do?
+                    </a>
+                  </h4>
+                </div>
+                <div id="instructor-page-not-loading" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <p>
+                      This is most likely an error on our part. To circumvent this issue, click "Open Entire PDF" and find the page you’re looking for.
+                    </p>
+                    <p>
+                      We’d also greatly appreciate it if you report the problem to <a href="mailto:support@scoryst.com">support@scoryst.com</a>.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <h3 class="instructor-releasing-grades">Releasing Grades</h3>
+            <div class="panel-group">
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#instructor-release-grades">
+                      How do I release grades so that students can see their score?
+                    </a>
+                  </h4>
+                </div>
+                <div id="instructor-release-grades" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <p>
+                      Click on "Grade" in the navigation bar, then click on the "Release Grades" button under "ASSESSMENT OPTIONS".
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#instructor-release-grades-what">
+                      What happens when I click "Release Grades"?
+                    </a>
+                  </h4>
+                </div>
+                <div id="instructor-release-grades-what" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <p>
+                      All students with graded assessments will receive an email that contains a link to see their score and the grading interface. Students will be able to see all of the rubrics, including ones that were not selected, in addition to comments left on the pages. Of course, students will not be able to modify scores nor comments. They will not be able to see the grades of other students either.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#instructor-release-grades-more">
+                      What happens if I click "Release Grades" more than once?
+                    </a>
+                  </h4>
+                </div>
+                <div id="instructor-release-grades-more" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <p>
+                      Students get notified via email only once that their grades for a particular assessment have been released. So, only students whose assessments have been graded after the last time "Release Grades" was clicked will receive an email.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#instructor-change-score">
+                      If I change a student’s score, do I need to release grades again?
+                    </a>
+                  </h4>
+                </div>
+                <div id="instructor-change-score" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <p>
+                      No. Once you have released grades, the student can see his/her assessment at any point after that. If you update a student’s score, the student will be able to see the new score immediately.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <h2 class="student-help">Student Help</h2>
+
+            <div class="summary">
+              <h4>Student FAQs</h4>
+              <div class="well">
+                <a class="to-scroll" href="#student-sign-up">How do I sign up for Scoryst?</a><br/>
+                <a class="to-scroll" href="#student-join-class">How do I join a class on Scoryst?</a><br/>
+                <a class="to-scroll" href="#student-submit">How do I submit a homework assignment?</a><br/>
+                <a class="to-scroll" href="#student-view-grades">How do I view my grades?</a><br/>
+                <a class="to-scroll" href="#student-see-missed">How do I see what I missed?</a><br/>
+                <a class="to-scroll" href="#student-view-statistics">How do I view statistics for an assessment?</a><br/>
+              </div>
+            </div>
+
+            <h3 class="student-getting-started">Getting Started</h3>
+            <div class="panel-group">
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#student-sign-up">
+                      How do I sign up for Scoryst?
+                    </a>
+                  </h4>
+                </div>
+                <div id="student-sign-up" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <p>
+                      To sign up as a student on Scoryst, you must <a href="to-scroll" href="#student-join-class">join a class</a>.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#student-join-class">
+                      How do I join a class on Scoryst?
+                    </a>
+                  </h4>
+                </div>
+                <div id="student-join-class" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <p>
+                      There are two ways to join a class. The first way is if your instructor manually adds you to the course. You would then receive an email notifying you that you have been added. If you do not have a Scoryst account yet, follow the link in the email to set up your password.
+                    </p>
+                    <p>
+                      The second way is if your instructor shares an enroll link with you. Click the link, and you will be brought to a log in page. If you already have a Scoryst account, input your credentials. Otherwise, click the "Sign Up" link to create a new account.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <h3 class="student-submitting">Submitting</h3>
+            <div class="panel-group">
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#student-submit">
+                      How do I submit a homework assignment?
+                    </a>
+                  </h4>
+                </div>
+                <div id="student-submit" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <p>
+                      Log in to Scoryst and click "Submit" in the navigation bar under the correct class. Then, choose the correct "Homework" from the dropdown menu, upload a PDF of the homework, and click the "Submit" button.
+                    </p>
+                    <p>
+                      Afterwards, you will be brought to a new page to map your submission. At this point, your homework is completely submitted, and your submission time has already been recorded. However, your homework is not yet finalized. Once your PDF is done processing (it should take at most a few minutes), you will need to click the page where your answer begins for each question/part. Once you are done mapping all question/parts, a message will appear that you have finished.
+                    </p>
+                    <img src="/static/img/help/map-submission.png" alt="Map Submission" width="700">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <h3 class="student-viewing-grades">Viewing Grades</h3>
+            <div class="panel-group">
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#student-view-grades">
+                      How do I view my grades?
+                    </a>
+                  </h4>
+                </div>
+                <div id="student-view-grades" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <p>
+                      You can view your grades for a particular assessment only after it has been graded and the instructor has released grades to students. If this has been done, you should have received an email from Scoryst notifying you that grades have been released. You can then follow the link provided in the email to view your grades.
+                    </p>
+                    <p>
+                      If the email was somehow lost or deleted, you can still view your grades simply by logging on and clicking "View Grades" in the navigation bar under the correct class.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#student-see-missed">
+                      How do I see what I missed?
+                    </a>
+                  </h4>
+                </div>
+                <div id="student-see-missed" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <p>
+                      On Scoryst, you can see precisely what deductions were made for your assessment. There are two ways to get to the interface that shows this information. The first way is by following the link provided in the email that notifies you that grades have been released. The second way is to log on to Scoryst, click "View Grades" in the navigation bar under the correct class, and then click "Details".
+                    </p>
+                    <img src="/static/img/help/student-view-grades.png" alt="Student View Grades" width="700">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <h3 class="student-statistics">Statistics</h3>
+            <div class="panel-group">
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#student-view-statistics">
+                      How do I view statistics for an assessment?
+                    </a>
+                  </h4>
+                </div>
+                <div id="student-view-statistics" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <p>
+                      Click "Statistics" in the navigation bar. If you see the message "The statistics are not available." that means that the grades have not yet been released.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="exact-container clearfix">
+          <p>Copyright &copy; {{year}} Scoryst</p>
+
+          <ul>
+            <li><a href="/about">About</a></li>
+            <li class="amp">&amp;</li>
+            <li><a href="mailto:hello@scoryst.com">Contact</a></li>
+          </ul>
+        </div>
+      </footer>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+
+    {% compress js %}
+      <script src="/static/js/lib/jquery.cookie.js"></script>
+      <script src="/static/js/script-pre.js"></script>
+      <script src="/static/js/feedback.js"></script>
+      <script src="/static/js/lib/transition.js"></script>
+      <script src="/static/js/lib/collapse.js"></script>
+      <script src="/static/js/lib/alert.js"></script>
+      <script src="/static/js/help.js"></script>
+      {% if not debug %}
+        <script src="/static/js/analytics.js"></script>
+      {% endif %}
+    {% endcompress %}
+
+  </body>
+</html>
