@@ -31,22 +31,27 @@
 
       <div class="container content">
         <div class="row">
-          <div class="col-xs-4 help-nav well">
-            <ul>
-              <li class="instructor-title">INSTRUCTOR HELP</li>
-              <li data-target="instructor-faq" class="active"><a href="#">FAQs Summary</a></li>
-              <li data-target="instructor-getting-started"><a href="#">Getting Started</a></li>
-              <li data-target="instructor-roster"><a href="#">Roster</a></li>
-              <li data-target="instructor-set-up"><a href="#">Set-Up</a></li>
-              <li data-target="instructor-grading"><a href="#">Grading</a></li>
-              <li data-target="instructor-releasing-grades"><a href="#">Releasing Grades</a></li>
-              <li class="student-title">STUDENT HELP</li>
-              <li data-target="student-faq"><a href="#">FAQs Summary</a></li>
-              <li data-target="student-getting-started"><a href="#">Getting Started</a></li>
-              <li data-target="student-submitting"><a href="#">Submitting</a></li>
-              <li data-target="student-viewing-grades"><a href="#">Viewing Grades</a></li>
-              <li data-target="student-statistics"><a href="#">Statistics</a></li>
-            </ul>
+          <div class="col-xs-4 help-nav">
+            <div class="well">
+              <ul>
+                <li class="instructor-title">INSTRUCTOR HELP</li>
+                <li data-target="instructor-faq" class="active"><a href="#">FAQs Summary</a></li>
+                <li data-target="instructor-getting-started"><a href="#">Getting Started</a></li>
+                <li data-target="instructor-roster"><a href="#">Roster</a></li>
+                <li data-target="instructor-set-up"><a href="#">Set-Up</a></li>
+                <li data-target="instructor-grading"><a href="#">Grading</a></li>
+                <li data-target="instructor-releasing-grades"><a href="#">Releasing Grades</a></li>
+                <li class="student-title">STUDENT HELP</li>
+                <li data-target="student-faq"><a href="#">FAQs Summary</a></li>
+                <li data-target="student-getting-started"><a href="#">Getting Started</a></li>
+                <li data-target="student-submitting"><a href="#">Submitting</a></li>
+                <li data-target="student-viewing-grades"><a href="#">Viewing Grades</a></li>
+                <li data-target="student-statistics"><a href="#">Statistics</a></li>
+              </ul>
+            </div>
+            <span>
+              <a href="/">&larr; Return to home</a>
+            </span>
           </div>
 
           <div class="col-xs-8">

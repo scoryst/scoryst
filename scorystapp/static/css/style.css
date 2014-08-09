@@ -662,7 +662,7 @@ input {
   margin-right: 1px;
 }
 
-.grade .assessment-nav a, .help .help-nav a {
+.grade .assessment-nav a, .help .help-nav .well a {
   display: block;
   height: 28px;
   line-height: 28px;
@@ -1820,7 +1820,7 @@ body.landing-page {
   width: 270px;
 }
 
-.help .help-nav a {
+.help .help-nav .well a {
   font-size: 16px;
 }
 
