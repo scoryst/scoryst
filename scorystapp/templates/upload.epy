@@ -51,8 +51,10 @@
 
 
     <div class="col-xs-6">
+      {% if has_exams %}
       <h2>Upload Progress</h2>
       <div class="upload-progress"></div>
+      {% endif %}
     </div>
   </div>
 
