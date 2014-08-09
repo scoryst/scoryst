@@ -88,8 +88,10 @@
         <p>Copyright &copy; 2014 Scoryst</p>
 
         <ul>
+          <li><a href="/help">Help</a></li>
+          <li>|</li>
           <li><a href="/about">About</a></li>
-          <li class="amp">&amp;</li>
+          <li>|</li>
           <li><a href="mailto:hello@scoryst.com">Contact</a></li>
         </ul>
       </div>
