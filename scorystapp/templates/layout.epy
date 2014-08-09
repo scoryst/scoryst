@@ -191,8 +191,10 @@
           <p>Copyright &copy; {{year}} Scoryst</p>
 
           <ul>
+            <li><a href="/help">Help</a></li>
+            <li class="amp">|</li>
             <li><a href="/about">About</a></li>
-            <li class="amp">&amp;</li>
+            <li class="amp">|</li>
             <li><a href="mailto:hello@scoryst.com">Contact</a></li>
           </ul>
         </div>

@@ -238,13 +238,6 @@ footer li a:hover {
   text-decoration: none;
 }
 
-footer .amp {
-  font-family: Baskerville, "Times New Roman", Times, Serif;
-  font-style: italic;
-  color: #aaa;
-  padding-top: 2px;
-}
-
 /* To align the input text with the input field (for Chrome) */
 input {
   line-height: 0;
