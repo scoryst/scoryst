@@ -47,4 +47,23 @@ $(function() {
   function isBlank(str) {
     return $.trim(str) === '';
   }
+
+  // The feedback form should not hide the links in the footer
+  var $feedback = $('.feedback');
+  var leftOffsetFooterLinks = $('footer ul').offset().left;
+  var originalRightOffsetFeedback = parseInt($feedback.css('right'), 10);
+  var $window = $(window);
+
+  function moveFeedback() {
+    if ($window.width() - originalRightOffsetFeedback >= leftOffsetFooterLinks) {
+      $feedback.css('right', ($window.width() - leftOffsetFooterLinks) + 'px');
+    } else {
+      $feedback.css('right', originalRightOffsetFeedback + 'px');
+    }
+  }
+
+  moveFeedback();
+  $window.resize(function() {
+    moveFeedback();
+  });
 });
