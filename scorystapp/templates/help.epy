@@ -34,12 +34,14 @@
           <div class="col-xs-4 help-nav well">
             <ul>
               <li class="instructor-title">INSTRUCTOR HELP</li>
-              <li data-target="instructor-getting-started" class="active"><a href="#">Getting Started</a></li>
+              <li data-target="instructor-faq" class="active"><a href="#">FAQs Summary</a></li>
+              <li data-target="instructor-getting-started"><a href="#">Getting Started</a></li>
               <li data-target="instructor-roster"><a href="#">Roster</a></li>
               <li data-target="instructor-set-up"><a href="#">Set-Up</a></li>
               <li data-target="instructor-grading"><a href="#">Grading</a></li>
               <li data-target="instructor-releasing-grades"><a href="#">Releasing Grades</a></li>
               <li class="student-title">STUDENT HELP</li>
+              <li data-target="student-faq"><a href="#">FAQs Summary</a></li>
               <li data-target="student-getting-started"><a href="#">Getting Started</a></li>
               <li data-target="student-submitting"><a href="#">Submitting</a></li>
               <li data-target="student-viewing-grades"><a href="#">Viewing Grades</a></li>
@@ -55,7 +57,7 @@
             </div>
 
             <div class="summary">
-              <h4>Instructor FAQs</h4>
+              <h3 class="instructor-faq">FAQs Summary</h4>
               <div class="well">
                 <a class="to-scroll" href="#instructor-get-started">How do I get started using Scoryst?</a><br/>
                 <a class="to-scroll" href="#instructor-create-course">How do I create a course on Scoryst?</a><br/>
@@ -424,7 +426,7 @@
             <h2 class="student-help">Student Help</h2>
 
             <div class="summary">
-              <h4>Student FAQs</h4>
+              <h3 class="student-faq">FAQs Summary</h3>
               <div class="well">
                 <a class="to-scroll" href="#student-sign-up">How do I sign up for Scoryst?</a><br/>
                 <a class="to-scroll" href="#student-join-class">How do I join a class on Scoryst?</a><br/>

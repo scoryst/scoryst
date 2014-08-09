@@ -79,14 +79,11 @@ $(function() {
 
   $('a.to-scroll').click(function(event) {
     event.preventDefault();
-    curProgrammaticallyScrolling = true;
 
     var $clickedLink = $(event.currentTarget);
     var $toScroll = $($clickedLink.attr('href'));
     $('html, body').animate({
         scrollTop: $toScroll.offset().top + 1
-    }, 500, function() {
-      curProgrammaticallyScrolling = false;
     });
   });
 
