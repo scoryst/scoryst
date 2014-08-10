@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="/static/css/style.css" />
     {% endcompress %}
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400|Josefin+Sans:600|Quicksand:400" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,700|Josefin+Sans:600" />
   </head>
   <body class="help">
     <div class="main">
@@ -72,7 +72,7 @@
                 <a class="to-scroll" href="#instructor-allow-homework">How do I allow students to submit their homework?</a><br/>
                 <a class="to-scroll" href="#instructor-allow-late">Can I allow a student to submit homework past the deadline?</a><br/>
                 <a class="to-scroll" href="#instructor-submit-homework">How can I submit homework for my students?</a><br/>
-                <a class="to-scroll" href="#instructor-create-exams">How do I create an exam on Scoryst?</a><br/>
+                <a class="to-scroll" href="#instructor-create-exam">How do I create an exam on Scoryst?</a><br/>
                 <a class="to-scroll" href="#instructor-upload-exams">How do I upload exams to Scoryst?</a><br/>
                 <a class="to-scroll" href="#instructor-begin-grading">How do I begin grading?</a><br/>
                 <a class="to-scroll" href="#instructor-see-ungraded">How do I see which students have not yet been graded?</a><br/>
@@ -267,10 +267,13 @@
                       First, <a class="to-scroll" href="#instructor-create-exam">create an exam</a> on Scoryst.
                     </p>
                     <p>
-                      To upload exams, click "Upload" in the navigation bar. You will want the exams to be scanned in PDF format. PDFs should be 300 (or 200) DPI and Black & White. A single PDF can contain multiple student exams. Also, you can upload multiple PDFs to Scoryst without waiting for previous uploads to complete.
+                      To upload exams, click "Upload" in the navigation bar. You will want the exams to be scanned in PDF format; they should be <strong>300 (or 200) DPI</strong> and <strong>Black & White</strong>. A single PDF can contain multiple student exams.
                     </p>
                     <p>
-                      Once uploading is complete, there are two additional steps. The next step is to ensure that the first page of every exam is marked. The final step is to assign exams to students using the typeahead assignment.
+                      For a single-sided exam that allowed students to show work on the back, scan double-sided and choose “Questions are on every other page” in the upload form. You can also scan just one side and choose “Questions are on every page” in the upload form. If the exam was printed double-sided, scan double-sided and choose “Questions are on every page”.
+                    </p>
+                    <p>
+                      You can upload multiple PDFs to Scoryst without waiting for previous uploads to complete. Once uploading is complete, there are two additional steps. The next step is to ensure that the first page of every exam is marked. The final step is to assign exams to students using the typeahead assignment.
                     </p>
                   </div>
                 </div>
