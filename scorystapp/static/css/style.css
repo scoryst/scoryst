@@ -640,7 +640,7 @@ input {
   border: 1px solid transparent;
 }
 
-.grade .assessment-nav .fa-plus-circle {
+.grade .assessment-nav .fa-chevron-up {
   display: none;
 }
 
@@ -648,23 +648,46 @@ input {
   display: none;
 }
 
-.grade .assessment-nav.nav-hidden .active-question-part {
+.grade .assessment-nav.nav-collapsed {
+  padding-bottom: 30px;
+}
+
+.grade .assessment-nav.nav-collapsed .active-question-part {
   display: block;
 }
 
-.grade .assessment-nav.nav-hidden ul {
+.grade .assessment-nav.nav-collapsed ul {
   display: none;
 }
 
-.grade .assessment-nav.nav-hidden .fa-minus-circle {
-  display: none;
-}
-
-.grade .assessment-nav.nav-hidden .fa-plus-circle {
+.grade .assessment-nav.nav-collapsed .fa-chevron-up {
   display: inline-block;
 }
 
-.grade .assessment-nav .fa-minus-circle, .grade .assessment-nav .fa-plus-circle {
+.grade .assessment-nav.nav-collapsed .fa-chevron-down {
+  display: none;
+}
+
+.grade .assessment-nav .next-part {
+  float: right;
+}
+
+.grade .assessment-nav .previous-part {
+  float: left;
+}
+
+.grade .assessment-nav .next-part,
+.grade .assessment-nav .previous-part {
+  display: none;
+}
+
+.grade .assessment-nav.nav-collapsed .next-part,
+.grade .assessment-nav.nav-collapsed .previous-part {
+  display: block;
+  font-size: 14px;
+}
+
+.grade .assessment-nav .fa-chevron-up, .grade .assessment-nav .fa-chevron-down {
   float: right;
   line-height: 1;
   font-size: 18px;
@@ -672,7 +695,7 @@ input {
   margin-right: 1px;
 }
 
-.grade .assessment-nav a, .help .help-nav .well a {
+.grade .assessment-nav ul a, .help .help-nav .well a {
   display: block;
   height: 28px;
   line-height: 28px;
@@ -683,7 +706,7 @@ input {
   font-size: 14px;
 }
 
-.grade .assessment-nav a:hover, .grade .assessment-nav .active a,
+.grade .assessment-nav ul a:hover, .grade .assessment-nav .active a,
 .help .help-nav a:hover, .help .help-nav .active a {
   background-color: white;
 }

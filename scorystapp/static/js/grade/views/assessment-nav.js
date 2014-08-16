@@ -5,16 +5,17 @@ var AssessmentNavView = IdempotentView.extend({
 
   template: _.template($('.assessment-nav-template').html()),
   events: {
-    'click a': 'triggerChangeQuestionPart',
-    'click .toggle-assessment-nav': 'toggleAssessmentNav'
+    'click ul a': 'triggerChangeQuestionPart',
+    'click .toggle-assessment-nav': 'toggleAssessmentNav',
+    'click .next-part': 'goToNextQuestionPart',
+    'click .previous-part': 'goToPreviousQuestionPart'
   },
 
   initialize: function(options) {
     this.constructor.__super__.initialize.apply(this, arguments);
     this.responses = options.responses;
 
-    this.listenTo(Mediator, 'changeResponse',
-      this.changeResponse);
+    this.listenTo(Mediator, 'changeResponse', this.changeResponse);
 
     var self = this;
     this.responses.each(function(response) {
@@ -69,6 +70,14 @@ var AssessmentNavView = IdempotentView.extend({
     };
     this.$el.html(this.template(templateData));
 
+    if (!this.getPreviousResponse()) {
+      this.$('.previous-part').hide();
+    }
+
+    if (!this.getNextResponse()) {
+      this.$('.next-part').hide();
+    }
+
     window.resizeNav();
     return this;
   },
@@ -91,7 +100,21 @@ var AssessmentNavView = IdempotentView.extend({
     }
   },
 
-  goToPreviousQuestionPart: function() {
+  goToPreviousQuestionPart: function(event) {
+    if (event) {
+      event.preventDefault();
+    }
+
+    var previousResponse = this.getPreviousResponse();
+
+    if (previousResponse) {
+      Mediator.trigger('changeResponse', previousResponse, -1);
+    } else {
+      // if that didn't work, there is no previous part, so do nothing
+    }
+  },
+
+  getPreviousResponse: function() {
     var curQuestionPart = this.model.get('questionPart');
     var previousResponse;
 
@@ -122,14 +145,24 @@ var AssessmentNavView = IdempotentView.extend({
       }
     }
 
-    if (previousResponse) {
-      Mediator.trigger('changeResponse', previousResponse, -1);
+    return previousResponse;
+  },
+
+  goToNextQuestionPart: function(event) {
+    if (event) {
+      event.preventDefault();
+    }
+
+    var nextResponse = this.getNextResponse();
+
+    if (nextResponse) {
+      Mediator.trigger('changeResponse', nextResponse, 0);
     } else {
-      // if that didn't work, there is no previous part, so do nothing
+      // if that didn't work, there is no next part, so do nothing
     }
   },
 
-  goToNextQuestionPart: function() {
+  getNextResponse: function(event) {
     var curQuestionPart = this.model.get('questionPart');
 
     // find the next part in the current question
@@ -152,11 +185,7 @@ var AssessmentNavView = IdempotentView.extend({
       nextResponse = nextResponse[0];
     }
 
-    if (nextResponse) {
-      Mediator.trigger('changeResponse', nextResponse, 0);
-    } else {
-      // if that didn't work, there is no next part, so do nothing
-    }
+    return nextResponse;
   },
 
   /* Triggers the changeResponse event when a part is clicked. */
@@ -179,6 +208,6 @@ var AssessmentNavView = IdempotentView.extend({
 
   /* Toggles the visibility of the assessment navigation. */
   toggleAssessmentNav: function() {
-    this.$el.toggleClass('nav-hidden');
+    this.$el.toggleClass('nav-collapsed');
   }
 });

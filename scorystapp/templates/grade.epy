@@ -124,7 +124,7 @@
         </div>
       </div>
 
-      <div class="well assessment-nav">
+      <div class="well assessment-nav nav-collapsed">
         <!-- Assessment nav will be inserted here using the template. -->
       </div>
 
@@ -176,8 +176,8 @@
       <% } %>
     </h3>
 
-    <i class="fa fa-plus-circle"></i>
-    <i class="fa fa-minus-circle"></i>
+    <i class="fa fa-chevron-down"></i>
+    <i class="fa fa-chevron-up"></i>
   </div>
 
   <p class="active-question-part">
@@ -204,6 +204,9 @@
       </li>
     <% } %>
   </ul>
+
+  <span class="next-part"><a href="#">Next Part &rarr;</a></span>
+  <span class="previous-part"><a href="#">&larr; Previous Part</a></span>
 </script>
 
 <script type="text/template" class="rubric-template">
