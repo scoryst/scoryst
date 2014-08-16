@@ -101,6 +101,8 @@ var AssessmentNavView = IdempotentView.extend({
   },
 
   goToPreviousQuestionPart: function(event) {
+    // The `event` might be undefined when this function is called from
+    // another function.
     if (event) {
       event.preventDefault();
     }
@@ -149,6 +151,8 @@ var AssessmentNavView = IdempotentView.extend({
   },
 
   goToNextQuestionPart: function(event) {
+    // The `event` might be undefined when this function is called from
+    // another function.
     if (event) {
       event.preventDefault();
     }
