@@ -11,7 +11,7 @@ var GradeAssessmentCanvasView = BaseAssessmentCanvasView.extend({
   events: function() {
     // extends the parent view's events
     return _.extend({}, this.constructor.__super__.events, {
-      'blur textarea': 'deleteBlankAnnotations',
+      'click .freeform-annotation-canvas': 'deleteBlankAnnotations',
       'mousedown .annotation': 'handleSendAnnotationToFrontEvent',
       'click .enable-zoom': 'handleToolbarClick',
       'click .set-freeform-annotations': 'handleToolbarClick',

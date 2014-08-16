@@ -170,7 +170,13 @@ var AnnotationView = IdempotentView.extend({
     this.$el.removeClass('annotation-front');
   },
 
-  toggleLatexRendering: function() {
+  toggleLatexRendering: function(event) {
+    // Only render LaTeX if the comment box isn't blank
+    var comment = $.trim(this.$textarea.val());
+    if (comment.length === 0) {
+      return;
+    }
+
     var renderLatex = this.$latexCheckbox.is(':checked');
     if (renderLatex) {
       this.$previewLatexIcon.show();
