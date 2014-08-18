@@ -4,14 +4,13 @@
 {% block content %}
 <div class="container submit">
   <div class="row">
-    <div class="col-xs-6">
+    <div class="col-xs-5">
       {% if is_staff %}
         <h2>Submit Homework for Student</h2>
       {% else %}
         <h2>Submit Homework</h2>
         <p>
-          We'll record the submission time as soon as your upload is complete.  You may
-          resubmit before the deadline; we'll only consider your latest submission.
+          You may resubmit before the deadline. However, <strong>only your latest submission is considered.</strong>
         </p>
       {% endif %}
 
@@ -48,7 +47,7 @@
       </form>
     </div>
 
-    <div class="col-xs-6">
+    <div class="col-xs-7">
       {% if is_staff %}
         <h2>Student Submission History</h2>
       {% else %}
@@ -74,13 +73,19 @@
               <td>{{ submission.time|date:"D, M d, f A" }}</td>
               <td><a href="{{ submission.pdf.url }}" target="_blank">View</a></td>
               <td>
-                {% if submission.is_finalized %}
+                {% if submission.is_finalized and submission.last %}
                   Yes
-                {% else %}
+                {% elif submission.last %}
                   <a href="{{ submission.id }}/">No</a>
                   <a class="finalized-info-popover" data-trigger="hover" data-placement="bottom"
                   data-content="To finalize your submission, please tell us which questions are
                   answered on which pages. Click this button to do so." href="{{ submission.id }}/">
+                    <i class="fa fa-question-circle"></i>
+                  </a>
+                {% else %}
+                  No
+                  <a class="finalized-info-popover" data-trigger="hover" data-placement="bottom"
+                  data-content="This is not the latest submission for this homework." href="#">
                     <i class="fa fa-question-circle"></i>
                   </a>
                 {% endif %}
@@ -98,7 +103,7 @@
     </div>
   </div>
 
-  <div class="row col-xs-6">
+  <div class="row col-xs-5">
 
     <div class="create-pdf-info">
       <h4>Creating PDFs</h4>
