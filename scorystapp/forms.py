@@ -1,10 +1,12 @@
 from scorystapp import models
 from django import forms
+from django.conf import settings
 from django.contrib.auth import authenticate, forms as django_forms
 from django.contrib.admin import widgets
 from django.utils import html, timezone
 import PyPDF2
 from PyPDF2 import utils as pdf_utils
+import pytz
 
 
 class HorizontalRadioRenderer(forms.RadioSelect.renderer):
@@ -182,11 +184,31 @@ class AssessmentUploadForm(forms.Form):
   # The question part information is passed as stringified JSON
   question_part_points = forms.CharField()
 
-  def clean(self):
-    assessment_type = self.cleaned_data.get('assessment_type')
-    soft_deadline = self.cleaned_data.get('soft_deadline')
-    hard_deadline = self.cleaned_data.get('hard_deadline')
 
+  def __init__(self, *args, **kwargs):
+    """ Get the string that corresponds to the course's timezone. """
+    self.timezone_string = kwargs.pop('timezone_string', None)
+    super(AssessmentUploadForm, self).__init__(*args, **kwargs)
+
+
+  def clean(self):
+    def change_timezone(datetime):
+      """
+      Given a datetime that believes it's in the `settings.TIME_ZONE` time zone
+      (which is the default timezone for `forms.DateTimeField`s), change it to
+      the course's timezone.
+      """
+      if datetime:
+        cur_timezone = pytz.timezone(self.timezone_string)
+        datetime = timezone.make_naive(datetime, timezone=pytz.timezone(settings.TIME_ZONE))
+        datetime = timezone.make_aware(datetime, timezone=cur_timezone)
+        return datetime
+      else:
+        return None
+
+    assessment_type = self.cleaned_data.get('assessment_type')
+    soft_deadline = change_timezone(self.cleaned_data.get('soft_deadline'))
+    hard_deadline = change_timezone(self.cleaned_data.get('hard_deadline'))
 
     if assessment_type == self.HOMEWORK_TYPE and not soft_deadline:
       # homework submission time required; add error to respective field
@@ -202,9 +224,16 @@ class AssessmentUploadForm(forms.Form):
       if 'hard_deadline' in self.cleaned_data:
         del self.cleaned_data['hard_deadline']
 
-    if soft_deadline and hard_deadline and soft_deadline > hard_deadline:
-      self._errors['hard_deadline'] = self.error_class(['Hard deadline can\'t be before soft deadline'])
-      del self.cleaned_data['hard_deadline']
+    if soft_deadline and hard_deadline:
+      if soft_deadline > hard_deadline:
+        self._errors['hard_deadline'] = self.error_class(['Hard deadline can\'t be before soft deadline'])
+        del self.cleaned_data['hard_deadline']
+      else:
+        print soft_deadline
+        print hard_deadline
+
+        self.cleaned_data['soft_deadline'] = soft_deadline
+        self.cleaned_data['hard_deadline'] = hard_deadline
 
     return self.cleaned_data
 
@@ -276,8 +305,8 @@ class HomeworkUploadForm(forms.Form):
   student_id = forms.ChoiceField(required=False)
 
 
-  def __init__(self, is_staff, homework_choices, student_choices, *args,
-      **kwargs):
+  def __init__(self, is_staff, homework_choices, student_choices, timezone_string,
+      *args, **kwargs):
     """ Sets up the `homework_id` choice field to hold the given choices. """
     super(HomeworkUploadForm, self).__init__(*args, **kwargs)
     self.fields['homework_id'].choices = homework_choices
@@ -287,6 +316,7 @@ class HomeworkUploadForm(forms.Form):
       self.fields['student_id'].required = True
 
     self.is_staff = is_staff
+    self.timezone_string = timezone_string
 
 
   def clean(self):
@@ -299,7 +329,8 @@ class HomeworkUploadForm(forms.Form):
     homework = models.Homework.objects.get(pk=data['homework_id'])
 
     if timezone.now() > homework.hard_deadline:
-      formatted_deadline = (timezone.localtime(homework.hard_deadline)
+      cur_timezone = pytz.timezone(self.timezone_string)
+      formatted_deadline = (timezone.localtime(homework.hard_deadline, timezone=cur_timezone)
         .strftime('%a, %b %d, %I:%M %p'))
 
       raise forms.ValidationError('Cannot submit past the hard deadline of ' +

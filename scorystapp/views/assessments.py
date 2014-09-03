@@ -10,6 +10,7 @@ from datetime import datetime
 import json, shlex, subprocess, tempfile, threading
 import os
 import PyPDF2
+import pytz
 from rest_framework import serializers
 from rest_framework import decorators as rest_decorators, response as rest_framework_response
 
@@ -29,13 +30,17 @@ def assessments(request, cur_course_user):
 
 
 def _render_assessments_page(request, cur_course_user):
+  timezone_string = cur_course_user.course.get_timezone_string()
+  current_time = timezone.localtime(timezone.now(), timezone=pytz.timezone(timezone_string))
+
   return helpers.render(request, 'assessments.epy', {
     'title': 'Assessments',
     'course': cur_course_user.course,
     'form': forms.AssessmentUploadForm(),
     'homework_assignments_exist': models.Homework.objects.filter(course=cur_course_user.course).count() > 0,
     'exams_exist': models.Exam.objects.filter(course=cur_course_user.course).count() > 0,
-    'current_time': timezone.localtime(timezone.now()).strftime('%m/%d/%Y %I:%M %p')
+    'current_time': current_time.strftime('%m/%d/%Y %I:%M %p'),
+    'timezone_string': timezone_string
   })
 
 
@@ -44,7 +49,8 @@ def _handle_assessment_form_submission(request, cur_course_user, assessment_id=N
   Handles request when user submits the form to create an assessment. The
   `assessment_id` is not None when the user is editing an assessment.
   """
-  form = forms.AssessmentUploadForm(request.POST, request.FILES)
+  form = forms.AssessmentUploadForm(request.POST, request.FILES,
+    timezone_string=cur_course_user.course.get_timezone_string())
 
   if not form.is_valid():
     return _render_assessments_page(request, cur_course_user)
@@ -65,7 +71,7 @@ def _handle_assessment_form_submission(request, cur_course_user, assessment_id=N
     # For an exam that is being created, ensure that an exam PDF is uploaded. This
     # was removed from the Django form because it's not required for editing
     # Return an error status, which is not actually returned to the user
-    current_time = timezone.localtime(timezone.now())
+    current_time = timezone.now()
     if data['assessment_type'] == 'homework':
       soft_deadline = data['soft_deadline']
       if soft_deadline < current_time:

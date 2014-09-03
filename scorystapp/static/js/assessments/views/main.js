@@ -39,7 +39,8 @@ var MainView = IdempotentView.extend({
   renderAssessmentsForm: function(assessment) {
     var assessmentsForm = new AssessmentFormView({
       el: this.$('.assessment-form'),
-      assessment: assessment
+      assessment: assessment,
+      timezoneString: this.$('.timezone-string').html()
     });
 
     this.registerSubview(assessmentsForm);

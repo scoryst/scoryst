@@ -3,6 +3,7 @@ from scorystapp import models
 from django.utils import timezone
 from django.db.models import Q
 import math
+import pytz
 
 
 class QuestionPartSerializer(serializers.ModelSerializer):
@@ -194,7 +195,8 @@ class SubmissionSerializer(serializers.ModelSerializer):
   late_days = serializers.SerializerMethodField('get_late_days')
 
   def get_time(self, submission):
-    return timezone.localtime(submission.time).strftime('%a, %b %d, %I:%M %p')
+    cur_timezone = pytz.timezone(submission.course_user.course.get_timezone_string())
+    return timezone.localtime(submission.time, timezone=cur_timezone).strftime('%a, %b %d, %I:%M %p')
 
   def get_late_days(self, submission):
     diff = submission.time - submission.assessment.homework.soft_deadline

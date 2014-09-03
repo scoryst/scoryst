@@ -116,9 +116,23 @@ class Course(models.Model):
     (SUMMER, 'Summer')
   )
 
+  # Enums for the timezone field
+  PACIFIC = 0
+  MOUNTAIN = 1
+  CENTRAL = 2
+  EASTERN = 3
+  TIMEZONE_CHOICES = (
+    (PACIFIC, 'Pacific'),
+    # Eventually will need to differentiate Arizona, which doesn't use DST
+    (MOUNTAIN, 'Mountain'),
+    (CENTRAL, 'Central'),
+    (EASTERN, 'Eastern')
+  )
+
   name = models.CharField(max_length=200)
   term = models.IntegerField(choices=TERM_CHOICES)
   year = models.IntegerField(default=timezone.now().year)
+  timezone = models.IntegerField(choices=TIMEZONE_CHOICES)
 
   student_enroll_token = models.CharField(max_length=10)
   ta_enroll_token = models.CharField(max_length=10)
@@ -156,6 +170,19 @@ class Course(models.Model):
     if len(year_str) == 4:
       return '\'' + year_str[2:]
     return year_str
+
+
+  def get_timezone_string(self):
+    if self.timezone == Course.PACIFIC:
+      return 'America/Los_Angeles'
+    elif self.timezone == Course.MOUNTAIN:
+      return 'America/Mexico_City'
+    elif self.timezone == Course.CENTRAL:
+      return 'America/Chicago'
+    elif self.timezone == Course.EASTERN:
+      return 'America/New_York'
+    else:
+      return None
 
 
   def __unicode__(self):

@@ -1,4 +1,5 @@
 from django.utils import timezone
+import pytz
 from rest_framework import serializers
 from scorystapp import models
 
@@ -49,14 +50,16 @@ class AssessmentSerializer(serializers.ModelSerializer):
   def get_soft_deadline(self, assessment):
     """ Submission deadline is a string returning the time in PST. """
     if hasattr(assessment, 'homework'):
-      local_time = timezone.localtime(assessment.homework.soft_deadline)
+      cur_timezone = pytz.timezone(assessment.course.get_timezone_string())
+      local_time = timezone.localtime(assessment.homework.soft_deadline, timezone=cur_timezone)
       return local_time.strftime('%m/%d/%y %I:%M %p')
     return None
 
   def get_hard_deadline(self, assessment):
     """ Submission deadline is a string returning the time in PST. """
     if hasattr(assessment, 'homework'):
-      local_time = timezone.localtime(assessment.homework.hard_deadline)
+      cur_timezone = pytz.timezone(assessment.course.get_timezone_string())
+      local_time = timezone.localtime(assessment.homework.hard_deadline, timezone=cur_timezone)
       return local_time.strftime('%m/%d/%y %I:%M %p')
     return None
 

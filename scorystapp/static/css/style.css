@@ -1196,7 +1196,8 @@ input {
   display: none;
 }
 
-.assessments button.next-question, .assessments button.submit-num-questions {
+.assessments button.next-question, .assessments button.submit-num-questions,
+.assessments .timezone-string {
   display: none;
 }
 

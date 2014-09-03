@@ -41,7 +41,7 @@ def submit(request, cur_course_user):
 
   if request.method == 'POST':
     form = forms.HomeworkUploadForm(is_staff, homework_choices, student_choices,
-      request.POST, request.FILES)
+      cur_course.get_timezone_string(), request.POST, request.FILES)
 
     if form.is_valid():
       homework = models.Homework.objects.get(pk=form.cleaned_data['homework_id'])
@@ -68,7 +68,8 @@ def submit(request, cur_course_user):
       return shortcuts.redirect('/course/%s/submit/%d/' %
         (cur_course_user.course.id, submission.pk))
   else:
-    form = forms.HomeworkUploadForm(is_staff, homework_choices, student_choices)
+    form = forms.HomeworkUploadForm(is_staff, homework_choices, student_choices,
+      cur_course.get_timezone_string())
 
   submission_set = models.Submission.objects.filter(course_user=
     cur_course_user)

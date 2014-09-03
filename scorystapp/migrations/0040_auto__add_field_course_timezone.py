@@ -1,19 +1,23 @@
 # -*- coding: utf-8 -*-
 from south.utils import datetime_utils as datetime
 from south.db import db
-from south.v2 import DataMigration
+from south.v2 import SchemaMigration
 from django.db import models
 
-class Migration(DataMigration):
+
+class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        homeworks = orm.Homework.objects.all()
-        for homework in homeworks:
-            homework.hard_deadline = homework.soft_deadline
-            homework.save()
+        # Adding field 'Course.timezone'
+        db.add_column(u'scorystapp_course', 'timezone',
+                      self.gf('django.db.models.fields.IntegerField')(default=0),
+                      keep_default=False)
+
 
     def backwards(self, orm):
-        raise Exception('Sorry, you cannot backwards migrate.')
+        # Deleting field 'Course.timezone'
+        db.delete_column(u'scorystapp_course', 'timezone')
+
 
     models = {
         u'auth.group': {
@@ -62,6 +66,7 @@ class Migration(DataMigration):
             'student_enroll_token': ('django.db.models.fields.CharField', [], {'max_length': '10'}),
             'ta_enroll_token': ('django.db.models.fields.CharField', [], {'max_length': '10'}),
             'term': ('django.db.models.fields.IntegerField', [], {}),
+            'timezone': ('django.db.models.fields.IntegerField', [], {}),
             'year': ('django.db.models.fields.IntegerField', [], {'default': '2014'})
         },
         u'scorystapp.courseuser': {
@@ -190,4 +195,3 @@ class Migration(DataMigration):
     }
 
     complete_apps = ['scorystapp']
-    symmetrical = True

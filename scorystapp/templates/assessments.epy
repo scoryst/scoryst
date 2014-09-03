@@ -48,6 +48,7 @@
       </div>
 
       <div class="col-xs-5 assessment-form">
+        <div class="timezone-string">{{ timezone_string }}</div>
         {% if assessment_id %}
           <a href="../.." class="btn btn-danger create-new-assessment">
             <i class="fa fa-times"></i> Disable editing</a>
@@ -253,6 +254,9 @@
 <script src="/static/js/lib/transition.js"></script>
 <script src="/static/js/lib/moment.min.js"></script>
 <script src="/static/js/lib/bootstrap-datetimepicker.min.js"></script>
+
+<!-- For timezone support -->
+<script src="/static/js/lib/moment-timezone-with-data-2010-2020.js"></script>
 
 <script src="/static/js/assessments/models/assessment.js"></script>
 <script src="/static/js/assessments/models/question-part.js"></script>

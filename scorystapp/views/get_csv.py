@@ -2,6 +2,7 @@ from django import shortcuts, http
 from scorystapp import models, decorators
 import csv
 import math
+import pytz
 from django.utils import timezone
 
 
@@ -54,7 +55,8 @@ def get_csv(request, cur_course_user, assessment_id):
     }
 
     if hasattr(assessment, 'homework'):
-      local_time = timezone.localtime(submission.time)
+      cur_timezone = pytz.timezone(assessment.course.get_timezone_string())
+      local_time = timezone.localtime(submission.time, timezone=cur_timezone)
       row['Submission time (PST)'] = local_time.strftime('%m/%d/%Y %I:%M %p')
 
       diff = submission.time - submission.assessment.homework.soft_deadline

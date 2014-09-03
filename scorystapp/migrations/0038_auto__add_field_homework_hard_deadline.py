@@ -144,6 +144,7 @@ class Migration(SchemaMigration):
             'begins_submission': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'is_blank': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'is_single': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'is_uploaded': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'page_jpeg': ('django.db.models.fields.files.ImageField', [], {'max_length': '100', 'blank': 'True'}),
             'page_jpeg_large': ('django.db.models.fields.files.ImageField', [], {'max_length': '100', 'blank': 'True'}),

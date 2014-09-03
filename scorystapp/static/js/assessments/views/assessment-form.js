@@ -24,6 +24,7 @@ var AssessmentFormView = IdempotentView.extend({
     // this would be undefined if the user is not editing an assessment
     this.assessment = options.assessment;
     this.isExam = false;
+    this.timezoneString = options.timezoneString;
 
     this.$homeworkFields = this.$('.homework-fields');
     this.$examFields = this.$('.exam-fields');
@@ -327,18 +328,16 @@ var AssessmentFormView = IdempotentView.extend({
       deadlineIsValid = false;
     }
 
-    var curUtcTime = (new Date).getTime();
-    var userEnteredTime = new Date(submissionString);
-    if (isNaN(userEnteredTime.getTime())) {
+    var curTime = (new Date).getTime();
+    var userEnteredTime = moment.tz(submissionString, this.timezoneString);
+    if (userEnteredTime._d === 'Invalid date') {
       deadlineIsValid = false;
     } else {
-      // we assume the user is in PST; convert to UTC
-      // TODO: handle other timezones and daylight savings
-      var utcUserEnteredTime = userEnteredTime - this.UTC_PST_OFFSET;
-      if (utcUserEnteredTime < curUtcTime) {
+      if (userEnteredTime < curTime) {
         deadlineIsValid = false;
       }
     }
+
     // having a past submission deadline is okay if there are already submissions
     if (deadlineIsValid || this.isFullyEditable === false) {
       $errorSelector.hide();
@@ -438,19 +437,16 @@ var AssessmentFormView = IdempotentView.extend({
 
     // populate remaining static form fields
     if (this.isExam) {
-      this.$('.exam-file-help .exam-pdf').attr('href',
-        this.assessment.get('examPdf'));
+      this.$('.exam-file-help .exam-pdf').attr('href', this.assessment.get('examPdf'));
       this.$('.exam-file-help').show();
     } else {
       var softDeadline = this.assessment.get('softDeadline');
       this.$('#id_soft_deadline').val(softDeadline);
-      this.$softDeadlineFormGroup.data('DateTimePicker').setDate(
-        new Date(softDeadline));
+      this.$softDeadlineFormGroup.data('DateTimePicker').setDate(new Date(softDeadline));
 
       var hardDeadline = this.assessment.get('hardDeadline');
       this.$('#id_hard_deadline').val(hardDeadline);
-      this.$hardDeadlineFormGroup.data('DateTimePicker').setDate(
-        new Date(hardDeadline));
+      this.$hardDeadlineFormGroup.data('DateTimePicker').setDate(new Date(hardDeadline));
     }
 
     if (this.assessment.get('solutionsPdf')) {
